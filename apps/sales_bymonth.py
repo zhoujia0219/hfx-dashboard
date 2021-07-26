@@ -13,14 +13,33 @@ from dash.dependencies import Input, Output, State
 from flask_caching import Cache
 from conf import db_conf
 from db import DbUtil
-from app import app, cache
 from utils import ToolUtil
+from app import flask_server
 
 ###############
-# 更新标题
+# dash
 ###############
-app.title = "门店月度销售分析"
-app.update_title = "数据载入中..."
+
+dash_app = dash.Dash(__name__,
+                     server=flask_server,
+                     title="门店月度销售分析",
+                     update_title="数据载入中...",
+                     suppress_callback_exceptions=True,
+                     url_base_pathname='/sales/',
+                     external_stylesheets=[dbc.themes.PULSE])
+
+#########################
+# 缓存
+#########################
+
+cache = Cache()
+CACHE_CONFIG = {
+    # try 'filesystem' if you don't want to setup redis
+    'CACHE_TYPE': 'redis',
+    'CACHE_REDIS_URL': db_conf.REDIS_URL,
+    'CACHE_DEFAULT_TIMEOUT': db_conf.REDIS_CACHE_DEFAULT_TIMEOUT
+}
+cache.init_app(dash_app.server, config=CACHE_CONFIG)
 
 ###############
 # sidebar
@@ -432,7 +451,7 @@ content = html.Div(
     ],
 )
 
-layout = html.Div([
+dash_app.layout = html.Div([
     sidebar,
     content,
     # signal value to trigger callbacks
@@ -498,7 +517,7 @@ def global_store(values):
         return result
 
 
-@app.callback(
+@dash_app.callback(
     Output('signal', 'data'),
     [
         Input("submit", "n_clicks"),
@@ -573,6 +592,7 @@ def caculate_cards(card_datas, values):
     # 近12月销售趋势
     group_df = df
     group_df["month"] = [x.strftime('%Y年%m月') for x in group_df["rdate"]]
+    # todo 无法正确获得聚合结果
     group_sales = pd.DataFrame(group_df.groupby(by="month", as_index=False)["dealtotal"].sum())
 
     # 封装结果数据
@@ -582,7 +602,7 @@ def caculate_cards(card_datas, values):
             "group_sales": group_sales}
 
 
-@app.callback(Output('card_data', 'children'), Input('signal', 'data'))
+@dash_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
 def update_card_data(values):
     card_datas = global_store(values)
     if card_datas:
@@ -592,7 +612,7 @@ def update_card_data(values):
     return build_layout_title_cards({}, values)
 
 
-@app.callback(
+@dash_app.callback(
     Output('fig_1', 'figure'),
     [
         Input('dw_fig_1_1', 'value'),
@@ -623,6 +643,3 @@ def update_fig_1(index_type, dims_value, figure_type, values):
             fig.add_trace()
         return fig
     return {}
-
-# if __name__ == '__main__':
-#     app.run_server(debug=True, port=8051)
