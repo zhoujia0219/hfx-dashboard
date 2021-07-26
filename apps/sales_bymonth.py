@@ -1,20 +1,21 @@
 import random
 import time
-from datetime import datetime, date
+from datetime import datetime
 
 import dash
-import dash_html_components as html
-import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-import plotly.express as px
+import dash_core_components as dcc
+import dash_html_components as html
 import numpy as np
 import pandas as pd
+import plotly.express as px
 from dash.dependencies import Input, Output, State
 from flask_caching import Cache
-from conf import db_conf
-from db import DbUtil
-from utils import ToolUtil
+
 from app import flask_server
+from conf import db_conf
+from datas.DataUtil import find_sales_list
+from utils import ToolUtil
 
 ###############
 # dash
@@ -271,7 +272,7 @@ layout_title_cards = [
 
 
 def build_group_sales_fig(df):
-    fig = px.bar(df, x="month", y="dealtotal", width=200, height=70)
+    fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=70)
     fig.update_xaxes(visible=False, fixedrange=True)
     fig.update_yaxes(visible=False, fixedrange=True)
     fig.update_layout(
@@ -316,6 +317,15 @@ def build_layout_title_cards(datas: dict, values: dict):
             dcc.Graph(id='title_4', figure=fig),
         ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
     ]
+
+
+def build_fig_3(df):
+    fig = px.bar(df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
+                 # category_orders={'Area': ['一战区', '二战区', '三战区', '四战区', '五战区']},
+                 hover_name='month_group',
+                 labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
+                 template="plotly_white")
+    return fig
 
 
 # 常量定义
@@ -429,7 +439,7 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(figure=test_fig_3),
+    dcc.Graph(id="fig_3", figure=test_fig_3),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -458,12 +468,10 @@ dash_app.layout = html.Div([
     dcc.Store(id='signal')
 ])
 
+
 ###########################
 # 取数据缓存
 ###########################
-
-default_dbname = "data_analysis"
-
 
 @cache.memoize()
 def global_store(values):
@@ -478,41 +486,8 @@ def global_store(values):
     if d:
         return d
     else:
-        query_sql = """
-                SELECT 
-                areauid3, areaname3, areauid4, areaname4, storeuid, storename, weeks, rdate :: date, province, 
-                province_name, city, city_name, county, county_name, businessname, vctype, areasize, 
-                billcount, dealtotal, rebillcount, redealtotal, weather, weather_desc, temperature, wind_direction, 
-                "month", "year", city_level
-                FROM chunbaiwei.fact_storesale_weather
-                WHERE 1 = 1
-        """
-        if values:
-            if values["begin_month"] and values["end_month"]:
-                query_sql += """  and to_char(rdate,'YYYY-MM') >= '{begin_month}'
-                                  and to_char(rdate,'YYYY-MM') <= '{end_month}'
-                """.format(begin_month=values["begin_month"], end_month=values["end_month"])
-            if values["city"]:
-                # 长度大于1 循环处理
-                citys = tuple(str(c) for c in values["city"]) if len(values['city']) > 1 \
-                    else "(" + str(values['city'][0]) + ")"
-                query_sql += """ and city_level in {city}""".format(city=citys)
-            # if values["channel"]:
-            #     channels = tuple(str(c) for c in values["channel"])
-            #     query_sql += """ and businessname in {channel}""".format(channel=channels)
-            # if values["store_age"]:
-            #     query_sql += """
-            #     """
-
-        # 从数据库查询
-        data = DbUtil.query_list(query_sql, default_dbname)
-        result = [{"areauid3": d[0], "areaname3": d[1], "areauid4": d[2], "areaname4": d[3], "storeuid": d[4],
-                   "storename": d[5], "weeks": d[6], "rdate": datetime.strptime(str(d[7]), '%Y-%m-%d').date(),
-                   "province": d[8], "province_name": d[9], "city": d[10], "city_name": d[11], "county": d[12],
-                   "county_name": d[13], "businessname": d[14], "vctype": d[15], "areasize": d[16],
-                   "billcount": d[17], "dealtotal": d[18], "rebillcount": d[19], "redealtotal": d[20],
-                   "weather": d[21], "weather_desc": d[22], "temperature": d[23], "wind_direction": d[24],
-                   "month": d[25], "year": d[26], "city_level": int(d[27])} for d in data]
+        result = find_sales_list(values)
+        print(result)
         cache.set(str(values), result)
         return result
 
@@ -545,7 +520,7 @@ def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, st
     return values
 
 
-def caculate_cards(card_datas, values):
+def calculate_cards(card_datas, values):
     df = pd.DataFrame(card_datas)
 
     total_sale = round(df["dealtotal"].sum(), 2)
@@ -591,10 +566,8 @@ def caculate_cards(card_datas, values):
 
     # 近12月销售趋势
     group_df = df
-    group_df["month"] = [x.strftime('%Y年%m月') for x in group_df["rdate"]]
-    # todo 无法正确获得聚合结果
-    group_sales = pd.DataFrame(group_df.groupby(by="month", as_index=False)["dealtotal"].sum())
-
+    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum()
+    group_sales = pd.DataFrame(month_groups)
     # 封装结果数据
     return {"total_sale": total_sale, "last_month_total": last_month_total,
             "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
@@ -607,7 +580,7 @@ def update_card_data(values):
     card_datas = global_store(values)
     if card_datas:
         # 封装结果数据
-        result_datas = caculate_cards(card_datas, values)
+        result_datas = calculate_cards(card_datas, values)
         return build_layout_title_cards(result_datas, values)
     return build_layout_title_cards({}, values)
 
@@ -627,19 +600,64 @@ def update_fig_1(index_type, dims_value, figure_type, values):
     if fig_datas:
         df = pd.DataFrame(fig_datas)
         month_group_df = df
-        month_group_df["month"] = [x.strftime('%Y年%m月') for x in month_group_df["rdate"]]
+
         # 默认根据战区及月份分组
         month_group_sales_df = pd.DataFrame(
-            month_group_df.groupby(by=["areaname3", "month"], as_index=False)["dealtotal"].sum())
-        fig = px.bar(month_group_sales_df, x="month", y="dealtotal", color="areaname3")
+            month_group_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum())
+        fig = px.bar(month_group_sales_df, x="month_group", y="dealtotal", color="areaname3")
         if index_type == 2:
             # 添加平均线
             month_group_avg_df = pd.DataFrame(
-                month_group_df.groupby(by="month", as_index=False)["dealtotal"].mean()
+                month_group_df.groupby(by="month_group", as_index=False)["dealtotal"].mean()
             )
-            fig.add_trace(px.line(month_group_avg_df, x="month", y="dealtotal", line_group="areaname3"))
+            fig.add_trace(px.line(month_group_avg_df, x="month_group", y="dealtotal", line_group="areaname3"))
         elif index_type == 3:
             # 添加中位数线
             fig.add_trace()
         return fig
+    return {}
+
+
+@dash_app.callback(
+    Output('fig_3', 'figure'),
+    [
+        Input('dw_fig_3_1', 'value'),
+        Input('signal', 'data'),
+    ])
+def update_fig_3(order_value, values):
+    """
+        更新排名图
+    @param order_value: 1: 正序， 2： 倒序
+    @param values:  全局缓存key
+    """
+    # 取数据
+    fig3_data = global_store(values)
+    df = pd.DataFrame(fig3_data)
+    group_df = df
+    # 当月数据 假设本月是2月
+    cs_date = datetime.strptime('2021-02-01', '%Y-%m-%d').date()
+    ce_date = datetime.strptime('2021-02-28', '%Y-%m-%d').date()
+    current_month_df = group_df[(group_df["rdate"] >= cs_date) & (group_df["rdate"] < ce_date)]
+
+    # 上月数据
+    ls_date = datetime.strptime('2021-01-01', '%Y-%m-%d').date()
+    le_date = datetime.strptime('2021-01-31', '%Y-%m-%d').date()
+    last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
+    # 本月战区分组聚合
+    c_df = current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    # 上月战区分组聚合
+    l_df = last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    l_df["dealtotal"] = l_df["dealtotal"] * (-1)
+    # 根据战区分组并排序
+    if order_value == 1:
+        c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+        l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+        fig_df = c_df.append(l_df)
+        return build_fig_3(fig_df) if len(fig_df) > 0 else {}
+    elif order_value == 2:
+        c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+        l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+        fig_df = c_df.append(l_df)
+        return build_fig_3(fig_df) if len(fig_df) > 0 else {}
+
     return {}
