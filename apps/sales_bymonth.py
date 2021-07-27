@@ -1,5 +1,4 @@
 import random
-import time
 from datetime import datetime
 
 import dash
@@ -10,6 +9,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from dash.dependencies import Input, Output, State
+from dateutil.relativedelta import relativedelta
 from flask_caching import Cache
 
 from app import flask_server
@@ -46,9 +46,15 @@ cache.init_app(dash_app.server, config=CACHE_CONFIG)
 # sidebar
 ###############
 # 当前年月日
-now = time.strftime("%Y-%m", time.localtime())
+today = datetime.now()
+# 格式化现在的月份
+now_month = today.strftime("%Y-%m")
 # 日期区间
-date_range = ToolUtil.get_date_list("2020-01", "2021-07")
+date_range = ToolUtil.get_date_list("2020-01", now_month)
+# 默认开始日期 当前日期减去1年份取月份
+start_month = (today - relativedelta(years=1)).strftime('%Y-%m')
+# 默认结束日期  当前日期减去1月 取月份
+stop_month = (today - relativedelta(months=1)).strftime('%Y-%m')
 
 filter_month_range = dbc.FormGroup([
     dbc.Label('日期范围', className='sidebar-label'),
@@ -57,14 +63,14 @@ filter_month_range = dbc.FormGroup([
             dbc.Col(dcc.Dropdown(
                 id='begin_month',
                 options=[{"label": x, "value": x} for x in date_range],
-                value='2020-01',
+                value=start_month,
                 clearable=False,
                 persistence=True,
             )),
             dbc.Col(dcc.Dropdown(
                 id='end_month',
                 options=[{"label": x, "value": x} for x in date_range],
-                value='2021-02',
+                value=stop_month,
                 clearable=False,
                 persistence=True,
             )),
@@ -242,47 +248,12 @@ test_fig_3 = px.bar(test_fig_3_df, x="Sales", y="Area", color='Month', orientati
                     labels={'Month': '销售额环比', 'Sales': '销售额', 'Area': '战区'},
                     template="plotly_white")
 
+
 ###############
 # content
 ###############
 
 # 顶部4个card
-
-layout_title_cards = [
-    dbc.Col(dbc.Card(dbc.CardBody([
-        html.H6("总销售额"),
-        html.H4('￥78,000,000', id='title_1', style={"color": "darkred"}),
-        html.Label("2021.01 - 2021.02"),
-    ]), className='title-card'), className='title-col mr-2'),
-    dbc.Col(dbc.Card(dbc.CardBody([
-        html.H6("上月销售额"),
-        html.H4('￥10,000,000', id='title_2', style={"color": "darkred"}),
-        html.Label("2021.01 - 2021.02"),
-    ]), className='title-card'), className='title-col mr-2'),
-    dbc.Col(dbc.Card(dbc.CardBody([
-        html.H6("本月销售额"),
-        html.H4('￥7,000,000', id='title_3', style={"color": "darkred"}),
-        html.Label("2021.01 - 2021.02"),
-    ]), className='title-card'), className='title-col mr-2'),
-    dbc.Col(dbc.Card(dbc.CardBody([
-        html.H6("近12月销售趋势"),
-        # dcc.Graph(id='title_4'),
-    ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
-]
-
-
-def build_group_sales_fig(df):
-    fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=70)
-    fig.update_xaxes(visible=False, fixedrange=True)
-    fig.update_yaxes(visible=False, fixedrange=True)
-    fig.update_layout(
-        showlegend=False,
-        plot_bgcolor="white",
-        margin=dict(t=10, l=10, b=10, r=10)
-    )
-    return fig
-
-
 def build_layout_title_cards(datas: dict, values: dict):
     total_sale = datas["total_sale"] if datas else '0'
     begin_month = values["begin_month"] if values else ''
@@ -319,13 +290,36 @@ def build_layout_title_cards(datas: dict, values: dict):
     ]
 
 
-def build_fig_3(df):
-    fig = px.bar(df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
-                 # category_orders={'Area': ['一战区', '二战区', '三战区', '四战区', '五战区']},
-                 hover_name='month_group',
-                 labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
-                 template="plotly_white")
+# 顶部 12月趋势图
+def build_group_sales_fig(df):
+    """
+    12个月销售趋势图
+    """
+    fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=70)
+    fig.update_xaxes(visible=False, fixedrange=True)
+    fig.update_yaxes(visible=False, fixedrange=True)
+    fig.update_layout(
+        showlegend=False,
+        plot_bgcolor="white",
+        margin=dict(t=10, l=10, b=10, r=10)
+    )
     return fig
+
+
+# 战区排名
+def build_fig_3(df):
+    """
+    排名图
+    """
+    if len(df) > 0:
+        fig = px.bar(df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
+                     # category_orders={'Area': ['一战区', '二战区', '三战区', '四战区', '五战区']},
+                     hover_name='month_group',
+                     labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
+                     template="plotly_white")
+        return fig
+    else:
+        return {}
 
 
 # 常量定义
@@ -434,12 +428,15 @@ c_fig_03 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(id='dw_fig_3_1', options=order_type, value=2, searchable=False, clearable=False,
                          style={'width': 120}),
+            dcc.Dropdown(id='dw_fig_3_2', options=[{"label": x, "value": x} for x in date_range], value=now_month,
+                         searchable=False, clearable=False,
+                         style={'width': 100}),
         ], className='media-right block-inline')
     ], className='media flex-wrap ', style={'alignItems': 'flex-end'}),
     html.Hr(),
 
     # 图
-    dcc.Graph(id="fig_3", figure=test_fig_3),
+    dcc.Graph(id="fig_3", figure=build_fig_3([])),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -450,7 +447,7 @@ c_fig_03 = dbc.Card(dbc.CardBody([
 content = html.Div(
     className='content-style',
     children=[
-        dbc.Row(id="card_data", children=layout_title_cards),
+        dbc.Row(id="card_data", children=build_layout_title_cards({}, {})),
         dbc.Row([
             dbc.Col([
                 dbc.Row(c_fig_01),
@@ -521,30 +518,33 @@ def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, st
 
 
 def calculate_cards(card_datas, values):
+    """
+    计算头部的4个card 的数据
+    """
     df = pd.DataFrame(card_datas)
 
     total_sale = round(df["dealtotal"].sum(), 2)
-    # 假设当前月份为2021年2月份 取2021年1月份为 上月数据
-    s_date = datetime.strptime('2021-01-01', '%Y-%m-%d').date()
-    e_date = datetime.strptime('2021-01-31', '%Y-%m-%d').date()
+    # 当前月份的上月数据
+    s_date = ToolUtil.get_last_month_first_day(today).date()
+    e_date = ToolUtil.get_last_month_last_day(today).date()
     last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)]
-    last_month_total = round(last_month_df["dealtotal"].sum(), 2)
+    last_month_total = round(last_month_df["dealtotal"].sum(), 2) if len(last_month_df) > 0 else 0.00
 
     # 同比 取去年当月数据
-    tb_sdate = datetime.strptime('2020-01-01', '%Y-%m-%d').date()
-    tb_edate = datetime.strptime('2020-01-31', '%Y-%m-%d').date()
+    tb_sdate = (s_date - relativedelta(years=1))
+    tb_edate = (e_date - relativedelta(years=1))
     # 去年的数据
     tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)]
     # 去年的总营业额
-    tb_total_sale = round(tb_df["dealtotal"].sum(), 2)
+    tb_total_sale = round(tb_df["dealtotal"].sum(), 2) if len(tb_df) > 0 else 0.00
 
     # 同比增长率计算 =（本期数－同期数）/同期数×100%
     tb_percentage = "%.2f%%" % round(
         ((last_month_total - tb_total_sale) / tb_total_sale * 100) if tb_total_sale > 0 else 0, 2)
 
     # 环比 取上月数据
-    hb_sdate = datetime.strptime('2020-12-01', '%Y-%m-%d').date()
-    hb_edate = datetime.strptime('2020-12-31', '%Y-%m-%d').date()
+    hb_sdate = ToolUtil.get_last_month_first_day(s_date).date()
+    hb_edate = ToolUtil.get_last_month_last_day(e_date).date()
 
     # 上月数据
     hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)]
@@ -555,10 +555,10 @@ def calculate_cards(card_datas, values):
     hb_percentage = "%.2f%%" % round(
         ((last_month_total - hb_total_sale) / hb_total_sale * 100) if hb_total_sale > 0 else 0, 2)
     # 本月销售额
-    c_sdate = datetime.strptime('2021-02-01', '%Y-%m-%d').date()
-    c_edate = datetime.strptime('2021-02-28', '%Y-%m-%d').date()
+    c_sdate = ToolUtil.get_month_first_day(today).date()
+    c_edate = ToolUtil.get_month_last_day(today).date()
     c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)]
-    c_month_total_sale = round(c_month_df["dealtotal"].sum(), 2)
+    c_month_total_sale = round(c_month_df["dealtotal"].sum(), 2) if len(c_month_df) > 0 else 0.00
 
     # 本月营业额与上月对比营业额 增长率 - 月增长率 =（本月营业额-上月营业额）/上月营业额*100%
     m_growth_rate = "%.2f%%" % round(
@@ -604,7 +604,9 @@ def update_fig_1(index_type, dims_value, figure_type, values):
         # 默认根据战区及月份分组
         month_group_sales_df = pd.DataFrame(
             month_group_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum())
-        fig = px.bar(month_group_sales_df, x="month_group", y="dealtotal", color="areaname3")
+        fig = px.bar(month_group_sales_df, x="month_group", y="dealtotal", color="areaname3",
+                     labels={'month_group': '月份', 'dealtotal': '销售额', 'areaname3': '战区'},
+                     )
         if index_type == 2:
             # 添加平均线
             month_group_avg_df = pd.DataFrame(
@@ -634,19 +636,23 @@ def update_fig_3(order_value, values):
     fig3_data = global_store(values)
     df = pd.DataFrame(fig3_data)
     group_df = df
-    # 当月数据 假设本月是2月
-    cs_date = datetime.strptime('2021-02-01', '%Y-%m-%d').date()
-    ce_date = datetime.strptime('2021-02-28', '%Y-%m-%d').date()
+    # 当月数据
+    cs_date = ToolUtil.get_month_first_day(today).date()
+    ce_date = ToolUtil.get_month_last_day(today).date()
     current_month_df = group_df[(group_df["rdate"] >= cs_date) & (group_df["rdate"] < ce_date)]
 
     # 上月数据
-    ls_date = datetime.strptime('2021-01-01', '%Y-%m-%d').date()
-    le_date = datetime.strptime('2021-01-31', '%Y-%m-%d').date()
+    ls_date = ToolUtil.get_last_month_first_day(today).date()
+    le_date = ToolUtil.get_last_month_last_day(today).date()
     last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
     # 本月战区分组聚合
-    c_df = current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    c_df = pd.DataFrame(
+        current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    )
     # 上月战区分组聚合
-    l_df = last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    l_df = pd.DataFrame(
+        last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    )
     l_df["dealtotal"] = l_df["dealtotal"] * (-1)
     # 根据战区分组并排序
     if order_value == 1:
