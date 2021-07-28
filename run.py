@@ -14,7 +14,7 @@ def hello():
 
 @flask_server.route('/menus/')
 def render_reports():
-    return flask.redirect('/dash2')
+    return flask.redirect('/dash1')
 
 
 app = DispatcherMiddleware(flask_server, {
