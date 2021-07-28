@@ -313,13 +313,13 @@ def build_fig_3(df):
     """
     if len(df) > 0:
         fig = px.bar(df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
-                     # category_orders={'Area': ['一战区', '二战区', '三战区', '四战区', '五战区']},
+                     # category_orders={'areaname3': df['areaname3']},
                      hover_name='month_group',
                      labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
                      template="plotly_white")
         return fig
     else:
-        return {}
+        return test_fig_3
 
 
 # 常量定义
@@ -428,7 +428,7 @@ c_fig_03 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(id='dw_fig_3_1', options=order_type, value=2, searchable=False, clearable=False,
                          style={'width': 120}),
-            dcc.Dropdown(id='dw_fig_3_2', options=[{"label": x, "value": x} for x in date_range], value=now_month,
+            dcc.Dropdown(id='dw_fig_3_2', options=[{"label": x, "value": x} for x in date_range], value=stop_month,
                          searchable=False, clearable=False,
                          style={'width': 100}),
         ], className='media-right block-inline')
@@ -617,19 +617,21 @@ def update_fig_1(index_type, dims_value, figure_type, values):
             # 添加中位数线
             fig.add_trace()
         return fig
-    return {}
+    return test_fig_1
 
 
 @dash_app.callback(
     Output('fig_3', 'figure'),
     [
         Input('dw_fig_3_1', 'value'),
+        Input('dw_fig_3_2', 'value'),
         Input('signal', 'data'),
     ])
-def update_fig_3(order_value, values):
+def update_fig_3(order_value, month_value, values):
     """
         更新排名图
     @param order_value: 1: 正序， 2： 倒序
+    @param month_value: 月份值
     @param values:  全局缓存key
     """
     # 取数据
@@ -637,13 +639,14 @@ def update_fig_3(order_value, values):
     df = pd.DataFrame(fig3_data)
     group_df = df
     # 当月数据
-    cs_date = ToolUtil.get_month_first_day(today).date()
-    ce_date = ToolUtil.get_month_last_day(today).date()
+    c_month = datetime.strptime(month_value, "%Y-%m")
+    cs_date = ToolUtil.get_month_first_day(c_month).date()
+    ce_date = ToolUtil.get_month_last_day(c_month).date()
     current_month_df = group_df[(group_df["rdate"] >= cs_date) & (group_df["rdate"] < ce_date)]
 
     # 上月数据
-    ls_date = ToolUtil.get_last_month_first_day(today).date()
-    le_date = ToolUtil.get_last_month_last_day(today).date()
+    ls_date = ToolUtil.get_last_month_first_day(c_month).date()
+    le_date = ToolUtil.get_last_month_last_day(c_month).date()
     last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
     # 本月战区分组聚合
     c_df = pd.DataFrame(
@@ -659,11 +662,11 @@ def update_fig_3(order_value, values):
         c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
         l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
         fig_df = c_df.append(l_df)
-        return build_fig_3(fig_df) if len(fig_df) > 0 else {}
+        return build_fig_3(fig_df) if len(fig_df) > 0 else test_fig_3
     elif order_value == 2:
         c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
         l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
         fig_df = c_df.append(l_df)
-        return build_fig_3(fig_df) if len(fig_df) > 0 else {}
+        return build_fig_3(fig_df) if len(fig_df) > 0 else test_fig_3
 
-    return {}
+    return test_fig_3
