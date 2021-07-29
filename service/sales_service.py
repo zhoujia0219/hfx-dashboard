@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from db import DbUtil
+from db import Db
 
 default_dbname = "data_analysis"
 
@@ -34,7 +34,7 @@ def find_sales_list(values):
         #     query_sql += """
         #     """
     # 从数据库查询
-    data = DbUtil.query_list(query_sql, default_dbname)
+    data = Db.query_list(query_sql, default_dbname)
 
     result = [{"areauid3": d[0], "areaname3": d[1], "areauid4": d[2], "areaname4": d[3], "storeuid": d[4],
                "storename": d[5], "weeks": d[6], "rdate": datetime.strptime(str(d[7]), '%Y-%m-%d').date(),
@@ -52,6 +52,6 @@ def find_channel_list():
         select distinct businessname from  chunbaiwei.fact_storesale_weather
     """
 
-    data = DbUtil.query_list(query_sql, default_dbname)
+    data = Db.query_list(query_sql, default_dbname)
 
     return data

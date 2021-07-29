@@ -1,4 +1,4 @@
-import random
+import math
 from datetime import datetime
 
 import dash
@@ -14,8 +14,14 @@ from dateutil.relativedelta import relativedelta
 from flask_caching import Cache
 
 from app import flask_server
-from conf import db_conf
-from datas.DataUtil import find_sales_list, find_channel_list
+from apps.components import filter_channels
+from apps.components import filter_city_level
+from apps.components import filter_date_range
+from apps.components import filter_store_age
+from apps.components import filter_store_area
+from apps.components import filter_store_star
+from conf import config
+from service import sales_service
 from utils import ToolUtil
 
 ###############
@@ -38,8 +44,8 @@ cache = Cache()
 CACHE_CONFIG = {
     # try 'filesystem' if you don't want to setup redis
     'CACHE_TYPE': 'redis',
-    'CACHE_REDIS_URL': db_conf.REDIS_URL,
-    'CACHE_DEFAULT_TIMEOUT': db_conf.REDIS_CACHE_DEFAULT_TIMEOUT
+    'CACHE_REDIS_URL': config.REDIS_URL,
+    'CACHE_DEFAULT_TIMEOUT': config.REDIS_CACHE_DEFAULT_TIMEOUT
 }
 cache.init_app(dash_app.server, config=CACHE_CONFIG)
 
@@ -58,143 +64,46 @@ start_month = (today - relativedelta(years=1)).strftime('%Y-%m')
 stop_month = (today - relativedelta(months=1)).strftime('%Y-%m')
 
 # 渠道信息获取
-channels = find_channel_list()
-
+channels = sales_service.find_channel_list()
+# 门店级别定义
+city_levels = [
+    {"label": "一线城市", "value": 1},
+    {"label": "二线城市", "value": 2},
+    {"label": "三线城市", "value": 3},
+    {"label": "其它", "value": 4},
+]
+default_city_values = [1, 2, 3, 4]
+# 店龄
+store_ages = [
+    {"label": "新店（0-1年）", "value": 1},
+    {"label": "1-2年", "value": 2},
+    {"label": "2-3年", "value": 3},
+    {"label": "3-5年", "value": 4},
+    {"label": ">5年", "value": 5},
+]
+default_age_values = [1, 2, 3, 4, 5]
+store_areas = [
+    {"label": "档口店(<30㎡)", "value": 1},
+    {"label": "外卖店(<30㎡)", "value": 2},
+    {"label": "小店(<50㎡)", "value": 3},
+    {"label": "标准店(50-70㎡)", "value": 4},
+    {"label": "大店(>70㎡)", "value": 5},
+]
+default_area_values = [1, 2, 3, 4, 5]
+store_stars = [
+    {"label": "☆", "value": 1},
+    {"label": "☆☆", "value": 2},
+    {"label": "☆☆☆", "value": 3},
+    {"label": "☆☆☆☆", "value": 4},
+    {"label": "☆☆☆☆☆", "value": 5},
+]
+default_star_values = [1, 2, 3, 4, 5]
+# 提交
+filter_submit = dbc.Button('重新计算', id='submit', color="primary", className="mt-3", block=True)
 # 默认筛选值
 default_filter_values = {'begin_month': start_month, 'end_month': stop_month,
-                         'city': [], 'channel': [], 'store_age': [], 'store_area': [],
+                         'city': default_city_values, 'channel': [], 'store_age': [], 'store_area': [],
                          'store_star': []}
-
-filter_month_range = dbc.FormGroup([
-    dbc.Label('日期范围', className='sidebar-label'),
-    dbc.Row(
-        [
-            dbc.Col(dcc.Dropdown(
-                id='begin_month',
-                options=[{"label": x, "value": x} for x in date_range],
-                value=start_month,
-                clearable=False,
-                persistence=True,
-            )),
-            dbc.Col(dcc.Dropdown(
-                id='end_month',
-                options=[{"label": x, "value": x} for x in date_range],
-                value=stop_month,
-                clearable=False,
-                persistence=True,
-            )),
-        ], no_gutters=True,
-    ),
-])
-
-filter_cities = dbc.FormGroup([
-    dbc.Label("门店所属城市", className='sidebar-label'),
-    dbc.Checklist(
-        id="f_cities",
-        options=[
-            {"label": "一线城市", "value": 1},
-            {"label": "二线城市", "value": 2},
-            {"label": "三线城市", "value": 3},
-            {"label": "其它", "value": 4},
-        ],
-        value=[1, 2, 3, 4],
-        inline=True,
-        labelStyle={'min-width': 70},
-        persistence=True,
-    ),
-])
-
-filter_channels = dbc.FormGroup([
-    dbc.Label("销售渠道", className='sidebar-label'),
-    dbc.Checklist(
-        id="f_channels",
-        options=[
-            # {"label": "堂食", "value": 1},
-            # {"label": "美团", "value": 2},
-            # {"label": "饿了么", "value": 3},
-            # {"label": "其它", "value": 0},
-            {"label": c, "value": c} for c in channels
-        ],
-        value=channels,
-        inline=True,
-        labelStyle={'min-width': 70},
-        persistence=True,
-    ),
-])
-
-filter_store_age = dbc.FormGroup([
-    dbc.Label("店龄", className='sidebar-label'),
-    dbc.Checklist(
-        id="f_store_age",
-        options=[
-            {"label": "新店（0-1年）", "value": 1},
-            {"label": "1-2年", "value": 2},
-            {"label": "2-3年", "value": 3},
-            {"label": "3-5年", "value": 4},
-            {"label": ">5年", "value": 5},
-        ],
-        value=[1, 2, 3, 4, 5],
-        inline=True,
-        labelStyle={'min-width': 70},
-        persistence=True,
-    ),
-])
-
-filter_store_area = dbc.FormGroup([
-    dbc.Label("门店面积", className='sidebar-label'),
-    dbc.Checklist(
-        id="f_store_area",
-        options=[
-            {"label": "档口店(<30㎡)", "value": 1},
-            {"label": "外卖店(<30㎡)", "value": 2},
-            {"label": "小店(<50㎡)", "value": 3},
-            {"label": "标准店(50-70㎡)", "value": 4},
-            {"label": "大店(>70㎡)", "value": 5},
-        ],
-        value=[1, 2, 3, 4, 5],
-        inline=True,
-        labelStyle={'min-width': 70},
-        persistence=True,
-    ),
-])
-
-filter_store_star = dbc.FormGroup([
-    dbc.Label("门店星级", className='sidebar-label'),
-    dbc.Checklist(
-        id="f_store_star",
-        options=[
-            {"label": "☆", "value": 1},
-            {"label": "☆☆", "value": 2},
-            {"label": "☆☆☆", "value": 3},
-            {"label": "☆☆☆☆", "value": 4},
-            {"label": "☆☆☆☆☆", "value": 5},
-        ],
-        value=[1, 2, 3, 4, 5],
-        inline=True,
-        labelStyle={'min-width': 70},
-        persistence=True,
-    ),
-])
-
-filter_store_area1 = dbc.FormGroup([
-    dbc.Label("门店面积", className='sidebar-label'),
-    dbc.Checklist(
-        id='',
-        options=[
-            {"label": "档口店(<30㎡)", "value": 1},
-            {"label": "外卖店(<30㎡)", "value": 2},
-            {"label": "小店(<50㎡)", "value": 3},
-            {"label": "标准店(50-70㎡)", "value": 4},
-            {"label": "大店(>70㎡)", "value": 5},
-        ],
-        value=[1, 2, 3, 4, 5],
-        inline=True,
-        labelStyle={'min-width': 70},
-        persistence=True,
-    ),
-])
-
-filter_submit = dbc.Button('重新计算', id='submit', color="primary", className="mt-3", block=True)
 
 sidebar = html.Div(
     className='sidebar-style',
@@ -203,53 +112,16 @@ sidebar = html.Div(
         html.Hr(),
         html.P("可通过条件筛选过滤数据，也可以改变维度和图形样式", className="small", style={'color': 'gray'}),
         html.Div([
-            filter_month_range,
-            filter_cities,
-            filter_channels,
-            filter_store_age,
-            filter_store_area,
-            filter_store_star,
+            filter_date_range.filter_month_range(date_range, start_month, stop_month),
+            filter_city_level.filter_city_level("门店所属城市", city_levels, default_city_values),
+            filter_channels.filter_channels("销售渠道", [{"label": c, "value": c} for c in channels], channels),
+            filter_store_age.filter_store_age("店龄", store_ages, default_age_values),
+            filter_store_area.filter_store_area("门店面积", store_areas, default_area_values),
+            filter_store_star.filter_store_star("门店星级", store_stars, default_star_values),
             filter_submit,
         ]),
     ],
 )
-
-###############
-# 模拟数据
-###############
-test_df = pd.DataFrame({'Month': random.choices(range(1, 13), k=360),
-                        'Area': random.choices(['一战区', '二战区', '三战区', '四战区', '五战区'], k=360),
-                        'City': random.choices(['一线城市', '二线城市', '三线城市', '其它'], weights=[1, 2, 3, 1], k=360),
-                        'Sales': np.random.randint(low=80, high=120, size=360)})
-test_df_2 = test_df.groupby(['Month', 'City']).sum()
-test_df_2 = test_df_2.reset_index()
-
-test_pm = pd.DataFrame({'Group': ['一战区一组', '一战区二组', '一战区三组', '一战区四组'
-    , '二战区一组', '二战区二组', '二战区三组', '二战区四组'
-    , '三战区一组', '三战区二组', '三战区三组', '三战区四组'
-    , '四战区一组', '四战区二组', '四战区三组', '四战区四组', ],
-                        'Sales': np.random.randint(low=20, high=80, size=16)})
-test_pm = test_pm.sort_values(by='Sales', axis=0, ascending=[True])
-
-test_fig_2 = px.line(test_df_2, x="Month", y="Sales", color='City', height=300,
-                     labels={'Month': '过去12个月', 'Sales': '销售额', 'City': '城市'},
-                     template="plotly_white")
-
-test_fig_3_df = pd.DataFrame({'Month': random.choices(['2021-02', '2021-01'], k=100),
-                              'Area': random.choices(['一战区', '二战区', '三战区', '四战区', '五战区'], k=100),
-                              'Sales': np.random.randint(low=10, high=100, size=100)})
-test_fig_3_df = test_fig_3_df.groupby(['Month', 'Area']).sum()
-test_fig_3_df = test_fig_3_df.reset_index()
-
-test_fig_3_df.loc[test_fig_3_df['Month'] == '2021-01', 'Sales'] = test_fig_3_df[test_fig_3_df['Month'] == '2021-01'][
-                                                                      'Sales'] * (-1)
-
-test_fig_3 = px.bar(test_fig_3_df, x="Sales", y="Area", color='Month', orientation='h', height=300,
-                    category_orders={'Area': ['一战区', '二战区', '三战区', '四战区', '五战区']},
-                    hover_name='Month',
-
-                    labels={'Month': '销售额环比', 'Sales': '销售额', 'Area': '战区'},
-                    template="plotly_white")
 
 
 ###########################
@@ -269,9 +141,13 @@ def global_store(values):
     if d:
         return d
     else:
-        result = find_sales_list(values)
+        result = sales_service.find_sales_list(values)
         cache.set(str(values), result)
         return result
+
+
+# 换算单位、百万
+trans_num = 100000
 
 
 # 计算cards 的 展示数据
@@ -280,8 +156,6 @@ def calculate_cards(card_datas, values):
     计算头部的4个card 的数据
     """
     df = pd.DataFrame(card_datas)
-    # 换算单位、百万
-    trans_num = 100000
     # 总营业额
     total_sale = round((df["dealtotal"].sum() / trans_num), 2)
     # 当前月份(以时间筛选的截止日期为准)的上月数据
@@ -444,13 +318,12 @@ def build_fig_3(order_value, month_value, values):
     le_date = ToolUtil.get_last_month_last_day(c_month).date()
     last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
     # 本月战区分组聚合
-    c_df = pd.DataFrame(
-        current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
-    )
+    c_group_data = current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    c_df = pd.DataFrame(c_group_data)
     # 上月战区分组聚合
-    l_df = pd.DataFrame(
-        last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
-    )
+    l_group_data = last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    l_df = pd.DataFrame(l_group_data)
+
     l_df["dealtotal"] = l_df["dealtotal"] * (-1)
     # 根据战区分组并排序
     if order_value == 1:
@@ -468,6 +341,7 @@ def build_fig_3(order_value, month_value, values):
                      category_orders={'areaname3': [c for c in fig_df['areaname3']]},
                      hover_name='month_group',
                      labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
+                     text=[str(round(math.fabs(c) / trans_num, 2)) + "M" for c in fig_df["dealtotal"]],
                      template="plotly_white")
 
         # todo 添加显示标签
