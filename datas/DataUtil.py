@@ -26,9 +26,10 @@ def find_sales_list(values):
             citys = tuple(str(c) for c in values["city"]) if len(values['city']) > 1 \
                 else "(" + str(values['city'][0]) + ")"
             query_sql += """ and city_level in {city}""".format(city=citys)
-        # if values["channel"]:
-        #     channels = tuple(str(c) for c in values["channel"])
-        #     query_sql += """ and businessname in {channel}""".format(channel=channels)
+        if values["channel"]:
+            channels = tuple(c[0] for c in values["channel"]) if len(values['channel']) > 1 \
+                else "(" + values['channel'][0] + ")"
+            query_sql += """ and businessname in {channel}""".format(channel=channels)
         # if values["store_age"]:
         #     query_sql += """
         #     """
@@ -44,3 +45,13 @@ def find_sales_list(values):
                "month": d[25], "year": d[26], "city_level": int(d[27]) if d[27] else 0, "month_group": d[28]} for d in
               data]
     return result
+
+
+def find_channel_list():
+    query_sql = """
+        select distinct businessname from  chunbaiwei.fact_storesale_weather
+    """
+
+    data = DbUtil.query_list(query_sql, default_dbname)
+
+    return data
