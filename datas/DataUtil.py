@@ -10,10 +10,11 @@ def find_sales_list(values):
                    SELECT 
                    areauid3, areaname3, areauid4, areaname4, storeuid, storename, weeks, rdate :: date, province, 
                    province_name, city, city_name, county, county_name, businessname, vctype, areasize, 
-                   billcount, dealtotal::float, rebillcount, redealtotal, weather, weather_desc, temperature, wind_direction, 
-                   "month", "year", city_level, to_char(rdate,'YYYY年MM月') as month_group
+                   billcount, dealtotal::float, rebillcount, redealtotal, weather, weather_desc, temperature, 
+                   wind_direction, "month", "year", city_level, to_char(rdate,'YYYY年MM月') as month_group
                    FROM chunbaiwei.fact_storesale_weather
-                   WHERE 1 = 1
+                   WHERE areauid3 is not null  and areauid4 is not null and province is not null and city is not null 
+                   and county is not null
            """
     if values:
         if values["begin_month"] and values["end_month"]:
@@ -31,7 +32,6 @@ def find_sales_list(values):
         # if values["store_age"]:
         #     query_sql += """
         #     """
-
     # 从数据库查询
     data = DbUtil.query_list(query_sql, default_dbname)
 
@@ -41,5 +41,6 @@ def find_sales_list(values):
                "county_name": d[13], "businessname": d[14], "vctype": d[15], "areasize": d[16],
                "billcount": d[17], "dealtotal": d[18], "rebillcount": d[19], "redealtotal": float(d[20]),
                "weather": d[21], "weather_desc": d[22], "temperature": d[23], "wind_direction": d[24],
-               "month": d[25], "year": d[26], "city_level": int(d[27]), "month_group": d[28]} for d in data]
+               "month": d[25], "year": d[26], "city_level": int(d[27]) if d[27] else 0, "month_group": d[28]} for d in
+              data]
     return result

@@ -249,12 +249,103 @@ test_fig_3 = px.bar(test_fig_3_df, x="Sales", y="Area", color='Month', orientati
                     template="plotly_white")
 
 
+###########################
+# 取数据缓存
+###########################
+
+@cache.memoize()
+def global_store(values):
+    """
+    全局缓存
+    :param values: json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
+                                'city':city, 'channel':channel,
+                                'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
+    :return:
+    """
+    d = cache.get(str(values))
+    if d:
+        return d
+    else:
+        result = find_sales_list(values)
+        print(result)
+        cache.set(str(values), result)
+        return result
+
+
+# 计算cards 的 展示数据
+def calculate_cards(card_datas, values):
+    """
+    计算头部的4个card 的数据
+    """
+    df = pd.DataFrame(card_datas)
+    # 换算单位、百万
+    trans_num = 100000
+    # 总营业额
+    total_sale = round((df["dealtotal"].sum() / trans_num), 2)
+    # 当前月份(以时间筛选的截止日期为准)的上月数据
+    ve_date = datetime.strptime(values["end_month"], "%Y-%m")
+    s_date = ToolUtil.get_last_month_first_day(ve_date).date()
+    e_date = ToolUtil.get_last_month_last_day(ve_date).date()
+    last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)]
+    last_month_total = round((last_month_df["dealtotal"].sum()) / trans_num, 2) if len(last_month_df) > 0 else 0.00
+
+    # 同比 取去年当月数据
+    tb_sdate = (s_date - relativedelta(years=1))
+    tb_edate = (e_date - relativedelta(years=1))
+    # 去年的数据
+    tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)]
+    # 去年的总营业额
+    tb_total_sale = round((tb_df["dealtotal"].sum() / trans_num), 2) if len(tb_df) > 0 else 0.00
+
+    # 同比增长率计算 =（本期数－同期数）/同期数×100%
+    tb_percentage = "%.2f%%" % round(
+        ((last_month_total - tb_total_sale) / tb_total_sale * 100) if tb_total_sale > 0 else 0, 2)
+
+    # 环比 取上月数据
+    hb_sdate = ToolUtil.get_last_month_first_day(s_date).date()
+    hb_edate = ToolUtil.get_last_month_last_day(e_date).date()
+
+    # 上月数据
+    hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)]
+    # 上月总营业额
+    hb_total_sale = round((hb_df["dealtotal"].sum() / trans_num), 2) if len(hb_df) > 0 else 0.00
+
+    # 环比增长率计算= （本期数-上期数）/上期数×100%。
+    hb_percentage = "%.2f%%" % round(
+        ((last_month_total - hb_total_sale) / hb_total_sale * 100) if hb_total_sale > 0 else 0, 2)
+    # 本月销售额
+    c_sdate = ToolUtil.get_month_first_day(ve_date).date()
+    c_edate = ToolUtil.get_month_last_day(ve_date).date()
+    c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)]
+    c_month_total_sale = round((c_month_df["dealtotal"].sum() / trans_num), 2) if len(c_month_df) > 0 else 0.00
+
+    # 本月营业额与上月对比营业额 增长率 - 月增长率 =（本月营业额-上月营业额）/上月营业额*100%
+    m_growth_rate = "%.2f%%" % round(
+        ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
+
+    # 近12月销售趋势
+    group_df = df
+    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum()
+    group_sales = pd.DataFrame(month_groups)
+    # 封装结果数据
+    return {"total_sale": total_sale, "last_month_total": last_month_total,
+            "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
+            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate,
+            "group_sales": group_sales}
+
+
 ###############
 # content
 ###############
 
 # 顶部4个card
-def build_layout_title_cards(datas: dict, values: dict):
+def build_layout_title_cards(values: dict):
+    card_datas = global_store(values)
+    datas = {}
+    if card_datas:
+        # 封装结果数据
+        datas = calculate_cards(card_datas, values)
+
     total_sale = datas["total_sale"] if datas else '0'
     begin_month = values["begin_month"] if values else ''
     end_month = values["end_month"] if values else ''
@@ -270,22 +361,22 @@ def build_layout_title_cards(datas: dict, values: dict):
     return [
         dbc.Col(dbc.Card(dbc.CardBody([
             html.H6("总销售额"),
-            html.H4(['￥', total_sale], id='title_1', style={"color": "darkred"}),
+            html.H4(['￥', total_sale, 'M'], id='title_1', style={"color": "darkred"}),
             html.Label(begin_month + " - " + end_month),
         ]), className='title-card'), className='title-col mr-2'),
         dbc.Col(dbc.Card(dbc.CardBody([
             html.H6("上月销售额"),
-            html.H4(['￥', last_month_total], id='title_2', style={"color": "darkred"}),
+            html.H4(['￥', last_month_total, 'M'], id='title_2', style={"color": "darkred"}),
             html.Label("同比:" + tb_percentage + "  环比：" + hb_percentage),
         ]), className='title-card'), className='title-col mr-2'),
         dbc.Col(dbc.Card(dbc.CardBody([
             html.H6("本月销售额"),
-            html.H4(['￥', c_month_total_sale], id='title_3', style={"color": "darkred"}),
+            html.H4(['￥', c_month_total_sale, 'M'], id='title_3', style={"color": "darkred"}),
             html.Label("增长率：" + m_growth_rate),
         ]), className='title-card'), className='title-col mr-2'),
         dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6("近12月销售趋势"),
-            dcc.Graph(id='title_4', figure=fig),
+            html.H6(["近12月销售趋势", "(", begin_month + " - " + end_month, ")"]),
+            dcc.Graph(id='title_4', figure=fig, style={"height": "60px"}),
         ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
     ]
 
@@ -295,7 +386,7 @@ def build_group_sales_fig(df):
     """
     12个月销售趋势图
     """
-    fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=70)
+    fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=60)
     fig.update_xaxes(visible=False, fixedrange=True)
     fig.update_yaxes(visible=False, fixedrange=True)
     fig.update_layout(
@@ -428,8 +519,8 @@ c_fig_03 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(id='dw_fig_3_1', options=order_type, value=2, searchable=False, clearable=False,
                          style={'width': 120}),
-            dcc.Dropdown(id='dw_fig_3_2', options=[{"label": x, "value": x} for x in date_range], value=stop_month,
-                         searchable=False, clearable=False,
+            dcc.Dropdown(id='dw_fig_3_2', options=[{"label": x, "value": x} for x in date_range],
+                         value=stop_month, searchable=False, clearable=False,
                          style={'width': 100}),
         ], className='media-right block-inline')
     ], className='media flex-wrap ', style={'alignItems': 'flex-end'}),
@@ -447,7 +538,10 @@ c_fig_03 = dbc.Card(dbc.CardBody([
 content = html.Div(
     className='content-style',
     children=[
-        dbc.Row(id="card_data", children=build_layout_title_cards({}, {})),
+        dbc.Row(id="card_data",
+                children=build_layout_title_cards({'begin_month': start_month, 'end_month': stop_month,
+                                                   'city': [], 'channel': [], 'store_age': [], 'store_area': [],
+                                                   'store_star': []})),
         dbc.Row([
             dbc.Col([
                 dbc.Row(c_fig_01),
@@ -466,29 +560,9 @@ dash_app.layout = html.Div([
 ])
 
 
-###########################
-# 取数据缓存
-###########################
-
-@cache.memoize()
-def global_store(values):
-    """
-    全局缓存
-    :param values: json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
-                                'city':city, 'channel':channel,
-                                'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
-    :return:
-    """
-    d = cache.get(str(values))
-    if d:
-        return d
-    else:
-        result = find_sales_list(values)
-        print(result)
-        cache.set(str(values), result)
-        return result
-
-
+###############
+# 回调
+###############
 @dash_app.callback(
     Output('signal', 'data'),
     [
@@ -517,72 +591,9 @@ def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, st
     return values
 
 
-def calculate_cards(card_datas, values):
-    """
-    计算头部的4个card 的数据
-    """
-    df = pd.DataFrame(card_datas)
-
-    total_sale = round(df["dealtotal"].sum(), 2)
-    # 当前月份的上月数据
-    s_date = ToolUtil.get_last_month_first_day(today).date()
-    e_date = ToolUtil.get_last_month_last_day(today).date()
-    last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)]
-    last_month_total = round(last_month_df["dealtotal"].sum(), 2) if len(last_month_df) > 0 else 0.00
-
-    # 同比 取去年当月数据
-    tb_sdate = (s_date - relativedelta(years=1))
-    tb_edate = (e_date - relativedelta(years=1))
-    # 去年的数据
-    tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)]
-    # 去年的总营业额
-    tb_total_sale = round(tb_df["dealtotal"].sum(), 2) if len(tb_df) > 0 else 0.00
-
-    # 同比增长率计算 =（本期数－同期数）/同期数×100%
-    tb_percentage = "%.2f%%" % round(
-        ((last_month_total - tb_total_sale) / tb_total_sale * 100) if tb_total_sale > 0 else 0, 2)
-
-    # 环比 取上月数据
-    hb_sdate = ToolUtil.get_last_month_first_day(s_date).date()
-    hb_edate = ToolUtil.get_last_month_last_day(e_date).date()
-
-    # 上月数据
-    hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)]
-    # 上月总营业额
-    hb_total_sale = round(hb_df["dealtotal"].sum(), 2)
-
-    # 环比增长率计算= （本期数-上期数）/上期数×100%。
-    hb_percentage = "%.2f%%" % round(
-        ((last_month_total - hb_total_sale) / hb_total_sale * 100) if hb_total_sale > 0 else 0, 2)
-    # 本月销售额
-    c_sdate = ToolUtil.get_month_first_day(today).date()
-    c_edate = ToolUtil.get_month_last_day(today).date()
-    c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)]
-    c_month_total_sale = round(c_month_df["dealtotal"].sum(), 2) if len(c_month_df) > 0 else 0.00
-
-    # 本月营业额与上月对比营业额 增长率 - 月增长率 =（本月营业额-上月营业额）/上月营业额*100%
-    m_growth_rate = "%.2f%%" % round(
-        ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
-
-    # 近12月销售趋势
-    group_df = df
-    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum()
-    group_sales = pd.DataFrame(month_groups)
-    # 封装结果数据
-    return {"total_sale": total_sale, "last_month_total": last_month_total,
-            "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
-            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate,
-            "group_sales": group_sales}
-
-
 @dash_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
 def update_card_data(values):
-    card_datas = global_store(values)
-    if card_datas:
-        # 封装结果数据
-        result_datas = calculate_cards(card_datas, values)
-        return build_layout_title_cards(result_datas, values)
-    return build_layout_title_cards({}, values)
+    return build_layout_title_cards(values)
 
 
 @dash_app.callback(
@@ -670,3 +681,14 @@ def update_fig_3(order_value, month_value, values):
         return build_fig_3(fig_df) if len(fig_df) > 0 else test_fig_3
 
     return test_fig_3
+
+
+@dash_app.callback(
+    Output('dw_fig_3_2', 'value'),
+    Input('end_month', 'value'),
+)
+def update_fig_3_2_value(value):
+    """
+    更新选项值
+    """
+    return value
