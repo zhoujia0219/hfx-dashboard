@@ -270,7 +270,6 @@ def global_store(values):
         return d
     else:
         result = find_sales_list(values)
-        print(result)
         cache.set(str(values), result)
         return result
 
@@ -429,7 +428,7 @@ def build_group_sales_fig(df):
 def build_fig_3(order_value, month_value, values):
     # 取数据
     fig3_data = global_store(values)
-    if len(fig3_data):
+    if len(fig3_data) < 0:
         return {}
 
     df = pd.DataFrame(fig3_data)
@@ -463,18 +462,18 @@ def build_fig_3(order_value, month_value, values):
 
     # 合并数据
     fig_df = c_df.append(l_df)
-    """
-    排名图
-    """
+
     if len(fig_df) > 0:
         fig = px.bar(fig_df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
-                     # category_orders={'areaname3': df['areaname3']},
+                     category_orders={'areaname3': [c for c in fig_df['areaname3']]},
                      hover_name='month_group',
                      labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
                      template="plotly_white")
+
+        # todo 添加显示标签
+
         return fig
     else:
-        # 默认不展示
         return {}
 
 
@@ -493,7 +492,7 @@ def build_sales_gragh(values, val_graph, val_cate, val_agg):
                                    x=dff[dff[val_cate] == lab]['month'],
                                    y=dff[dff[val_cate] == lab]['dealtotal'], )
                             for lab in dff[val_cate].unique()] +
-                        [go.Line(name='平均值', x=dff_line['month'], y=dff_line['dealtotal'])])
+                        [go.Scatter(name='平均值', x=dff_line['month'], y=dff_line['dealtotal'], mode="lines")])
         fig.update_layout(barmode='group', template='plotly_white')
         return fig
     else:
