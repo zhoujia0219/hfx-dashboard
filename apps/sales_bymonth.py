@@ -231,7 +231,6 @@ test_pm = pd.DataFrame({'Group': ['一战区一组', '一战区二组', '一战�
                         'Sales': np.random.randint(low=20, high=80, size=16)})
 test_pm = test_pm.sort_values(by='Sales', axis=0, ascending=[True])
 
-
 test_fig_2 = px.line(test_df_2, x="Month", y="Sales", color='City', height=300,
                      labels={'Month': '过去12个月', 'Sales': '销售额', 'City': '城市'},
                      template="plotly_white")
@@ -338,6 +337,31 @@ def calculate_cards(card_datas, values):
             "group_sales": group_sales}
 
 
+# 展示图数据
+def calculate_gragh_data(values):
+    data = global_store(values)
+    if len(data) > 0:
+        df = pd.DataFrame(data)
+        # 转换0值
+        df.replace(0, np.nan, inplace=True)
+        df['areasize'] = df['areasize'].astype('float')
+        # 新增areasize_bins
+        df['areasize_bins'] = pd.cut(df['areasize'], bins=[0, 40, 72, 90, 130], labels=['小店', '中店', '大店', '超大店'])
+        # 缩小渠道范围
+        df = df[df['businessname'].isin(['到店销售', '开放平台-扫码点餐'])]
+        # 缩小战区范围
+        df = df[df['areaname3'].isin(['一战区', '二战区', '三战区', '四战区'])]
+        # 变更‘rdate’类型
+        df['rdate'] = pd.to_datetime(df['rdate'])
+        # 去2021年的值
+        df = df[df['rdate'] >= '2021-01-01']
+        df = df[df['businessname'].isin(['到店销售', '开放平台-扫码点餐'])]
+        df['month_str'] = df['month'].map({1: '1月', 2: '2月', 3: '3月', 4: '4月', 5: '5月'})
+        df['month'] = df['month'].astype('str')
+        return df
+    return []
+
+
 ###############
 # content
 ###############
@@ -402,19 +426,114 @@ def build_group_sales_fig(df):
 
 
 # 战区排名
-def build_fig_3(df):
+def build_fig_3(order_value, month_value, values):
+    # 取数据
+    fig3_data = global_store(values)
+    if len(fig3_data):
+        return {}
+
+    df = pd.DataFrame(fig3_data)
+    group_df = df
+    # 当月数据
+    c_month = datetime.strptime(month_value, "%Y-%m")
+    cs_date = ToolUtil.get_month_first_day(c_month).date()
+    ce_date = ToolUtil.get_month_last_day(c_month).date()
+    current_month_df = group_df[(group_df["rdate"] >= cs_date) & (group_df["rdate"] < ce_date)]
+
+    # 上月数据
+    ls_date = ToolUtil.get_last_month_first_day(c_month).date()
+    le_date = ToolUtil.get_last_month_last_day(c_month).date()
+    last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
+    # 本月战区分组聚合
+    c_df = pd.DataFrame(
+        current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    )
+    # 上月战区分组聚合
+    l_df = pd.DataFrame(
+        last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
+    )
+    l_df["dealtotal"] = l_df["dealtotal"] * (-1)
+    # 根据战区分组并排序
+    if order_value == 1:
+        c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+        l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+    elif order_value == 2:
+        c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+        l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+
+    # 合并数据
+    fig_df = c_df.append(l_df)
     """
     排名图
     """
-    if len(df) > 0:
-        fig = px.bar(df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
+    if len(fig_df) > 0:
+        fig = px.bar(fig_df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
                      # category_orders={'areaname3': df['areaname3']},
                      hover_name='month_group',
                      labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
                      template="plotly_white")
         return fig
     else:
-        return test_fig_3
+        # 默认不展示
+        return {}
+
+
+# 销售分析
+def build_sales_gragh(values, val_graph, val_cate, val_agg):
+    df = calculate_gragh_data(values)
+    if len(df) < 1:
+        return {}
+    if val_graph == 'px.bar':
+        dff = df.groupby(['month', val_cate], as_index=False)['dealtotal']
+        dff = eval(val_agg)
+        dff_line = dff.groupby('month', as_index=False)['dealtotal'].mean()
+
+        fig = go.Figure([
+                            go.Bar(name=lab,
+                                   x=dff[dff[val_cate] == lab]['month'],
+                                   y=dff[dff[val_cate] == lab]['dealtotal'], )
+                            for lab in dff[val_cate].unique()] +
+                        [go.Line(name='平均值', x=dff_line['month'], y=dff_line['dealtotal'])])
+        fig.update_layout(barmode='group', template='plotly_white')
+        return fig
+    else:
+        dff = df.groupby(['month', val_cate], as_index=False)['dealtotal']
+        dff = eval(val_agg)
+        fig = eval(val_graph)(
+            dff,
+            x='month',
+            y='dealtotal',
+            color=val_cate,
+            labels={'month': '月份', 'dealtotal': '总销售额'},
+            title='销售额分析',
+            template='plotly_white'
+        )
+        return fig
+
+
+# 所属城市级别
+def build_city_graph(values, val_x, val_cate, val_agg):
+    df = calculate_gragh_data(values)
+    if len(df) < 1:
+        return {}
+    if val_x == val_cate:
+        return dash.no_update
+    else:
+        dff = df.groupby([val_x, val_cate], as_index=False)['dealtotal']
+        dff = eval(val_agg)
+        fig = px.bar(
+            dff,
+            x=val_x,
+            y='dealtotal',
+            color=val_cate,
+            labels={'dealtotal': '总销售额'},
+            title='销售额分析',
+            barmode='group',
+            text='dealtotal',
+            template='plotly_white'
+        )
+        fig.update_traces(texttemplate='%{text:.2s}', textposition='inside')
+        return fig
 
 
 # 常量定义
@@ -474,7 +593,7 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="graph_out_qs"),
+    dcc.Graph(id="graph_out_qs", figure=build_sales_gragh(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -487,20 +606,33 @@ c_fig_02 = dbc.Card(dbc.CardBody([
 
     # 用户选项
     html.Div([
-        html.H5('销售额-战区分析', className='media-body', style={'min-width': '150px'}),
+        html.H5('销售额分析', className='media-body', style={'min-width': '150px'}),
         html.Div([
-            dcc.Dropdown(id='dw_fig_2_1', options=index_type, value=1, searchable=False, clearable=False,
-                         style={'width': 120}),
-            dcc.Dropdown(id='dw_fig_2_2', options=dims, value=1, searchable=False, clearable=False,
-                         style={'width': 150}),
-            dcc.Dropdown(id='dw_fig_2_3', options=figure_type, value=1, searchable=False, clearable=False,
-                         style={'width': 100}),
+            dcc.Dropdown(
+                id="x_choice",
+                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                value='businessname',
+                searchable=False, clearable=False, style={'width': 120}
+            ),
+            dcc.Dropdown(
+                id='cate_choice_2',
+                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                value='areaname3',
+                searchable=False, clearable=False, style={'width': 120}
+            ),
+            dcc.Dropdown(
+                id='agg_choice_2',
+                options=[{'label': x, 'value': y} for x, y in agg.items()],
+                value='dff.sum()',
+                searchable=False, clearable=False, style={'width': 120}
+            ),
         ], className='media-right block-inline')
     ], className='media flex-wrap ', style={'alignItems': 'flex-end'}),
     html.Hr(),
 
     # 图
-    dcc.Graph(figure=test_fig_2),
+    dcc.Graph(id='graph_out_wd',
+              figure=build_city_graph(default_filter_values, 'businessname', 'areaname3', 'dff.sum()')),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -524,7 +656,7 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="fig_3", figure=build_fig_3([])),
+    dcc.Graph(id="fig_3", figure=build_fig_3(1, stop_month, default_filter_values)),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -605,42 +737,8 @@ def update_fig_3(order_value, month_value, values):
     @param month_value: 月份值
     @param values:  全局缓存key
     """
-    # 取数据
-    fig3_data = global_store(values)
-    df = pd.DataFrame(fig3_data)
-    group_df = df
-    # 当月数据
-    c_month = datetime.strptime(month_value, "%Y-%m")
-    cs_date = ToolUtil.get_month_first_day(c_month).date()
-    ce_date = ToolUtil.get_month_last_day(c_month).date()
-    current_month_df = group_df[(group_df["rdate"] >= cs_date) & (group_df["rdate"] < ce_date)]
 
-    # 上月数据
-    ls_date = ToolUtil.get_last_month_first_day(c_month).date()
-    le_date = ToolUtil.get_last_month_last_day(c_month).date()
-    last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
-    # 本月战区分组聚合
-    c_df = pd.DataFrame(
-        current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
-    )
-    # 上月战区分组聚合
-    l_df = pd.DataFrame(
-        last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
-    )
-    l_df["dealtotal"] = l_df["dealtotal"] * (-1)
-    # 根据战区分组并排序
-    if order_value == 1:
-        c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
-        l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
-        fig_df = c_df.append(l_df)
-        return build_fig_3(fig_df) if len(fig_df) > 0 else test_fig_3
-    elif order_value == 2:
-        c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
-        l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
-        fig_df = c_df.append(l_df)
-        return build_fig_3(fig_df) if len(fig_df) > 0 else test_fig_3
-
-    return test_fig_3
+    return build_fig_3(order_value, month_value, values)
 
 
 @dash_app.callback(
@@ -654,31 +752,6 @@ def update_fig_3_2_value(value):
     return value
 
 
-# 淳百味数据
-def calculate_gragh_data(values):
-    data = global_store(values)
-    if len(data) > 0:
-        df = pd.DataFrame(data)
-        # 转换0值
-        df.replace(0, np.nan, inplace=True)
-        df['areasize'] = df['areasize'].astype('float')
-        # 新增areasize_bins
-        df['areasize_bins'] = pd.cut(df['areasize'], bins=[0, 40, 72, 90, 130], labels=['小店', '中店', '大店', '超大店'])
-        # 缩小渠道范围
-        df = df[df['businessname'].isin(['到店销售', '开放平台-扫码点餐'])]
-        # 缩小战区范围
-        df = df[df['areaname3'].isin(['一战区', '二战区', '三战区', '四战区'])]
-        # 变更‘rdate’类型
-        df['rdate'] = pd.to_datetime(df['rdate'])
-        # 去2021年的值
-        df = df[df['rdate'] >= '2021-01-01']
-        df = df[df['businessname'].isin(['到店销售', '开放平台-扫码点餐'])]
-        df['month_str'] = df['month'].map({1: '1月', 2: '2月', 3: '3月', 4: '4月', 5: '5月'})
-        df['month'] = df['month'].astype('str')
-        return df
-    return []
-
-
 # graph_out_qs
 @dash_app.callback(
     Output('graph_out_qs', 'figure'),
@@ -690,35 +763,7 @@ def calculate_gragh_data(values):
     ],
 )
 def update_my_graph(val_cate, val_agg, val_graph, values):
-    df = calculate_gragh_data(values)
-    if len(df) < 1:
-        return {}
-    if val_graph == 'px.bar':
-        dff = df.groupby(['month', val_cate], as_index=False)['dealtotal']
-        dff = eval(val_agg)
-        dff_line = dff.groupby('month', as_index=False)['dealtotal'].mean()
-
-        fig = go.Figure([
-                            go.Bar(name=lab,
-                                   x=dff[dff[val_cate] == lab]['month'],
-                                   y=dff[dff[val_cate] == lab]['dealtotal'], )
-                            for lab in dff[val_cate].unique()] +
-                        [go.Line(name='平均值', x=dff_line['month'], y=dff_line['dealtotal'])])
-        fig.update_layout(barmode='group', template='plotly_white')
-        return fig
-    else:
-        dff = df.groupby(['month', val_cate], as_index=False)['dealtotal']
-        dff = eval(val_agg)
-        fig = eval(val_graph)(
-            dff,
-            x='month',
-            y='dealtotal',
-            color=val_cate,
-            labels={'month': '月份', 'dealtotal': '总销售额'},
-            title='销售额分析',
-            template='plotly_white'
-        )
-        return fig
+    return build_sales_gragh(values, val_graph, val_cate, val_agg)
 
 
 # graph_out_wd
@@ -732,24 +777,4 @@ def update_my_graph(val_cate, val_agg, val_graph, values):
     ],
 )
 def update_my_graph(val_x, val_cate, val_agg, values):
-    df = calculate_gragh_data(values)
-    if len(df) < 1:
-        return {}
-    if val_x == val_cate:
-        return dash.no_update
-    else:
-        dff = df.groupby([val_x, val_cate], as_index=False)['dealtotal']
-        dff = eval(val_agg)
-        fig = px.bar(
-            dff,
-            x=val_x,
-            y='dealtotal',
-            color=val_cate,
-            labels={'dealtotal': '总销售额'},
-            title='销售额分析',
-            barmode='group',
-            text='dealtotal',
-            template='plotly_white'
-        )
-        fig.update_traces(texttemplate='%{text:.2s}', textposition='inside')
-        return fig
+    return build_city_graph(values, val_x, val_cate, val_agg)
