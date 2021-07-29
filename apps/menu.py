@@ -11,7 +11,7 @@ from core.flask_app import flask_server
 ###############
 menu_app = dash.Dash(__name__,
                      server=flask_server,
-                     title="门店月度销售分析",
+                     title="菜单",
                      update_title="数据载入中...",
                      suppress_callback_exceptions=True,
                      url_base_pathname=router_conts.MENUS,

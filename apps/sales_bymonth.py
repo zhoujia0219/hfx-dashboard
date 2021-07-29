@@ -5,13 +5,11 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
 from dateutil.relativedelta import relativedelta
-from flask_caching import Cache
 
 from apps.components import filter_channels
 from apps.components import filter_city_level
@@ -19,7 +17,6 @@ from apps.components import filter_date_range
 from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
-from conf import config
 from conts import router_conts
 from core.flask_app import flask_server
 from service import sales_service
@@ -36,19 +33,6 @@ sales_app = dash.Dash(__name__,
                       suppress_callback_exceptions=True,
                       url_base_pathname=router_conts.SALES_BY_MONTH,
                       external_stylesheets=[dbc.themes.PULSE])
-
-#########################
-# 缓存
-#########################
-
-cache = Cache()
-CACHE_CONFIG = {
-    # try 'filesystem' if you don't want to setup redis
-    'CACHE_TYPE': 'redis',
-    'CACHE_REDIS_URL': config.REDIS_URL,
-    'CACHE_DEFAULT_TIMEOUT': config.REDIS_CACHE_DEFAULT_TIMEOUT
-}
-cache.init_app(sales_app.server, config=CACHE_CONFIG)
 
 ###############
 # sidebar
@@ -125,128 +109,14 @@ sidebar = html.Div(
 )
 
 
-###########################
-# 取数据缓存
-###########################
-
-@cache.memoize()
-def global_store(values):
-    """
-    全局缓存
-    :param values: json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
-                                'city':city, 'channel':channel,
-                                'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
-    :return:
-    """
-    d = cache.get(str(values))
-    if d:
-        return d
-    else:
-        result = sales_service.find_sales_list(values)
-        cache.set(str(values), result)
-        return result
-
-
-# 换算单位、百万
-trans_num = 100000
-
-
-# 计算cards 的 展示数据
-def calculate_cards(card_datas, values):
-    """
-    计算头部的4个card 的数据
-    """
-    df = pd.DataFrame(card_datas)
-    # 总营业额
-    total_sale = round((df["dealtotal"].sum() / trans_num), 2)
-    # 当前月份(以时间筛选的截止日期为准)的上月数据
-    ve_date = datetime.strptime(values["end_month"], "%Y-%m")
-    s_date = ToolUtil.get_last_month_first_day(ve_date).date()
-    e_date = ToolUtil.get_last_month_last_day(ve_date).date()
-    last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)]
-    last_month_total = round((last_month_df["dealtotal"].sum()) / trans_num, 2) if len(last_month_df) > 0 else 0.00
-
-    # 同比 取去年当月数据
-    tb_sdate = (s_date - relativedelta(years=1))
-    tb_edate = (e_date - relativedelta(years=1))
-    # 去年的数据
-    tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)]
-    # 去年的总营业额
-    tb_total_sale = round((tb_df["dealtotal"].sum() / trans_num), 2) if len(tb_df) > 0 else 0.00
-
-    # 同比增长率计算 =（本期数－同期数）/同期数×100%
-    tb_percentage = "%.2f%%" % round(
-        ((last_month_total - tb_total_sale) / tb_total_sale * 100) if tb_total_sale > 0 else 0, 2)
-
-    # 环比 取上月数据
-    hb_sdate = ToolUtil.get_last_month_first_day(s_date).date()
-    hb_edate = ToolUtil.get_last_month_last_day(e_date).date()
-
-    # 上月数据
-    hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)]
-    # 上月总营业额
-    hb_total_sale = round((hb_df["dealtotal"].sum() / trans_num), 2) if len(hb_df) > 0 else 0.00
-
-    # 环比增长率计算= （本期数-上期数）/上期数×100%。
-    hb_percentage = "%.2f%%" % round(
-        ((last_month_total - hb_total_sale) / hb_total_sale * 100) if hb_total_sale > 0 else 0, 2)
-    # 本月销售额
-    c_sdate = ToolUtil.get_month_first_day(ve_date).date()
-    c_edate = ToolUtil.get_month_last_day(ve_date).date()
-    c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)]
-    c_month_total_sale = round((c_month_df["dealtotal"].sum() / trans_num), 2) if len(c_month_df) > 0 else 0.00
-
-    # 本月营业额与上月对比营业额 增长率 - 月增长率 =（本月营业额-上月营业额）/上月营业额*100%
-    m_growth_rate = "%.2f%%" % round(
-        ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
-
-    # 近12月销售趋势
-    group_df = df
-    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum()
-    group_sales = pd.DataFrame(month_groups)
-    # 封装结果数据
-    return {"total_sale": total_sale, "last_month_total": last_month_total,
-            "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
-            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate,
-            "group_sales": group_sales}
-
-
-# 展示图数据
-def calculate_gragh_data(values):
-    data = global_store(values)
-    if len(data) > 0:
-        df = pd.DataFrame(data)
-        # 转换0值
-        df.replace(0, np.nan, inplace=True)
-        df['areasize'] = df['areasize'].astype('float')
-        # 新增areasize_bins
-        df['areasize_bins'] = pd.cut(df['areasize'], bins=[0, 40, 72, 90, 130], labels=['小店', '中店', '大店', '超大店'])
-        # 缩小渠道范围
-        df = df[df['businessname'].isin(['到店销售', '开放平台-扫码点餐'])]
-        # 缩小战区范围
-        df = df[df['areaname3'].isin(['一战区', '二战区', '三战区', '四战区'])]
-        # 变更‘rdate’类型
-        df['rdate'] = pd.to_datetime(df['rdate'])
-        # 去2021年的值
-        df = df[df['rdate'] >= '2021-01-01']
-        df = df[df['businessname'].isin(['到店销售', '开放平台-扫码点餐'])]
-        df['month_str'] = df['month'].map({1: '1月', 2: '2月', 3: '3月', 4: '4月', 5: '5月'})
-        df['month'] = df['month'].astype('str')
-        return df
-    return []
-
-
 ###############
 # content
 ###############
 
 # 顶部4个card
 def build_layout_title_cards(values: dict):
-    card_datas = global_store(values)
-    datas = {}
-    if card_datas:
-        # 封装结果数据
-        datas = calculate_cards(card_datas, values)
+    # 封装结果数据
+    datas = sales_service.calculate_cards(values)
 
     total_sale = datas["total_sale"] if datas else '0'
     begin_month = values["begin_month"] if values else ''
@@ -302,7 +172,7 @@ def build_group_sales_fig(df):
 # 战区排名
 def build_fig_3(order_value, month_value, values):
     # 取数据
-    fig3_data = global_store(values)
+    fig3_data = sales_service.global_store(values)
     if len(fig3_data) < 0:
         return {}
 
@@ -342,7 +212,7 @@ def build_fig_3(order_value, month_value, values):
                      category_orders={'areaname3': [c for c in fig_df['areaname3']]},
                      hover_name='month_group',
                      labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
-                     text=[str(round(math.fabs(c) / trans_num, 2)) + "M" for c in fig_df["dealtotal"]],
+                     text=[str(round(math.fabs(c) / sales_service.trans_num, 2)) + "M" for c in fig_df["dealtotal"]],
                      template="plotly_white")
 
         # todo 添加显示标签
@@ -354,7 +224,7 @@ def build_fig_3(order_value, month_value, values):
 
 # 销售分析
 def build_sales_gragh(values, val_graph, val_cate, val_agg):
-    df = calculate_gragh_data(values)
+    df = sales_service.calculate_gragh_data(values)
     if len(df) < 1:
         return {}
     if val_graph == 'px.bar':
@@ -387,7 +257,7 @@ def build_sales_gragh(values, val_graph, val_cate, val_agg):
 
 # 所属城市级别
 def build_city_graph(values, val_x, val_cate, val_agg):
-    df = calculate_gragh_data(values)
+    df = sales_service.calculate_gragh_data(values)
     if len(df) < 1:
         return {}
     if val_x == val_cate:
@@ -588,7 +458,7 @@ def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, st
               'city': city, 'channel': channel,
               'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
     # compute value and send a signal when done
-    global_store(values)
+    sales_service.global_store(values)
     return values
 
 
