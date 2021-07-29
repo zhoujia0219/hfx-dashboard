@@ -13,7 +13,6 @@ from dash.dependencies import Input, Output, State
 from dateutil.relativedelta import relativedelta
 from flask_caching import Cache
 
-from app import flask_server
 from apps.components import filter_channels
 from apps.components import filter_city_level
 from apps.components import filter_date_range
@@ -21,6 +20,8 @@ from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
 from conf import config
+from conts import router_conts
+from core.flask_app import flask_server
 from service import sales_service
 from utils import ToolUtil
 
@@ -28,13 +29,13 @@ from utils import ToolUtil
 # dash
 ###############
 
-dash_app = dash.Dash(__name__,
-                     server=flask_server,
-                     title="门店月度销售分析",
-                     update_title="数据载入中...",
-                     suppress_callback_exceptions=True,
-                     url_base_pathname='/sales/',
-                     external_stylesheets=[dbc.themes.PULSE])
+sales_app = dash.Dash(__name__,
+                      server=flask_server,
+                      title="门店月度销售分析",
+                      update_title="数据载入中...",
+                      suppress_callback_exceptions=True,
+                      url_base_pathname=router_conts.SALES_BY_MONTH,
+                      external_stylesheets=[dbc.themes.PULSE])
 
 #########################
 # 缓存
@@ -47,7 +48,7 @@ CACHE_CONFIG = {
     'CACHE_REDIS_URL': config.REDIS_URL,
     'CACHE_DEFAULT_TIMEOUT': config.REDIS_CACHE_DEFAULT_TIMEOUT
 }
-cache.init_app(dash_app.server, config=CACHE_CONFIG)
+cache.init_app(sales_app.server, config=CACHE_CONFIG)
 
 ###############
 # sidebar
@@ -552,7 +553,7 @@ content = html.Div(
     ],
 )
 
-dash_app.layout = html.Div([
+sales_app.layout = html.Div([
     sidebar,
     content,
     # signal value to trigger callbacks
@@ -563,7 +564,7 @@ dash_app.layout = html.Div([
 ###############
 # 回调
 ###############
-@dash_app.callback(
+@sales_app.callback(
     Output('signal', 'data'),
     [
         Input("submit", "n_clicks"),
@@ -591,12 +592,12 @@ def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, st
     return values
 
 
-@dash_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
+@sales_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
 def update_card_data(values):
     return build_layout_title_cards(values)
 
 
-@dash_app.callback(
+@sales_app.callback(
     Output('fig_3', 'figure'),
     [
         Input('dw_fig_3_1', 'value'),
@@ -614,7 +615,7 @@ def update_fig_3(order_value, month_value, values):
     return build_fig_3(order_value, month_value, values)
 
 
-@dash_app.callback(
+@sales_app.callback(
     Output('dw_fig_3_2', 'value'),
     Input('end_month', 'value'),
 )
@@ -626,7 +627,7 @@ def update_fig_3_2_value(value):
 
 
 # graph_out_qs
-@dash_app.callback(
+@sales_app.callback(
     Output('graph_out_qs', 'figure'),
     [
         Input('cate_choice', 'value'),
@@ -640,7 +641,7 @@ def update_my_graph(val_cate, val_agg, val_graph, values):
 
 
 # graph_out_wd
-@dash_app.callback(
+@sales_app.callback(
     Output('graph_out_wd', 'figure'),
     [
         Input('x_choice', 'value'),
