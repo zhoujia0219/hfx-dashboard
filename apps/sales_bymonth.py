@@ -593,6 +593,35 @@ c_fig_01 = dbc.Card(dbc.CardBody([
 
     # 图
     dcc.Graph(id="graph_out_qs", figure=build_sales_gragh(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
+
+    # 用户选项
+    html.Div([
+        html.H5('单月分析', className='media-body', style={'min-width': '150px'}),
+        html.Div([
+            dcc.Dropdown(
+                id="x_choice_1",
+                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                value='businessname',
+                searchable=False, clearable=False, style={'width': 120}
+            ),
+            dcc.Dropdown(
+                id='cate_choice_1',
+                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                value='areaname3',
+                searchable=False, clearable=False, style={'width': 120}
+            ),
+            dcc.Dropdown(
+                id='agg_choice_1',
+                options=[{'label': x, 'value': y} for x, y in agg.items()],
+                value='dff.sum()',
+                searchable=False, clearable=False, style={'width': 120}
+            ),
+        ], className='media-right block-inline')
+    ], className='media flex-wrap ', style={'alignItems': 'flex-end'}),
+    html.Hr(),
+
+    # 图
+    dcc.Graph(id="graph_out_dy", figure=build_sales_gragh(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -608,7 +637,7 @@ c_fig_02 = dbc.Card(dbc.CardBody([
         html.H5('销售额分析', className='media-body', style={'min-width': '150px'}),
         html.Div([
             dcc.Dropdown(
-                id="x_choice",
+                id="x_choice_2",
                 options=[{'label': x, 'value': y} for x, y in cate.items()],
                 value='businessname',
                 searchable=False, clearable=False, style={'width': 120}
@@ -769,9 +798,22 @@ def update_my_graph(val_cate, val_agg, val_graph, values):
 @dash_app.callback(
     Output('graph_out_wd', 'figure'),
     [
-        Input('x_choice', 'value'),
+        Input('x_choice_2', 'value'),
         Input('cate_choice_2', 'value'),
         Input('agg_choice_2', 'value'),
+        Input('signal', 'data'),
+    ],
+)
+def update_my_graph(val_x, val_cate, val_agg, values):
+    return build_city_graph(values, val_x, val_cate, val_agg)
+
+# graph_out_dy
+@dash_app.callback(
+    Output('graph_out_dy', 'figure'),
+    [
+        Input('x_choice_1', 'value'),
+        Input('cate_choice_1', 'value'),
+        Input('agg_choice_1', 'value'),
         Input('signal', 'data'),
     ],
 )
