@@ -36,12 +36,12 @@ hfx-dashboard
 │  └─ flask_app.py                       # flask 实例配置       
 ├─db                                      # 数据库连接工具
 │  │  __init__.py
-│  └─Db.py
+│  └─db.py
 │          
 ├─service                                 # 数据处理
 │      sales_service.py
 ├─utils                                   # 通用工具类
-│  └─ToolUtil.py
+│  └─tool_util.py
 └─run.py
 
 ```
