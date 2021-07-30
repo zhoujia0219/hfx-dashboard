@@ -17,10 +17,13 @@ from apps.components import filter_date_range
 from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
-from conts import router_conts
-from core.flask_app import flask_server
-from service import sales_service
-from utils import ToolUtil
+
+from conf.hfx_dashboard import BOOTSTRAP_THEME
+from conf.router_conts import URL_SALES_BYMONTH
+
+from flask_app import flask_server
+from services import srv_sales_bymonth
+from utils import date_util
 
 ###############
 # dash
@@ -31,8 +34,8 @@ sales_app = dash.Dash(__name__,
                       title="门店月度销售分析",
                       update_title="数据载入中...",
                       suppress_callback_exceptions=True,
-                      url_base_pathname=router_conts.SALES_BY_MONTH,
-                      external_stylesheets=[dbc.themes.PULSE])
+                      url_base_pathname=URL_SALES_BYMONTH,
+                      external_stylesheets=[BOOTSTRAP_THEME])
 
 ###############
 # sidebar
@@ -42,14 +45,14 @@ today = datetime.now()
 # 格式化现在的月份
 now_month = today.strftime("%Y-%m")
 # 日期区间
-date_range = ToolUtil.get_date_list("2020-01", now_month)
+date_range = date_util.get_date_list("2020-01", now_month)
 # 默认开始日期 当前日期减去1年份取月份
 start_month = (today - relativedelta(years=1)).strftime('%Y-%m')
 # 默认结束日期  当前日期减去1月 取月份
 stop_month = (today - relativedelta(months=1)).strftime('%Y-%m')
 
 # 渠道信息获取
-channels = sales_service.find_channel_list()
+channels = srv_sales_bymonth.find_channel_list()
 # 门店级别定义
 city_levels = [
     {"label": "一线城市", "value": 1},
@@ -119,7 +122,7 @@ sidebar = html.Div(
 # 顶部4个card
 def build_layout_title_cards(values: dict):
     # 封装结果数据
-    datas = sales_service.calculate_cards(values)
+    datas = srv_sales_bymonth.calculate_cards(values)
 
     total_sale = datas["total_sale"] if datas else '0'
     begin_month = values["begin_month"] if values else ''
@@ -175,7 +178,7 @@ def build_group_sales_fig(df):
 # 战区排名
 def build_fig_3(order_value, month_value, values):
     # 取数据
-    fig3_data = sales_service.global_store(values)
+    fig3_data = srv_sales_bymonth.global_store(values)
     if len(fig3_data) < 0:
         return {}
 
@@ -183,13 +186,13 @@ def build_fig_3(order_value, month_value, values):
     group_df = df
     # 当月数据
     c_month = datetime.strptime(month_value, "%Y-%m")
-    cs_date = ToolUtil.get_month_first_day(c_month).date()
-    ce_date = ToolUtil.get_month_last_day(c_month).date()
+    cs_date = date_util.get_month_first_day(c_month).date()
+    ce_date = date_util.get_month_last_day(c_month).date()
     current_month_df = group_df[(group_df["rdate"] >= cs_date) & (group_df["rdate"] < ce_date)]
 
     # 上月数据
-    ls_date = ToolUtil.get_last_month_first_day(c_month).date()
-    le_date = ToolUtil.get_last_month_last_day(c_month).date()
+    ls_date = date_util.get_last_month_first_day(c_month).date()
+    le_date = date_util.get_last_month_last_day(c_month).date()
     last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
     # 本月战区分组聚合
     c_group_data = current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
@@ -215,7 +218,7 @@ def build_fig_3(order_value, month_value, values):
                      category_orders={'areaname3': [c for c in fig_df['areaname3']]},
                      hover_name='month_group',
                      labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
-                     text=[str(round(math.fabs(c) / sales_service.trans_num, 2)) + "M" for c in fig_df["dealtotal"]],
+                     text=[str(round(math.fabs(c) / srv_sales_bymonth.trans_num, 2)) + "M" for c in fig_df["dealtotal"]],
                      template="plotly_white")
 
         # todo 添加显示标签
@@ -227,7 +230,7 @@ def build_fig_3(order_value, month_value, values):
 
 # 销售分析
 def build_sales_gragh(values, val_graph, val_cate, val_agg):
-    df = sales_service.calculate_gragh_data(values)
+    df = srv_sales_bymonth.calculate_gragh_data(values)
     if len(df) < 1:
         return {}
     if val_graph == 'px.bar':
@@ -260,7 +263,7 @@ def build_sales_gragh(values, val_graph, val_cate, val_agg):
 
 # 所属城市级别
 def build_city_graph(values, val_x, val_cate, val_agg):
-    df = sales_service.calculate_gragh_data(values)
+    df = srv_sales_bymonth.calculate_gragh_data(values)
     if len(df) < 1:
         return {}
     if val_x == val_cate:
@@ -460,7 +463,7 @@ def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, st
               'city': city, 'channel': channel,
               'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
     # compute value and send a signal when done
-    sales_service.global_store(values)
+    srv_sales_bymonth.global_store(values)
     return values
 
 
