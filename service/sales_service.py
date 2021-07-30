@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 from core.flask_app import cache
 from db import Db
-from utils import ToolUtil
+from utils import tool_util
 
 default_dbname = "data_analysis"
 
@@ -48,8 +48,8 @@ def calculate_cards(values):
     total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
     # 当前月份(以时间筛选的截止日期为准)的上月数据
     ve_date = datetime.strptime(values["end_month"], "%Y-%m")
-    s_date = ToolUtil.get_last_month_first_day(ve_date).date()
-    e_date = ToolUtil.get_last_month_last_day(ve_date).date()
+    s_date = tool_util.get_last_month_first_day(ve_date).date()
+    e_date = tool_util.get_last_month_last_day(ve_date).date()
     last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)]
     last_month_total = round((last_month_df["dealtotal"].sum()) / trans_num, 2) if len(last_month_df) > 0 else 0.00
 
@@ -66,8 +66,8 @@ def calculate_cards(values):
         ((last_month_total - tb_total_sale) / tb_total_sale * 100) if tb_total_sale > 0 else 0, 2)
 
     # 环比 取上月数据
-    hb_sdate = ToolUtil.get_last_month_first_day(s_date).date()
-    hb_edate = ToolUtil.get_last_month_last_day(e_date).date()
+    hb_sdate = tool_util.get_last_month_first_day(s_date).date()
+    hb_edate = tool_util.get_last_month_last_day(e_date).date()
 
     # 上月数据
     hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)]
@@ -78,8 +78,8 @@ def calculate_cards(values):
     hb_percentage = "%.2f%%" % round(
         ((last_month_total - hb_total_sale) / hb_total_sale * 100) if hb_total_sale > 0 else 0, 2)
     # 本月销售额
-    c_sdate = ToolUtil.get_month_first_day(ve_date).date()
-    c_edate = ToolUtil.get_month_last_day(ve_date).date()
+    c_sdate = tool_util.get_month_first_day(ve_date).date()
+    c_edate = tool_util.get_month_last_day(ve_date).date()
     c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)]
     c_month_total_sale = round((c_month_df["dealtotal"].sum() / trans_num), 2) if len(c_month_df) > 0 else 0.00
 

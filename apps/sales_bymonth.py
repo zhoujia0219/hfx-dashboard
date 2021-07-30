@@ -67,6 +67,7 @@ store_ages = [
     {"label": ">5年", "value": 5},
 ]
 default_age_values = [1, 2, 3, 4, 5]
+# 门店面积
 store_areas = [
     {"label": "档口店(<30㎡)", "value": 1},
     {"label": "外卖店(<30㎡)", "value": 2},
@@ -75,6 +76,7 @@ store_areas = [
     {"label": "大店(>70㎡)", "value": 5},
 ]
 default_area_values = [1, 2, 3, 4, 5]
+# 门店星级
 store_stars = [
     {"label": "☆", "value": 1},
     {"label": "☆☆", "value": 2},
@@ -90,6 +92,7 @@ default_filter_values = {'begin_month': start_month, 'end_month': stop_month,
                          'city': default_city_values, 'channel': [], 'store_age': [], 'store_area': [],
                          'store_star': []}
 
+# 侧边栏
 sidebar = html.Div(
     className='sidebar-style',
     children=[
@@ -281,7 +284,6 @@ def build_city_graph(values, val_x, val_cate, val_agg):
 
 
 # 常量定义
-
 dims = [
     {'label': '维度: 门店所属战区', 'value': 1},
     {'label': '维度: 门店所属城市', 'value': 2},
