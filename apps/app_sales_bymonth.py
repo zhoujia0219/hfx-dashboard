@@ -5,11 +5,11 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
 from dateutil.relativedelta import relativedelta
+from pandas import DataFrame
 
 from apps.components import filter_channels
 from apps.components import filter_city_level
@@ -17,12 +17,10 @@ from apps.components import filter_date_range
 from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
-
 from conf.hfx_dashboard import BOOTSTRAP_THEME
 from conf.router_conts import URL_SALES_BYMONTH
-
 from flask_app import flask_server
-from services import srv_sales_bymonth
+from services import srv_sales_bymonth, srv_comm_dim
 from utils import date_util
 
 ###############
@@ -38,7 +36,7 @@ sales_app = dash.Dash(__name__,
                       external_stylesheets=[BOOTSTRAP_THEME])
 
 ###############
-# sidebar
+# 页面初始值
 ###############
 # 当前年月日
 today = datetime.now()
@@ -52,48 +50,29 @@ start_month = (today - relativedelta(years=1)).strftime('%Y-%m')
 stop_month = (today - relativedelta(months=1)).strftime('%Y-%m')
 
 # 渠道信息获取
-channels = srv_sales_bymonth.find_channel_list()
+channels = srv_comm_dim.get_dim_channel()
+default_channel_values = [r["value"] for r in channels]
 # 门店级别定义
-city_levels = [
-    {"label": "一线城市", "value": 1},
-    {"label": "二线城市", "value": 2},
-    {"label": "三线城市", "value": 3},
-    {"label": "其它", "value": 4},
-]
-default_city_values = [1, 2, 3, 4]
+city_levels = srv_comm_dim.get_dim_city_levels()
+default_city_values = [r["value"] for r in city_levels]
 # 店龄
-store_ages = [
-    {"label": "新店（0-1年）", "value": 1},
-    {"label": "1-2年", "value": 2},
-    {"label": "2-3年", "value": 3},
-    {"label": "3-5年", "value": 4},
-    {"label": ">5年", "value": 5},
-]
-default_age_values = [1, 2, 3, 4, 5]
+store_ages = srv_comm_dim.get_dim_store_ages()
+default_age_values = [r["value"] for r in store_ages]
 # 门店面积
-store_areas = [
-    {"label": "档口店(<30㎡)", "value": 1},
-    {"label": "外卖店(<30㎡)", "value": 2},
-    {"label": "小店(<50㎡)", "value": 3},
-    {"label": "标准店(50-70㎡)", "value": 4},
-    {"label": "大店(>70㎡)", "value": 5},
-]
-default_area_values = [1, 2, 3, 4, 5]
+store_areas = srv_comm_dim.get_dim_store_areas()
+default_area_values = [r["value"] for r in store_areas]
 # 门店星级
-store_stars = [
-    {"label": "☆", "value": 1},
-    {"label": "☆☆", "value": 2},
-    {"label": "☆☆☆", "value": 3},
-    {"label": "☆☆☆☆", "value": 4},
-    {"label": "☆☆☆☆☆", "value": 5},
-]
-default_star_values = [1, 2, 3, 4, 5]
-# 提交
-filter_submit = dbc.Button('重新计算', id='submit', color="primary", className="mt-3", block=True)
+store_stars = srv_comm_dim.get_dim_store_star()
+default_star_values = [r["value"] for r in store_stars]
 # 默认筛选值
 default_filter_values = {'begin_month': start_month, 'end_month': stop_month,
-                         'city': default_city_values, 'channel': [], 'store_age': [], 'store_area': [],
-                         'store_star': []}
+                         'city': default_city_values, 'channel': default_channel_values,
+                         'store_age': default_age_values, 'store_area': default_area_values,
+                         'store_star': default_star_values}
+
+###############
+# sidebar
+###############
 
 # 侧边栏
 sidebar = html.Div(
@@ -105,11 +84,11 @@ sidebar = html.Div(
         html.Div([
             filter_date_range.filter_month_range(date_range, start_month, stop_month),
             filter_city_level.filter_city_level("门店所属城市", city_levels, default_city_values),
-            filter_channels.filter_channels("销售渠道", [{"label": c, "value": c} for c in channels], channels),
+            filter_channels.filter_channels("销售渠道", channels, default_channel_values),
             filter_store_age.filter_store_age("店龄", store_ages, default_age_values),
             filter_store_area.filter_store_area("门店面积", store_areas, default_area_values),
             filter_store_star.filter_store_star("门店星级", store_stars, default_star_values),
-            filter_submit,
+            dbc.Button('重新计算', id='f_submit', color="primary", className="mt-3", block=True),
         ]),
     ],
 )
@@ -119,14 +98,18 @@ sidebar = html.Div(
 # content
 ###############
 
-# 顶部4个card
-def build_layout_title_cards(values: dict):
+def build_layout_title_cards(filter_values: dict):
+    """
+    头部卡片
+    @param filter_values: 筛选值
+    @return
+    """
     # 封装结果数据
-    datas = srv_sales_bymonth.calculate_cards(values)
+    datas = srv_sales_bymonth.calculate_cards(filter_values)
 
     total_sale = datas["total_sale"] if datas else '0'
-    begin_month = values["begin_month"] if values else ''
-    end_month = values["end_month"] if values else ''
+    begin_month = filter_values["begin_month"] if filter_values else ''
+    end_month = filter_values["end_month"] if filter_values else ''
     last_month_total = datas["last_month_total"] if datas else '0'
 
     tb_percentage = datas["tb_percentage"] if datas else '0'
@@ -160,7 +143,7 @@ def build_layout_title_cards(values: dict):
 
 
 # 顶部 12月趋势图
-def build_group_sales_fig(df):
+def build_group_sales_fig(df: DataFrame):
     """
     12个月销售趋势图
     """
@@ -176,49 +159,22 @@ def build_group_sales_fig(df):
 
 
 # 战区排名
-def build_fig_3(order_value, month_value, values):
-    # 取数据
-    fig3_data = srv_sales_bymonth.global_store(values)
-    if len(fig3_data) < 0:
-        return {}
+def build_top_graph(order_value: int, month_value: str, filter_values: dict):
+    """
+    构建排名图
+    @param: order_value
+    @param: month_value
+    @param: filter_values
+    """
 
-    df = pd.DataFrame(fig3_data)
-    group_df = df
-    # 当月数据
-    c_month = datetime.strptime(month_value, "%Y-%m")
-    cs_date = date_util.get_month_first_day(c_month).date()
-    ce_date = date_util.get_month_last_day(c_month).date()
-    current_month_df = group_df[(group_df["rdate"] >= cs_date) & (group_df["rdate"] < ce_date)]
-
-    # 上月数据
-    ls_date = date_util.get_last_month_first_day(c_month).date()
-    le_date = date_util.get_last_month_last_day(c_month).date()
-    last_month_df = group_df[(group_df["rdate"] >= ls_date) & (group_df["rdate"] < le_date)]
-    # 本月战区分组聚合
-    c_group_data = current_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
-    c_df = pd.DataFrame(c_group_data)
-    # 上月战区分组聚合
-    l_group_data = last_month_df.groupby(by=["areaname3", "month_group"], as_index=False)["dealtotal"].sum()
-    l_df = pd.DataFrame(l_group_data)
-
-    l_df["dealtotal"] = l_df["dealtotal"] * (-1)
-    # 根据战区分组并排序
-    if order_value == 1:
-        c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
-        l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
-    elif order_value == 2:
-        c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
-        l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
-
-    # 合并数据
-    fig_df = c_df.append(l_df)
-
+    fig_df = srv_sales_bymonth.calculate_top_graph(filter_values, month_value, order_value)
     if len(fig_df) > 0:
         fig = px.bar(fig_df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
                      category_orders={'areaname3': [c for c in fig_df['areaname3']]},
                      hover_name='month_group',
                      labels={'month_group': '销售额环比', 'dealtotal': '销售额', 'areaname3': '战区'},
-                     text=[str(round(math.fabs(c) / srv_sales_bymonth.trans_num, 2)) + "M" for c in fig_df["dealtotal"]],
+                     text=[str(round(math.fabs(c) / srv_sales_bymonth.trans_num, 2)) + "M" for c in
+                           fig_df["dealtotal"]],
                      template="plotly_white")
 
         # todo 添加显示标签
@@ -229,8 +185,8 @@ def build_fig_3(order_value, month_value, values):
 
 
 # 销售分析
-def build_sales_gragh(values, val_graph, val_cate, val_agg):
-    df = srv_sales_bymonth.calculate_gragh_data(values)
+def build_sales_graph(filter_values, val_graph, val_cate, val_agg):
+    df = srv_sales_bymonth.calculate_graph_data(filter_values)
     if len(df) < 1:
         return {}
     if val_graph == 'px.bar':
@@ -262,8 +218,8 @@ def build_sales_gragh(values, val_graph, val_cate, val_agg):
 
 
 # 所属城市级别
-def build_city_graph(values, val_x, val_cate, val_agg):
-    df = srv_sales_bymonth.calculate_gragh_data(values)
+def build_city_graph(filter_values, val_x, val_cate, val_agg):
+    df = srv_sales_bymonth.calculate_graph_data(filter_values)
     if len(df) < 1:
         return {}
     if val_x == val_cate:
@@ -286,33 +242,6 @@ def build_city_graph(values, val_x, val_cate, val_agg):
         return fig
 
 
-# 常量定义
-dims = [
-    {'label': '维度: 门店所属战区', 'value': 1},
-    {'label': '维度: 门店所属城市', 'value': 2},
-    {'label': '维度: 销售渠道', 'value': 3},
-    {'label': '维度: 店龄', 'value': 4},
-    {'label': '维度: 门店面积', 'value': 5},
-    {'label': '维度: 门店星级', 'value': 6},
-]
-figure_type = [
-    {'label': '图: 折线图', 'value': 1},
-    {'label': '图: 柱状图', 'value': 2},
-]
-index_type = [
-    {'label': '指标: 销售总额', 'value': 1},
-    {'label': '指标: 平均值', 'value': 2},
-    {'label': '指标: 中位数', 'value': 3},
-]
-order_type = [
-    {'label': '排序: 正序', 'value': 1},
-    {'label': '排序: 降序', 'value': 2},
-]
-
-cate = {'维度: 渠道': 'businessname', '维度: 战区': 'areaname3', '维度: 店面积': 'areasize_bins'}
-agg = {'聚合函数: 总和': 'dff.sum()', '聚合函数: 平均值': 'dff.mean()', '聚合函数: 中位数': 'dff.median()'}
-graph = {'图形: 柱状图': 'px.bar', '图形: 线性图': 'px.line'}
-
 # 战区分析 -- dengxiaohu
 c_fig_01 = dbc.Card(dbc.CardBody([
     # 用户选项
@@ -321,19 +250,19 @@ c_fig_01 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(
                 id="cate_choice",
-                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
                 value='businessname',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='agg_choice',
-                options=[{'label': x, 'value': y} for x, y in agg.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_agg().items()],
                 value='dff.sum()',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='graph_choice',
-                options=[{'label': x, 'value': y} for x, y in graph.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_type().items()],
                 value='px.bar',
                 searchable=False, clearable=False, style={'width': 120}
             ),
@@ -342,7 +271,7 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="graph_out_qs", figure=build_sales_gragh(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
+    dcc.Graph(id="graph_out_qs", figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
 
     # 用户选项
     html.Div([
@@ -350,19 +279,19 @@ c_fig_01 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(
                 id="x_choice_1",
-                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
                 value='businessname',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='cate_choice_1',
-                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
                 value='areaname3',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='agg_choice_1',
-                options=[{'label': x, 'value': y} for x, y in agg.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_agg().items()],
                 value='dff.sum()',
                 searchable=False, clearable=False, style={'width': 120}
             ),
@@ -371,7 +300,7 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="graph_out_dy", figure=build_sales_gragh(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
+    dcc.Graph(id="graph_out_dy", figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -388,19 +317,19 @@ c_fig_02 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(
                 id="x_choice_2",
-                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
                 value='businessname',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='cate_choice_2',
-                options=[{'label': x, 'value': y} for x, y in cate.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
                 value='areaname3',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='agg_choice_2',
-                options=[{'label': x, 'value': y} for x, y in agg.items()],
+                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_type().items()],
                 value='dff.sum()',
                 searchable=False, clearable=False, style={'width': 120}
             ),
@@ -424,9 +353,10 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     html.Div([
         html.H5('销售额-战区排名', className='media-body'),
         html.Div([
-            dcc.Dropdown(id='dw_fig_3_1', options=order_type, value=2, searchable=False, clearable=False,
+            dcc.Dropdown(id='top_choices_order', options=srv_comm_dim.get_dim_order_type(), value=2, searchable=False,
+                         clearable=False,
                          style={'width': 120}),
-            dcc.Dropdown(id='dw_fig_3_2', options=[{"label": x, "value": x} for x in date_range],
+            dcc.Dropdown(id='top_choices_month', options=[{"label": x, "value": x} for x in date_range],
                          value=stop_month, searchable=False, clearable=False,
                          style={'width': 100}),
         ], className='media-right block-inline')
@@ -434,7 +364,7 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="fig_3", figure=build_fig_3(1, stop_month, default_filter_values)),
+    dcc.Graph(id="graph_top", figure=build_top_graph(1, stop_month, default_filter_values)),
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
@@ -471,10 +401,10 @@ sales_app.layout = html.Div([
 @sales_app.callback(
     Output('signal', 'data'),
     [
-        Input("submit", "n_clicks"),
+        Input("f_submit", "n_clicks"),
         # 日期筛选
-        State('begin_month', 'value'),
-        State('end_month', 'value'),
+        State('f_begin_month', 'value'),
+        State('f_end_month', 'value'),
         # 城市筛选
         State('f_cities', 'value'),
         # 渠道筛选
@@ -488,46 +418,51 @@ sales_app.layout = html.Div([
     ]
 )
 def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, store_area, store_star):
-    values = {'begin_month': begin_month, 'end_month': end_month,
-              'city': city, 'channel': channel,
-              'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
+    filter_values = {'begin_month': begin_month, 'end_month': end_month,
+                     'city': city, 'channel': channel,
+                     'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
     # compute value and send a signal when done
-    srv_sales_bymonth.global_store(values)
-    return values
+    srv_sales_bymonth.global_store(filter_values)
+    return filter_values
 
 
 @sales_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
-def update_card_data(values):
-    return build_layout_title_cards(values)
+def update_card_data(filter_values):
+    """
+    更新card数值
+    @param filter_values: 筛选值
+    """
+    return build_layout_title_cards(filter_values)
 
 
 @sales_app.callback(
-    Output('fig_3', 'figure'),
+    Output('graph_top', 'figure'),
     [
-        Input('dw_fig_3_1', 'value'),
-        Input('dw_fig_3_2', 'value'),
+        Input('top_choices_order', 'value'),
+        Input('top_choices_month', 'value'),
         Input('signal', 'data'),
     ])
-def update_fig_3(order_value, month_value, values):
+def update_top_graph(order_value, month_value, filter_values):
     """
         更新排名图
     @param order_value: 1: 正序， 2： 倒序
     @param month_value: 月份值
-    @param values:  全局缓存key
+    @param filter_values:  筛选值->全局缓存key
     """
 
-    return build_fig_3(order_value, month_value, values)
+    return build_top_graph(order_value, month_value, filter_values)
 
 
 @sales_app.callback(
-    Output('dw_fig_3_2', 'value'),
-    Input('end_month', 'value'),
+    Output('top_choices_month', 'value'),
+    Input('f_end_month', 'value'),
 )
-def update_fig_3_2_value(value):
+def update_top_choices_month_value(month_value):
     """
-    更新选项值
+    更新排名月份选项值 -- 用于页面初始化时，默认展示排名月份的展示
+    @param month_value : 过滤结束月份时间
     """
-    return value
+    return month_value
 
 
 # graph_out_qs
@@ -540,8 +475,8 @@ def update_fig_3_2_value(value):
         Input('signal', 'data'),
     ],
 )
-def update_my_graph(val_cate, val_agg, val_graph, values):
-    return build_sales_gragh(values, val_graph, val_cate, val_agg)
+def update_sales_graph(val_cate, val_agg, val_graph, filter_values):
+    return build_sales_graph(filter_values, val_graph, val_cate, val_agg)
 
 
 # graph_out_wd
@@ -554,8 +489,9 @@ def update_my_graph(val_cate, val_agg, val_graph, values):
         Input('signal', 'data'),
     ],
 )
-def update_my_graph(val_x, val_cate, val_agg, values):
-    return build_city_graph(values, val_x, val_cate, val_agg)
+def update_city_graph(val_x, val_cate, val_agg, filter_values):
+    return build_city_graph(filter_values, val_x, val_cate, val_agg)
+
 
 # graph_out_dy
 @sales_app.callback(
@@ -567,5 +503,5 @@ def update_my_graph(val_x, val_cate, val_agg, values):
         Input('signal', 'data'),
     ],
 )
-def update_my_graph(val_x, val_cate, val_agg, values):
-    return build_city_graph(values, val_x, val_cate, val_agg)
+def update_my_graph(val_x, val_cate, val_agg, filter_values):
+    return build_city_graph(filter_values, val_x, val_cate, val_agg)

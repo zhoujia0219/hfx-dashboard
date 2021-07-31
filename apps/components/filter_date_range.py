@@ -8,14 +8,14 @@ def filter_month_range(date_range, default_start_month, default_end_month):
         dbc.Row(
             [
                 dbc.Col(dcc.Dropdown(
-                    id='begin_month',
+                    id='f_begin_month',
                     options=[{"label": x, "value": x} for x in date_range],
                     value=default_start_month,
                     clearable=False,
                     persistence=True,
                 )),
                 dbc.Col(dcc.Dropdown(
-                    id='end_month',
+                    id='f_end_month',
                     options=[{"label": x, "value": x} for x in date_range],
                     value=default_end_month,
                     clearable=False,

@@ -1,12 +1,14 @@
 from datetime import datetime
+from typing import List, Dict
 
 import numpy as np
 import pandas as pd
 from dateutil.relativedelta import relativedelta
+from pandas import DataFrame
 
 from flask_app import cache
-from utils import db_util
 from utils import date_util
+from utils import db_util
 
 default_dbname = "data_analysis"
 
@@ -16,20 +18,21 @@ default_dbname = "data_analysis"
 ###########################
 
 @cache.memoize()
-def global_store(values):
+def global_store(filter_values: dict) -> List[Dict]:
     """
     全局缓存
-    :param values: json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
+    :param filter_values: 筛选值 json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
                                 'city':city, 'channel':channel,
                                 'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
     :return:
     """
-    d = cache.get(str(values))
+    d = cache.get(str(filter_values))
     if d:
         return d
     else:
-        result = find_sales_list(values)
-        cache.set(str(values), result)
+        result = find_sales_list(filter_values)
+        if result:
+            cache.set(str(filter_values), result)
         return result
 
 
@@ -38,26 +41,31 @@ trans_num = 100000
 
 
 # 计算cards 的 展示数据
-def calculate_cards(values):
+def calculate_cards(filter_values: dict) -> Dict:
     """
     计算头部的4个card 的数据
+    @param filter_values :  { 'begin_month': begin_month, 'end_month': end_month,
+                    'city':city, 'channel':channel,
+                    'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
+    @return
     """
-    card_datas = global_store(values)
+    card_datas = global_store(filter_values)
     df = pd.DataFrame(card_datas)
+
     # 总营业额
     total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
     # 当前月份(以时间筛选的截止日期为准)的上月数据
-    ve_date = datetime.strptime(values["end_month"], "%Y-%m")
+    ve_date = datetime.strptime(filter_values["end_month"], "%Y-%m")
     s_date = date_util.get_last_month_first_day(ve_date).date()
     e_date = date_util.get_last_month_last_day(ve_date).date()
-    last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)]
+    last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)] if len(df) > 0 else []
     last_month_total = round((last_month_df["dealtotal"].sum()) / trans_num, 2) if len(last_month_df) > 0 else 0.00
 
     # 同比 取去年当月数据
     tb_sdate = (s_date - relativedelta(years=1))
     tb_edate = (e_date - relativedelta(years=1))
     # 去年的数据
-    tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)]
+    tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)] if len(df) > 0 else []
     # 去年的总营业额
     tb_total_sale = round((tb_df["dealtotal"].sum() / trans_num), 2) if len(tb_df) > 0 else 0.00
 
@@ -70,7 +78,7 @@ def calculate_cards(values):
     hb_edate = date_util.get_last_month_last_day(e_date).date()
 
     # 上月数据
-    hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)]
+    hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)] if len(df) > 0 else []
     # 上月总营业额
     hb_total_sale = round((hb_df["dealtotal"].sum() / trans_num), 2) if len(hb_df) > 0 else 0.00
 
@@ -80,7 +88,7 @@ def calculate_cards(values):
     # 本月销售额
     c_sdate = date_util.get_month_first_day(ve_date).date()
     c_edate = date_util.get_month_last_day(ve_date).date()
-    c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)]
+    c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)] if len(df) > 0 else []
     c_month_total_sale = round((c_month_df["dealtotal"].sum() / trans_num), 2) if len(c_month_df) > 0 else 0.00
 
     # 本月营业额与上月对比营业额 增长率 - 月增长率 =（本月营业额-上月营业额）/上月营业额*100%
@@ -89,7 +97,7 @@ def calculate_cards(values):
 
     # 近12月销售趋势
     group_df = df
-    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum()
+    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum() if len(group_df) > 0 else []
     group_sales = pd.DataFrame(month_groups)
     # 封装结果数据
     return {"total_sale": total_sale, "last_month_total": last_month_total,
@@ -99,8 +107,13 @@ def calculate_cards(values):
 
 
 # 展示图数据
-def calculate_gragh_data(values):
-    data = global_store(values)
+def calculate_graph_data(filter_values: dict) -> DataFrame:
+    """
+    图
+    @param filter_values
+    @return
+    """
+    data = global_store(filter_values)
     if len(data) > 0:
         df = pd.DataFrame(data)
         # 转换0值
@@ -123,7 +136,56 @@ def calculate_gragh_data(values):
     return []
 
 
-def find_sales_list(values):
+def calculate_top_graph(filter_values: dict, month_value: str, order_value: int) -> DataFrame:
+    """
+    计算排名图数据
+    """
+    # 取数据
+    fig3_data = global_store(filter_values)
+    if len(fig3_data) > 0:
+        df = pd.DataFrame(fig3_data)
+
+        group_df = df
+        # 当月数据
+        c_month = datetime.strptime(month_value, "%Y-%m")
+        cs_date = date_util.get_month_first_day(c_month).date()
+        ce_date = date_util.get_month_last_day(c_month).date()
+        current_month_df = group_df[(group_df["rdate"] >= cs_date) &
+                                    (group_df["rdate"] < ce_date)]
+
+        # 上月数据
+        ls_date = date_util.get_last_month_first_day(c_month).date()
+        le_date = date_util.get_last_month_last_day(c_month).date()
+        last_month_df = group_df[(group_df["rdate"] >= ls_date) &
+                                 (group_df["rdate"] < le_date)]
+
+        # 本月战区分组聚合
+        c_group_data = current_month_df.groupby(by=["areaname3", "month_group"],
+                                                as_index=False)["dealtotal"].sum()
+        c_df = pd.DataFrame(c_group_data)
+
+        # 上月战区分组聚合
+        l_group_data = last_month_df.groupby(by=["areaname3", "month_group"],
+                                             as_index=False)["dealtotal"].sum()
+        l_df = pd.DataFrame(l_group_data)
+
+        l_df["dealtotal"] = l_df["dealtotal"] * (-1)
+        # 根据战区分组并排序
+        if order_value == 1:
+            c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+            l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+        elif order_value == 2:
+            c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+            l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+
+        # 合并数据
+        fig_df = c_df.append(l_df)
+
+        return fig_df
+    return []
+
+
+def find_sales_list(filter_values: dict) -> List[Dict]:
     query_sql = """
                    SELECT 
                    areauid3, areaname3, areauid4, areaname4, storeuid, storename, weeks, rdate :: date, province, 
@@ -134,19 +196,19 @@ def find_sales_list(values):
                    WHERE areauid3 is not null  and areauid4 is not null and province is not null and city is not null 
                    and county is not null
            """
-    if values:
-        if values["begin_month"] and values["end_month"]:
+    if filter_values:
+        if filter_values["begin_month"] and filter_values["end_month"]:
             query_sql += """  and to_char(rdate,'YYYY-MM') >= '{begin_month}'
                                      and to_char(rdate,'YYYY-MM') <= '{end_month}'
-                   """.format(begin_month=values["begin_month"], end_month=values["end_month"])
-        if values["city"]:
+                   """.format(begin_month=filter_values["begin_month"], end_month=filter_values["end_month"])
+        if filter_values["city"]:
             # 长度大于1 循环处理
-            citys = tuple(str(c) for c in values["city"]) if len(values['city']) > 1 \
-                else "(" + str(values['city'][0]) + ")"
+            citys = tuple(str(c) for c in filter_values["city"]) if len(filter_values['city']) > 1 \
+                else "(" + str(filter_values['city'][0]) + ")"
             query_sql += """ and city_level in {city}""".format(city=citys)
-        if values["channel"]:
-            channels = tuple(c[0] for c in values["channel"]) if len(values['channel']) > 1 \
-                else "(" + values['channel'][0] + ")"
+        if filter_values["channel"]:
+            channels = tuple(c for c in filter_values["channel"]) if len(filter_values['channel']) > 1 \
+                else "(" + filter_values['channel'][0] + ")"
             query_sql += """ and businessname in {channel}""".format(channel=channels)
         # if values["store_age"]:
         #     query_sql += """
@@ -165,11 +227,11 @@ def find_sales_list(values):
     return result
 
 
-def find_channel_list():
+def find_channel_list() -> List[Dict]:
     query_sql = """
         select distinct businessname from  chunbaiwei.fact_storesale_weather
     """
 
     data = db_util.query_list(query_sql, default_dbname)
 
-    return data
+    return [{"channel": d[0]} for d in data]
