@@ -142,7 +142,7 @@ def build_layout_title_cards(filter_values: dict):
             html.Label("同比:" + tb_percentage + "  环比：" + hb_percentage),
         ]), className='title-card'), className='title-col mr-2'),
         dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6("本月销售额"),
+            html.H6(["本月销售额", "(", end_month, ")"]),
             html.H4(['￥', c_month_total_sale, 'M'], id='title_3', style={"color": "darkred"}),
             html.Label("增长率：" + m_growth_rate),
         ]), className='title-card'), className='title-col mr-2'),
