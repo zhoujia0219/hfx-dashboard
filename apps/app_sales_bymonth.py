@@ -558,7 +558,7 @@ def update_my_graph(val_x, val_cate, val_agg, values):
     return build_city_graph(values, val_x, val_cate, val_agg)
 
 # graph_out_dy
-@dash_app.callback(
+@sales_app.callback(
     Output('graph_out_dy', 'figure'),
     [
         Input('x_choice_1', 'value'),
