@@ -4,7 +4,8 @@ import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
 import psycopg2.pool
-from conf import db_conf
+
+from conf import hfx_dashboard
 
 logging.getLogger(__name__)
 
@@ -24,10 +25,10 @@ class LoggingCursor(psycopg2.extensions.cursor):
 def gp_connect(dbname: str):
     try:
         conn_pool = psycopg2.pool.SimpleConnectionPool(minconn=1, maxconn=5, dbname=dbname,
-                                                       user=db_conf.USERNAME,
-                                                       password=db_conf.PASSWORD,
-                                                       host=db_conf.HOST,
-                                                       port=db_conf.PORT)
+                                                       user=hfx_dashboard.USERNAME,
+                                                       password=hfx_dashboard.PASSWORD,
+                                                       host=hfx_dashboard.HOST,
+                                                       port=hfx_dashboard.PORT)
         # 从数据库连接池获取连接
         conn = conn_pool.getconn()
         return conn
