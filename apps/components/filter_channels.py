@@ -7,9 +7,10 @@ def filter_channels(
         default_values: list):
     """
       渠道筛选组件
-      @param label_name ： 组件标签名称
-      @param options: 选项
-      @param default_values: 默认选中值
+      :param label_name ： 组件标签名称
+      :param options: 选项
+      :param default_values: 默认选中值
+      :return 组件
     """
     return dbc.FormGroup([
         dbc.Label(label_name, className='sidebar-label'),

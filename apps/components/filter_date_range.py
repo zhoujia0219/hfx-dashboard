@@ -1,8 +1,19 @@
+from typing import List
+
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 
 
-def filter_month_range(date_range, default_start_month, default_end_month):
+def filter_month_range(date_range: List[str],
+                       default_start_month: str,
+                       default_end_month: str):
+    """
+      日期区间筛选组件
+      :param date_range ： 组件标签名称
+      :param default_start_month: 默认开始月份
+      :param default_end_month: 默认结束月份
+      :return 组件
+    """
     return dbc.FormGroup([
         dbc.Label('日期范围', className='sidebar-label'),
         dbc.Row(

@@ -112,8 +112,8 @@ sidebar = html.Div(
 def build_layout_title_cards(filter_values: dict):
     """
     头部卡片
-    @param filter_values: 筛选值
-    @return
+    :param filter_values: 筛选值
+    :return 卡片内容
     """
     # 封装结果数据
     datas = srv_sales_bymonth.calculate_cards(filter_values)
@@ -157,6 +157,8 @@ def build_layout_title_cards(filter_values: dict):
 def build_group_sales_fig(df: DataFrame):
     """
     12个月销售趋势图
+    :param df: 包含月份和销售额的dataframe 数据
+    :return 返回图形
     """
     fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=60)
     fig.update_xaxes(visible=False, fixedrange=True)
@@ -172,10 +174,12 @@ def build_group_sales_fig(df: DataFrame):
 # 战区排名
 def build_top_graph(order_value: int, month_value: str, filter_values: dict):
     """
+
     构建排名图
-    @param: order_value
-    @param: month_value
-    @param: filter_values
+    :param order_value: 排序
+    :param month_value:
+    :param filter_values:
+    :return:
     """
 
     fig_df = srv_sales_bymonth.calculate_top_graph(filter_values, month_value, order_value)
@@ -197,6 +201,14 @@ def build_top_graph(order_value: int, month_value: str, filter_values: dict):
 
 # 销售分析
 def build_sales_graph(filter_values, val_graph, val_cate, val_agg):
+    """
+
+    :param filter_values:
+    :param val_graph:
+    :param val_cate:
+    :param val_agg:
+    :return:
+    """
     df = srv_sales_bymonth.calculate_graph_data(filter_values)
     if len(df) < 1:
         return {}
@@ -230,6 +242,14 @@ def build_sales_graph(filter_values, val_graph, val_cate, val_agg):
 
 # 所属城市级别
 def build_city_graph(filter_values, val_x, val_cate, val_agg):
+    """
+
+    :param filter_values:
+    :param val_x:
+    :param val_cate:
+    :param val_agg:
+    :return:
+    """
     df = srv_sales_bymonth.calculate_graph_data(filter_values)
     if len(df) < 1:
         return {}
@@ -432,15 +452,15 @@ sales_app.layout = html.Div([
 def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_age, store_area, store_star):
     """
     点击提交按钮后，保存筛选值到signal
-    @param n_clicks 提交按钮点击次数
-    @param begin_month 结束日期
-    @param end_month 开始日期
-    @param city_level  城市级别
-    @param channel 渠道
-    @param store_age 店龄
-    @param store_area 店面积
-    @param store_star 门店星级
-    @return 返回筛选的所有选中值（用于取缓存）
+    :param n_clicks 提交按钮点击次数
+    :param begin_month 结束日期
+    :param end_month 开始日期
+    :param city_level  城市级别
+    :param channel 渠道
+    :param store_age 店龄
+    :param store_area 店面积
+    :param store_star 门店星级
+    :return 返回筛选的所有选中值（用于取缓存）
 
     """
     filter_values = {'begin_month': begin_month, 'end_month': end_month,
@@ -455,8 +475,8 @@ def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_a
 def update_card_data(filter_values):
     """
     更新card数值
-    @param filter_values: 筛选值
-    @return  返回顶部的card
+    :param filter_values: 筛选值
+    :return  返回顶部的card
     """
     return build_layout_title_cards(filter_values)
 
@@ -471,9 +491,9 @@ def update_card_data(filter_values):
 def update_top_graph(order_value, month_value, filter_values):
     """
     更新排名图
-    @param order_value: 1: 正序， 2： 倒序
-    @param month_value: 月份值
-    @param filter_values:  筛选值->全局缓存key
+    :param order_value: 1: 正序， 2： 倒序
+    :param month_value: 月份值
+    :param filter_values:  筛选值->全局缓存key
     """
 
     return build_top_graph(order_value, month_value, filter_values)
@@ -486,8 +506,8 @@ def update_top_graph(order_value, month_value, filter_values):
 def update_top_choices_month_value(month_value):
     """
     更新排名月份选项值 -- 用于页面初始化时，默认展示排名月份的展示
-    @param month_value : 过滤结束月份时间
-    @return  返回 筛选结束月份的值
+    :param month_value : 过滤结束月份时间
+    :return  返回 筛选结束月份的值
     """
     return month_value
 
@@ -505,6 +525,11 @@ def update_top_choices_month_value(month_value):
 def update_sales_graph(val_cate, val_agg, val_graph, filter_values):
     """
 
+    :param val_cate:
+    :param val_agg:
+    :param val_graph:
+    :param filter_values:
+    :return:
     """
     return build_sales_graph(filter_values, val_graph, val_cate, val_agg)
 
@@ -522,6 +547,11 @@ def update_sales_graph(val_cate, val_agg, val_graph, filter_values):
 def update_city_graph(val_x, val_cate, val_agg, filter_values):
     """
 
+    :param val_x:
+    :param val_cate:
+    :param val_agg:
+    :param filter_values:
+    :return:
     """
     return build_city_graph(filter_values, val_x, val_cate, val_agg)
 
@@ -538,6 +568,11 @@ def update_city_graph(val_x, val_cate, val_agg, filter_values):
 )
 def update_my_graph(val_x, val_cate, val_agg, filter_values):
     """
-
+    :param val_x:
+    :param val_cate:
+    :param val_agg:
+    :param filter_values:
+    :return:
     """
+
     return build_city_graph(filter_values, val_x, val_cate, val_agg)

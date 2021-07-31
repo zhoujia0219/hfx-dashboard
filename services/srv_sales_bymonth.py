@@ -21,10 +21,10 @@ default_dbname = "data_analysis"
 def global_store(filter_values: dict) -> List[Dict]:
     """
     全局缓存
-    :param filter_values: 筛选值 json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
+    @:param filter_values: 筛选值 json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
                                 'city_level':city_level, 'channel':channel,
                                 'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
-    :return:
+    @:return:
     """
     d = cache.get(str(filter_values))
     if d:
@@ -43,7 +43,7 @@ trans_num = 100000
 def calculate_cards(filter_values: dict) -> Dict:
     """
     计算头部的4个card 的数据
-    @param filter_values :
+    :param filter_values :
                     { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
                       'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
                       'city_level': 城市级别: List类型,
@@ -51,7 +51,7 @@ def calculate_cards(filter_values: dict) -> Dict:
                       'store_age': 店龄: List类型 ,
                       'store_area': 门店面积: List类型,
                       'store_star': 门店星级: List类型}
-    @return dict :
+    :return dict :
             {"total_sale": 总销售量: 浮点类型，单位百万(M),
             "last_month_total": 上月销售量：浮点类型，单位百万(M),
             "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
@@ -120,9 +120,9 @@ def calculate_cards(filter_values: dict) -> Dict:
 # 展示图数据
 def calculate_graph_data(filter_values: dict) -> DataFrame:
     """
-    图
-    @param filter_values
-    @return
+    计算销售图的数据
+    :param filter_values: 过滤值
+    :return:
     """
     data = global_store(filter_values)
     if len(data) > 0:
@@ -150,10 +150,10 @@ def calculate_graph_data(filter_values: dict) -> DataFrame:
 def calculate_top_graph(filter_values: dict, month_value: str, order_value: int) -> DataFrame:
     """
     计算排名图数据
-    @param filter_values 过滤值
-    @param month_value 月份
-    @param order_value 排序
-    @return  返回一组Dataframe类型的数据
+    :param filter_values:  过滤值
+    :param month_value: 月份
+    :param order_value: 排序
+    :return: 返回一组Dataframe类型的数据
     """
     # 取数据
     fig3_data = global_store(filter_values)

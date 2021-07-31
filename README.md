@@ -91,15 +91,15 @@ hfx-dashboard
         def calculate_cards(filter_values: dict) -> Dict:
             """
             计算头部的4个card 的数据
-            @param filter_values :
-                            { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
-                              'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
-                              'city_level': 城市级别: List类型,
-                              'channel': 渠道: List类型,
-                              'store_age': 店龄: List类型 ,
-                              'store_area': 门店面积: List类型,
-                              'store_star': 门店星级: List类型}
-            @return dict :
+            :param filter_values :
+                        { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
+                          'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
+                          'city_level': 城市级别: List类型,
+                          'channel': 渠道: List类型,
+                          'store_age': 店龄: List类型 ,
+                          'store_area': 门店面积: List类型,
+                          'store_star': 门店星级: List类型}
+            :return dict :
                     {"total_sale": 总销售量: 浮点类型，单位百万(M),
                     "last_month_total": 上月销售量：浮点类型，单位百万(M),
                     "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
