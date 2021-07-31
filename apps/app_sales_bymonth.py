@@ -36,7 +36,7 @@ sales_app = dash.Dash(__name__,
                       external_stylesheets=[BOOTSTRAP_THEME])
 
 ###############
-# 页面初始值
+# 页面筛选初始值
 ###############
 # 当前年月日
 today = datetime.now()
@@ -70,6 +70,17 @@ default_filter_values = {'begin_month': start_month, 'end_month': stop_month,
                          'store_age': default_age_values, 'store_area': default_area_values,
                          'store_star': default_star_values}
 
+###############
+# 图形维度初始值
+###############
+# 排序类型
+order_types = srv_comm_dim.get_dim_order_type()
+# 分类维度
+dim_cates = srv_comm_dim.get_dim_graph_cate()
+# 图形类型维度
+dim_types = srv_comm_dim.get_dim_graph_type()
+# 聚合函数维度
+dim_aggs = srv_comm_dim.get_dim_graph_agg()
 ###############
 # sidebar
 ###############
@@ -250,19 +261,19 @@ c_fig_01 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(
                 id="cate_choice",
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_cates.items()],
                 value='businessname',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='agg_choice',
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_agg().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_aggs.items()],
                 value='dff.sum()',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='graph_choice',
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_type().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_types.items()],
                 value='px.bar',
                 searchable=False, clearable=False, style={'width': 120}
             ),
@@ -279,19 +290,19 @@ c_fig_01 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(
                 id="x_choice_1",
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_cates.items()],
                 value='businessname',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='cate_choice_1',
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_cates.items()],
                 value='areaname3',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='agg_choice_1',
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_agg().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_aggs.items()],
                 value='dff.sum()',
                 searchable=False, clearable=False, style={'width': 120}
             ),
@@ -317,19 +328,19 @@ c_fig_02 = dbc.Card(dbc.CardBody([
         html.Div([
             dcc.Dropdown(
                 id="x_choice_2",
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_cates.items()],
                 value='businessname',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='cate_choice_2',
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_cate().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_cates.items()],
                 value='areaname3',
                 searchable=False, clearable=False, style={'width': 120}
             ),
             dcc.Dropdown(
                 id='agg_choice_2',
-                options=[{'label': x, 'value': y} for x, y in srv_comm_dim.get_dim_graph_type().items()],
+                options=[{'label': x, 'value': y} for x, y in dim_types.items()],
                 value='dff.sum()',
                 searchable=False, clearable=False, style={'width': 120}
             ),
@@ -353,7 +364,7 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     html.Div([
         html.H5('销售额-战区排名', className='media-body'),
         html.Div([
-            dcc.Dropdown(id='top_choices_order', options=srv_comm_dim.get_dim_order_type(), value=2, searchable=False,
+            dcc.Dropdown(id='top_choices_order', options=order_types, value=2, searchable=False,
                          clearable=False,
                          style={'width': 120}),
             dcc.Dropdown(id='top_choices_month', options=[{"label": x, "value": x} for x in date_range],
@@ -398,6 +409,7 @@ sales_app.layout = html.Div([
 ###############
 # 回调
 ###############
+
 @sales_app.callback(
     Output('signal', 'data'),
     [
@@ -417,9 +429,22 @@ sales_app.layout = html.Div([
         State('f_store_star', 'value'),
     ]
 )
-def compute_value(n_clicks, begin_month, end_month, city, channel, store_age, store_area, store_star):
+def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_age, store_area, store_star):
+    """
+    点击提交按钮后，保存筛选值到signal
+    @param n_clicks 提交按钮点击次数
+    @param begin_month 结束日期
+    @param end_month 开始日期
+    @param city_level  城市级别
+    @param channel 渠道
+    @param store_age 店龄
+    @param store_area 店面积
+    @param store_star 门店星级
+    @return 返回筛选的所有选中值（用于取缓存）
+
+    """
     filter_values = {'begin_month': begin_month, 'end_month': end_month,
-                     'city': city, 'channel': channel,
+                     'city': city_level, 'channel': channel,
                      'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
     # compute value and send a signal when done
     srv_sales_bymonth.global_store(filter_values)
@@ -431,6 +456,7 @@ def update_card_data(filter_values):
     """
     更新card数值
     @param filter_values: 筛选值
+    @return  返回顶部的card
     """
     return build_layout_title_cards(filter_values)
 
@@ -444,7 +470,7 @@ def update_card_data(filter_values):
     ])
 def update_top_graph(order_value, month_value, filter_values):
     """
-        更新排名图
+    更新排名图
     @param order_value: 1: 正序， 2： 倒序
     @param month_value: 月份值
     @param filter_values:  筛选值->全局缓存key
@@ -461,6 +487,7 @@ def update_top_choices_month_value(month_value):
     """
     更新排名月份选项值 -- 用于页面初始化时，默认展示排名月份的展示
     @param month_value : 过滤结束月份时间
+    @return  返回 筛选结束月份的值
     """
     return month_value
 
@@ -476,6 +503,9 @@ def update_top_choices_month_value(month_value):
     ],
 )
 def update_sales_graph(val_cate, val_agg, val_graph, filter_values):
+    """
+
+    """
     return build_sales_graph(filter_values, val_graph, val_cate, val_agg)
 
 
@@ -490,6 +520,9 @@ def update_sales_graph(val_cate, val_agg, val_graph, filter_values):
     ],
 )
 def update_city_graph(val_x, val_cate, val_agg, filter_values):
+    """
+
+    """
     return build_city_graph(filter_values, val_x, val_cate, val_agg)
 
 
@@ -504,4 +537,7 @@ def update_city_graph(val_x, val_cate, val_agg, filter_values):
     ],
 )
 def update_my_graph(val_x, val_cate, val_agg, filter_values):
+    """
+
+    """
     return build_city_graph(filter_values, val_x, val_cate, val_agg)
