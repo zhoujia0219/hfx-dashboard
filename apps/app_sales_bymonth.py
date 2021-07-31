@@ -66,7 +66,7 @@ store_stars = srv_comm_dim.get_dim_store_star()
 default_star_values = [r["value"] for r in store_stars]
 # 默认筛选值
 default_filter_values = {'begin_month': start_month, 'end_month': stop_month,
-                         'city': default_city_values, 'channel': default_channel_values,
+                         'city_level': default_city_values, 'channel': default_channel_values,
                          'store_age': default_age_values, 'store_area': default_area_values,
                          'store_star': default_star_values}
 
@@ -444,7 +444,7 @@ def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_a
 
     """
     filter_values = {'begin_month': begin_month, 'end_month': end_month,
-                     'city': city_level, 'channel': channel,
+                     'city_level': city_level, 'channel': channel,
                      'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
     # compute value and send a signal when done
     srv_sales_bymonth.global_store(filter_values)

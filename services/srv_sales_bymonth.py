@@ -22,7 +22,7 @@ def global_store(filter_values: dict) -> List[Dict]:
     """
     全局缓存
     :param filter_values: 筛选值 json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
-                                'city':city, 'channel':channel,
+                                'city_level':city_level, 'channel':channel,
                                 'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
     :return:
     """
@@ -40,14 +40,25 @@ def global_store(filter_values: dict) -> List[Dict]:
 trans_num = 100000
 
 
-# 计算cards 的 展示数据
 def calculate_cards(filter_values: dict) -> Dict:
     """
     计算头部的4个card 的数据
-    @param filter_values :  { 'begin_month': begin_month, 'end_month': end_month,
-                    'city':city, 'channel':channel,
-                    'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
-    @return
+    @param filter_values :
+                    { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
+                      'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
+                      'city_level': 城市级别: List类型,
+                      'channel': 渠道: List类型,
+                      'store_age': 店龄: List类型 ,
+                      'store_area': 门店面积: List类型,
+                      'store_star': 门店星级: List类型}
+    @return dict :
+            {"total_sale": 总销售量: 浮点类型，单位百万(M),
+            "last_month_total": 上月销售量：浮点类型，单位百万(M),
+            "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
+            "hb_percentage": 环比百分比（上月的数据比上上月的数据）：字符串类型，单位%,
+            "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
+            "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
+            "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
     """
     card_datas = global_store(filter_values)
     df = pd.DataFrame(card_datas)
@@ -139,6 +150,10 @@ def calculate_graph_data(filter_values: dict) -> DataFrame:
 def calculate_top_graph(filter_values: dict, month_value: str, order_value: int) -> DataFrame:
     """
     计算排名图数据
+    @param filter_values 过滤值
+    @param month_value 月份
+    @param order_value 排序
+    @return  返回一组Dataframe类型的数据
     """
     # 取数据
     fig3_data = global_store(filter_values)
@@ -201,11 +216,11 @@ def find_sales_list(filter_values: dict) -> List[Dict]:
             query_sql += """  and to_char(rdate,'YYYY-MM') >= '{begin_month}'
                                      and to_char(rdate,'YYYY-MM') <= '{end_month}'
                    """.format(begin_month=filter_values["begin_month"], end_month=filter_values["end_month"])
-        if filter_values["city"]:
+        if filter_values["city_level"]:
             # 长度大于1 循环处理
-            citys = tuple(str(c) for c in filter_values["city"]) if len(filter_values['city']) > 1 \
-                else "(" + str(filter_values['city'][0]) + ")"
-            query_sql += """ and city_level in {city}""".format(city=citys)
+            citys = tuple(str(c) for c in filter_values["city_level"]) if len(filter_values['city_level']) > 1 \
+                else "(" + str(filter_values['city_level'][0]) + ")"
+            query_sql += """ and city_level in {city_level}""".format(city_level=citys)
         if filter_values["channel"]:
             channels = tuple(c for c in filter_values["channel"]) if len(filter_values['channel']) > 1 \
                 else "(" + filter_values['channel'][0] + ")"
