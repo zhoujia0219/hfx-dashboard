@@ -173,13 +173,19 @@ pip install -r requirements.txt
 
 ## 开发新dash_app步骤
 
-### 第一步： 在apps下，按照规则添加页面布局文件(通用组件可直接新增在components下或引入现有的),在services层添加对应的数据处理逻辑文件
+### 第一步： 在apps下，按照规则添加页面布局文件(通用组件可直接新增在components下或引入现有的)
 
-> 例如 apps/app_sales_bymonth.py -> services/srv_sales_bymonth.py
+> 例如 apps/app_sales_bymonth.py
 
-### 第二步： 在 routers.py 下 注册访问路由
+### 第二步：在services下，添加对应的数据处理逻辑文件
 
-> 示例
+> 例如 services/srv_sales_bymonth.py
+
+### 第三步： 页面功能与数据处理联调
+
+### 第四步： 在 routers.py 下 注册访问路由
+
+- 示例
 
 ```python
 
