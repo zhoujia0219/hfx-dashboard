@@ -2,6 +2,26 @@
 
 基于Dash+Greenplum的数据看板
 
+## 技术选型
+
+| 技术 | 描述 | 官网 |
+|-------|-----|---- |
+| Flask| Python Web框架| https://dormousehole.readthedocs.io/en/latest/     |
+| Dash| 可视化Web框架| https://dash.plotly.com/                            |
+| Plotly| Python数据可视化交互式图形库| https://plotly.com/python/|
+| Dash-bootstrap-components | Dash ui布局组件|https://dash-bootstrap-components.opensource.faculty.ai/|
+| Redis| 分布式缓存数据库| https://redis.io/|
+| Greenplum| 基于PostgreSQL的数据分析仓库| https://greenplum.org/|
+
+## 开发环境
+
+- Python 3.8+
+- Redis :
+    - 部署服务器：192.168.1.182
+- Greenplum :
+    - 部署服务器：192.168.1.174
+    - 用户名密码：gpadmin/gpadmin
+
 ## 项目结构
 
 ```
@@ -51,8 +71,22 @@ hfx-dashboard
         - `greenplum` 数据库连接配置
         - `redis` 连接配置
         - 项目主题配置
+        - 其他（后续可能新增）
 - 其他配置文件： conf/router_conts.py
     - 主要包含路由路径常量定义
+
+## 项目分层定义：
+
+    - UI视图层 - apps  包含：
+        - assets: 通用样式
+        - components: 通用组件
+        - *.py: 可视化应用代码（只包含页面布局代码）
+    - 数据处理层 - services  包含:
+        - srv_comm_dim.py : 通用维度定义
+        - srv_sales_bymonth.py ： 对应可视化应用代码的数据处理逻辑
+    - 通用工具层 - utils  包含：
+        - date_util: 常用日期处理函数
+        - db_util: 数据库连接工具
 
 ## 项目规范
 
@@ -87,6 +121,8 @@ hfx-dashboard
 ### 注释规范
 
 1. 每一个函数方法, 必须要有方法说明、方法参数、方法返回值都必须有说明，并且需要规定返回值类型(页面组件元素除外)
+
+> 示例：
    ```python
         def calculate_cards(filter_values: dict) -> Dict:
             """
@@ -119,3 +155,46 @@ hfx-dashboard
                     "group_sales": []}
         
    ```
+
+## 项目部署运行
+
+### 本地运行
+
+- 下载依赖包
+
+```shell
+pip install -r requirements.txt
+```
+
+- 运行
+    - 在Windows 直接使用ide工具找到main.py 鼠标右键运行即可
+
+    - Linux上,使用Gunicorn或其他方式（参考flask官网） 部署运行
+
+## 开发新dash_app步骤
+
+### 第一步： 在apps下，按照规则添加页面布局文件(通用组件可直接新增在components下或引入现有的),在services层添加对应的数据处理逻辑文件
+
+> 例如 apps/app_sales_bymonth.py -> services/srv_sales_bymonth.py
+
+### 第二步： 在 routers.py 下 注册访问路由
+
+> 示例
+
+```python
+
+@flask_server.route(URL_SALES_BYMONTH)
+def dev_debug():
+    """
+    仅用于测试
+    """
+    return flask.redirect('/sales_bymonth')
+
+
+# 将dash应用绑定到flask
+app = DispatcherMiddleware(flask_server, {
+    '/sales_bymonth': sales_app.server
+})
+
+
+```

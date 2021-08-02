@@ -82,32 +82,10 @@ dim_cates = srv_comm_dim.get_dim_graph_cate()
 dim_types = srv_comm_dim.get_dim_graph_type()
 # 聚合函数维度
 dim_aggs = srv_comm_dim.get_dim_graph_agg()
-###############
-# sidebar
-###############
-
-# 侧边栏
-sidebar = html.Div(
-    className='sidebar-style',
-    children=[
-        html.H4("门店月度销售分析"),
-        html.Hr(),
-        html.P("可通过条件筛选过滤数据，也可以改变维度和图形样式", className="small", style={'color': 'gray'}),
-        html.Div([
-            filter_date_range.filter_month_range(date_range, start_month, stop_month),
-            filter_city_level.filter_city_level("门店所属城市", city_levels, default_city_values),
-            filter_channels.filter_channels("销售渠道", channels, default_channel_values),
-            filter_store_age.filter_store_age("店龄", store_ages, default_age_values),
-            filter_store_area.filter_store_area("门店面积", store_areas, default_area_values),
-            filter_store_star.filter_store_star("门店星级", store_stars, default_star_values),
-            dbc.Button('重新计算', id='f_submit', color="primary", className="mt-3", block=True),
-        ]),
-    ],
-)
 
 
 ###############
-# content
+# 页面内容构建刷新函数
 ###############
 
 def build_layout_title_cards(filter_values: dict):
@@ -274,6 +252,32 @@ def build_city_graph(filter_values, val_x, val_cate, val_agg):
         return fig
 
 
+###############
+# sidebar
+###############
+
+# 侧边栏
+sidebar = html.Div(
+    className='sidebar-style',
+    children=[
+        html.H4("门店月度销售分析"),
+        html.Hr(),
+        html.P("可通过条件筛选过滤数据，也可以改变维度和图形样式", className="small", style={'color': 'gray'}),
+        html.Div([
+            filter_date_range.filter_month_range(date_range, start_month, stop_month),
+            filter_city_level.filter_city_level("门店所属城市", city_levels, default_city_values),
+            filter_channels.filter_channels("销售渠道", channels, default_channel_values),
+            filter_store_age.filter_store_age("店龄", store_ages, default_age_values),
+            filter_store_area.filter_store_area("门店面积", store_areas, default_area_values),
+            filter_store_star.filter_store_star("门店星级", store_stars, default_star_values),
+            dbc.Button('重新计算', id='f_submit', color="primary", className="mt-3", block=True),
+        ]),
+    ],
+)
+
+###############
+# content
+###############
 # 战区分析 -- dengxiaohu
 c_fig_01 = dbc.Card(dbc.CardBody([
     # 用户选项
@@ -308,9 +312,7 @@ c_fig_01 = dbc.Card(dbc.CardBody([
                 children=[dcc.Graph(
                     id="graph_out_qs",
                     figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()"))
-                ],style={'width':'1022px','height':'450px'}),
-
-
+                ], style={'width': '1022px', 'height': '450px'}),
 
     # 用户选项
     html.Div([
@@ -349,7 +351,7 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm',id='button-1',n_clicks=0)),
+        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='button-1', n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -393,7 +395,7 @@ c_fig_02 = dbc.Card(dbc.CardBody([
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm',id='button-2',n_clicks=0)),
+        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='button-2', n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -417,12 +419,12 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     dcc.Loading(id='loading-4',
                 type='circle',
                 children=[dcc.Graph(id="graph_top", figure=build_top_graph(1, stop_month, default_filter_values))
-                ], style={'width': '460px', 'height': '450px'}),
+                          ], style={'width': '460px', 'height': '450px'}),
 
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='button-3',n_clicks=0)),
+        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='button-3', n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -440,6 +442,10 @@ content = html.Div(
         ], className='mt-3'),
     ],
 )
+
+###############
+# 页面布局
+###############
 
 sales_app.layout = html.Div([
     sidebar,
@@ -601,17 +607,19 @@ def update_my_graph(val_x, val_cate, val_agg, filter_values):
     return build_city_graph(filter_values, val_x, val_cate, val_agg)
 
 
-@sales_app.callback(Output('graph_out_dy','figure'),Input('button-1','n_clicks'))
+@sales_app.callback(Output('graph_out_dy', 'figure'), Input('button-1', 'n_clicks'))
 def loading_ceshi1(n_clicks1):
     time.sleep(1)
     return n_clicks1
 
-@sales_app.callback(Output('graph_out_wd','figure'),Input('button-2','n_clicks'))
+
+@sales_app.callback(Output('graph_out_wd', 'figure'), Input('button-2', 'n_clicks'))
 def loading_ceshi2(n_clicks2):
     time.sleep(1)
     return n_clicks2
 
-@sales_app.callback(Output('graph_top','figure'),Input('button-3','n_clicks'))
+
+@sales_app.callback(Output('graph_top', 'figure'), Input('button-3', 'n_clicks'))
 def loading_ceshi3(n_clicks3):
     time.sleep(1)
     return n_clicks3
