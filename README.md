@@ -83,7 +83,7 @@ hfx-dashboard
         - *.py: 可视化应用代码（只包含页面布局代码）
     - 数据处理层 - services  包含:
         - srv_comm_dim.py : 通用维度定义
-        - srv_sales_bymonth.py ： 对应可视化应用代码的数据处理逻辑
+        - srv_sales_bymonth.py ： 对应可视化应用代码的数据处理逻辑（数据库sql查询代码,和计算处理逻辑代码都在这个文件中）
     - 通用工具层 - utils  包含：
         - date_util: 常用日期处理函数
         - db_util: 数据库连接工具
