@@ -108,6 +108,8 @@ hfx-dashboard
                     "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
                     "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
             """
+            # ...省略计算处理逻辑
+            # 返回示例
             return {"total_sale": 15.00,
                     "last_month_total": 12.00,
                     "tb_percentage": '10.00%',
