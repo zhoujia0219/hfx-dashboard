@@ -1,4 +1,5 @@
 import math
+import time
 from datetime import datetime
 
 import dash
@@ -302,7 +303,14 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="graph_out_qs", figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
+    dcc.Loading(id='loading-1',
+                type='circle',
+                children=[dcc.Graph(
+                    id="graph_out_qs",
+                    figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()"))
+                ],style={'width':'1022px','height':'450px'}),
+
+
 
     # 用户选项
     html.Div([
@@ -331,11 +339,17 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="graph_out_dy", figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()")),
+    dcc.Loading(id='loading-2',
+                type='circle',
+                children=[dcc.Graph(
+                    id="graph_out_dy",
+                    figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()"))
+                ], style={'width': '1022px', 'height': '450px'}),
+
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm')),
+        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm',id='button-1',n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -369,12 +383,17 @@ c_fig_02 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id='graph_out_wd',
-              figure=build_city_graph(default_filter_values, 'businessname', 'areaname3', 'dff.sum()')),
+    dcc.Loading(id='loading-3',
+                type='circle',
+                children=[dcc.Graph(
+                    id='graph_out_wd',
+                    figure=build_city_graph(default_filter_values, 'businessname', 'areaname3', 'dff.sum()'))
+                ], style={'width': '1022px', 'height': '450px'}),
+
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm')),
+        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm',id='button-2',n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -395,11 +414,15 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     html.Hr(),
 
     # 图
-    dcc.Graph(id="graph_top", figure=build_top_graph(1, stop_month, default_filter_values)),
+    dcc.Loading(id='loading-4',
+                type='circle',
+                children=[dcc.Graph(id="graph_top", figure=build_top_graph(1, stop_month, default_filter_values))
+                ], style={'width': '460px', 'height': '450px'}),
+
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm')),
+        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='button-3',n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -576,3 +599,19 @@ def update_my_graph(val_x, val_cate, val_agg, filter_values):
     """
 
     return build_city_graph(filter_values, val_x, val_cate, val_agg)
+
+
+@sales_app.callback(Output('graph_out_dy','figure'),Input('button-1','n_clicks'))
+def loading_ceshi1(n_clicks1):
+    time.sleep(1)
+    return n_clicks1
+
+@sales_app.callback(Output('graph_out_wd','figure'),Input('button-2','n_clicks'))
+def loading_ceshi2(n_clicks2):
+    time.sleep(1)
+    return n_clicks2
+
+@sales_app.callback(Output('graph_top','figure'),Input('button-3','n_clicks'))
+def loading_ceshi3(n_clicks3):
+    time.sleep(1)
+    return n_clicks3
