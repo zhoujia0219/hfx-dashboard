@@ -5,11 +5,12 @@
 ## 技术选型
 
 | 技术 | 描述 | 官网 |
-|-------|-----|---- |
+|-----|----- |-----|
 | Flask| Python Web框架| https://dormousehole.readthedocs.io/en/latest/     |
 | Dash| 可视化Web框架| https://dash.plotly.com/                            |
 | Plotly| Python数据可视化交互式图形库| https://plotly.com/python/|
 | Dash-bootstrap-components | Dash ui布局组件|https://dash-bootstrap-components.opensource.faculty.ai/|
+| Flask-Caching| Flask 缓存组件| https://flask-caching.readthedocs.io/en/latest/|
 | Redis| 分布式缓存数据库| https://redis.io/|
 | Greenplum| 基于PostgreSQL的数据分析仓库| https://greenplum.org/|
 
