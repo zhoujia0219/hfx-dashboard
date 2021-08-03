@@ -38,6 +38,12 @@ def gp_connect(dbname: str):
 
 # 查询数据
 def query_list(sql: str, dbname: str):
+    """
+    查询列表
+    :param sql: 要执行的sql
+    :param dbname:  默认的schema
+    :return:
+    """
     conn = gp_connect(dbname=dbname)
     cur = conn.cursor(cursor_factory=LoggingCursor)
     try:
@@ -48,5 +54,3 @@ def query_list(sql: str, dbname: str):
         raise e
     finally:
         conn.close()
-
-
