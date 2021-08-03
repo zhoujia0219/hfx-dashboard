@@ -36,6 +36,10 @@ def global_store(filter_values: dict) -> List[Dict]:
         return result
 
 
+###########################
+# 展示计算数据
+###########################
+
 # 换算单位、百万
 trans_num = 100000
 
@@ -199,6 +203,10 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
         return fig_df
     return []
 
+
+###########################
+# 数据库取数
+###########################
 
 def find_sales_list(filter_values: dict) -> List[Dict]:
     query_sql = """
