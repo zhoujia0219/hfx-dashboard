@@ -175,11 +175,13 @@ pip install -r requirements.txt
 
 ### 第一步： 在apps下，按照规则添加页面布局文件(通用组件可直接新增在components下或引入现有的)
 
-> 例如 apps/app_sales_bymonth.py
+- 例如 apps/app_sales_bymonth.py
+    - 主要包含代码说明： dash实例化 、初始值变量及数据、默认页面布局构建函数、页面布局代码、回调函数
 
 ### 第二步：在services下，添加对应的数据处理逻辑文件
 
-> 例如 services/srv_sales_bymonth.py
+- 例如 services/srv_sales_bymonth.py
+    - 主要包含代码说明：全局缓存处理函数、数据计算处理函数、数据库连接查询函数
 
 ### 第三步： 页面功能与数据处理联调
 
@@ -190,7 +192,7 @@ pip install -r requirements.txt
 ```python
 
 @flask_server.route(URL_SALES_BYMONTH)
-def dev_debug():
+def sales_bymonth():
     """
     仅用于测试
     """
@@ -204,3 +206,106 @@ app = DispatcherMiddleware(flask_server, {
 
 
 ```
+
+## 如何从数据库取数据
+
+由于数据库使用的是greenplum,greenplumn 又是基于postgresql的，所以连接驱动和postgresql连接驱动一致，都是使用`psycopg2`
+连接示例参考 utils/db_util:
+
+```python
+import logging
+
+import psycopg2
+import psycopg2.extensions
+import psycopg2.extras
+import psycopg2.pool
+
+from conf import hfx_dashboard
+
+logging.getLogger(__name__)
+
+
+class LoggingCursor(psycopg2.extensions.cursor):
+    def execute(self, sql, args=None):
+        logger = logging.getLogger('sql_debug')
+        logger.info(self.mogrify(sql, args))
+
+        try:
+            psycopg2.extensions.cursor.execute(self, sql, args)
+        except Exception as exc:
+            logger.error("%s: %s" % (exc.__class__.__name__, exc))
+            raise
+
+
+def gp_connect(dbname: str):
+    try:
+        conn_pool = psycopg2.pool.SimpleConnectionPool(minconn=1, maxconn=5,
+                                                       # 默认db 
+                                                       dbname="",
+                                                       # 用户名
+                                                       user=hfx_dashboard.USERNAME,
+                                                       # 密码
+                                                       password=hfx_dashboard.PASSWORD,
+                                                       # 服务器地址
+                                                       host=hfx_dashboard.HOST,
+                                                       # 服务器端口
+                                                       port=hfx_dashboard.PORT)
+        # 从数据库连接池获取连接
+        conn = conn_pool.getconn()
+        return conn
+    except psycopg2.DatabaseError as e:
+        print("could not connect to Greenplum server", e)
+
+
+# 查询数据
+def query_list(sql: str, dbname: str):
+    """
+    查询列表
+    :param sql: 要执行的sql
+    :param dbname:  默认的schema 
+    :return:
+    """
+    conn = gp_connect(dbname=dbname)
+    cur = conn.cursor(cursor_factory=LoggingCursor)
+    try:
+        cur.execute(sql)
+        return cur.fetchall()
+    except Exception as e:
+        logging.error("查询异常：{}, sql {}", str(e), sql)
+        raise e
+    finally:
+        conn.close()
+
+```
+
+根据上面的封装工具，测试一个查询（目前暂时只封装了查询方法）：
+
+```python
+from utils import db_util
+
+# 查询渠道列表
+channel_list = db_util.query_list(""" 
+                select distinct businessname 
+                from  chunbaiwei.fact_storesale_weather
+                """, "data_analysis")
+
+print(channel_list)
+
+```
+
+> 结果：[('开放平台-扫码点餐',), ('到店销售',), ('开放平台-淳乐送',), ('堂食销售',), ('网络销售',)]
+
+根据上面查询的结果，转换一下格式：
+
+```python
+
+channels = [{"channel": d[0]} for d in channel_list]
+
+print(channels)
+```
+
+> 执行结果: [{'channel': '开放平台-扫码点餐'}, {'channel': '到店销售'}, {'channel': '开放平台-淳乐送'}, {'channel': '堂食销售'}, {'channel': '网络销售'}]
+
+## 如何使用回调函数
+
+## 缓存
