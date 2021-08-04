@@ -40,7 +40,7 @@ def get_dim_channel() -> List[Dict]:
     :return List[dict]
     """
     channels = srv_sales_bymonth.find_channel_list()
-    return [{"label": c["channel"], "value": c["channel"]} for c in channels]
+    return [{"label": c, "value": c} for c in channels["channel"]]
 
 
 def get_dim_store_areas() -> List[Dict]:

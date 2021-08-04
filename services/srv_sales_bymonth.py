@@ -31,7 +31,7 @@ def global_store(filter_values: dict) -> List[Dict]:
         return d
     else:
         result = find_sales_list(filter_values)
-        if result:
+        if len(result) > 0:
             cache.set(str(filter_values), result)
         return result
 
@@ -64,8 +64,8 @@ def calculate_cards(filter_values: dict) -> Dict:
             "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
             "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
     """
-    card_datas = global_store(filter_values)
-    df = pd.DataFrame(card_datas)
+    data_list = global_store(filter_values)
+    df = pd.DataFrame(data_list)
 
     # 总营业额
     total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
@@ -128,9 +128,9 @@ def calculate_graph_data(filter_values: dict) -> DataFrame:
     :param filter_values: 过滤值
     :return:
     """
-    data = global_store(filter_values)
-    if len(data) > 0:
-        df = pd.DataFrame(data)
+    data_list = global_store(filter_values)
+    if len(data_list) > 0:
+        df = pd.DataFrame(data_list)
         # 转换0值
         df.replace(0, np.nan, inplace=True)
         df['areasize'] = df['areasize'].astype('float')
@@ -160,9 +160,9 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
     :return: 返回一组Dataframe类型的数据
     """
     # 取数据
-    fig3_data = global_store(filter_values)
-    if len(fig3_data) > 0:
-        df = pd.DataFrame(fig3_data)
+    data_list = global_store(filter_values)
+    if len(data_list) > 0:
+        df = pd.DataFrame(data_list)
 
         group_df = df
         # 当月数据
@@ -210,11 +210,7 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
 
 def find_sales_list(filter_values: dict) -> List[Dict]:
     query_sql = """
-                   SELECT 
-                   areauid3, areaname3, areauid4, areaname4, storeuid, storename, weeks, rdate :: date, province, 
-                   province_name, city, city_name, county, county_name, businessname, vctype, areasize, 
-                   billcount, dealtotal::float, rebillcount, redealtotal, weather, weather_desc, temperature, 
-                   wind_direction, "month", "year", city_level, to_char(rdate,'YYYY年MM月') as month_group
+                   SELECT  {}
                    FROM chunbaiwei.fact_storesale_weather
                    WHERE areauid3 is not null  and areauid4 is not null and province is not null and city is not null 
                    and county is not null
@@ -237,24 +233,30 @@ def find_sales_list(filter_values: dict) -> List[Dict]:
         #     query_sql += """
         #     """
     # 从数据库查询
-    data = db_util.query_list(query_sql, default_dbname)
+    # data = db_util.query_list(query_sql, default_dbname)
 
-    result = [{"areauid3": d[0], "areaname3": d[1], "areauid4": d[2], "areaname4": d[3], "storeuid": d[4],
-               "storename": d[5], "weeks": d[6], "rdate": datetime.strptime(str(d[7]), '%Y-%m-%d').date(),
-               "province": d[8], "province_name": d[9], "city": d[10], "city_name": d[11], "county": d[12],
-               "county_name": d[13], "businessname": d[14], "vctype": d[15], "areasize": d[16],
-               "billcount": d[17], "dealtotal": d[18], "rebillcount": d[19], "redealtotal": float(d[20]),
-               "weather": d[21], "weather_desc": d[22], "temperature": d[23], "wind_direction": d[24],
-               "month": d[25], "year": d[26], "city_level": int(d[27]) if d[27] else 0, "month_group": d[28]} for d in
-              data]
-    return result
+    query_cols = """areauid3, areaname3, areauid4, areaname4, storeuid, storename, weeks, rdate :: date, province, 
+                   province_name, city, city_name, county, county_name, businessname, vctype, areasize, 
+                   billcount, dealtotal::float, rebillcount, redealtotal, weather, weather_desc, temperature, 
+                   wind_direction, "month", "year", city_level, to_char(rdate,'YYYY年MM月') as month_group"""
+    query_sql = query_sql.format(query_cols)
+    df = db_util.read_by_pd(query_sql, default_dbname)
+
+    # result = [{"areauid3": d[0], "areaname3": d[1], "areauid4": d[2], "areaname4": d[3], "storeuid": d[4],
+    #            "storename": d[5], "weeks": d[6], "rdate": datetime.strptime(str(d[7]), '%Y-%m-%d').date(),
+    #            "province": d[8], "province_name": d[9], "city": d[10], "city_name": d[11], "county": d[12],
+    #            "county_name": d[13], "businessname": d[14], "vctype": d[15], "areasize": d[16],
+    #            "billcount": d[17], "dealtotal": d[18], "rebillcount": d[19], "redealtotal": float(d[20]),
+    #            "weather": d[21], "weather_desc": d[22], "temperature": d[23], "wind_direction": d[24],
+    #            "month": d[25], "year": d[26], "city_level": int(d[27]) if d[27] else 0, "month_group": d[28]} for d in
+    #           data]
+    return df
 
 
 def find_channel_list() -> List[Dict]:
     query_sql = """
-        select distinct businessname from  chunbaiwei.fact_storesale_weather
-    """
+        select distinct businessname as {} from  chunbaiwei.fact_storesale_weather
+    """.format("channel")
 
-    data = db_util.query_list(query_sql, default_dbname)
-
-    return [{"channel": d[0]} for d in data]
+    channels = db_util.read_by_pd(query_sql, default_dbname)
+    return channels
