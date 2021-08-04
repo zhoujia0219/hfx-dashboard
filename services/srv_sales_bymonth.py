@@ -251,10 +251,10 @@ def find_sales_list(filter_values: dict) -> DataFrame:
         #     query_sql += """
         #     """
 
-    query_cols = """areauid3, areaname3, areauid4, areaname4, storeuid, storename, weeks, rdate :: date, province, 
-                   province_name, city, city_name, county, county_name, businessname, vctype, areasize, 
-                   billcount, dealtotal::float, rebillcount, redealtotal, weather, weather_desc, temperature, 
-                   wind_direction, "month", "year", city_level, to_char(rdate,'YYYY年MM月') as month_group"""
+    query_cols = """ areaname3,  areaname4,  storename, weeks, rdate :: date,  
+                   province_name,  city_name,  county_name, businessname, vctype, areasize, 
+                   billcount, dealtotal::float, rebillcount, redealtotal, weather,   
+                    "month", "year", city_level, to_char(rdate,'YYYY年MM月') as month_group"""
     query_sql = query_sql.format(query_cols)
     df = db_util.read_by_pd(query_sql, default_dbname)
 
