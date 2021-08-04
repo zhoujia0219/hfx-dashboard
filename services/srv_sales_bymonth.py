@@ -102,7 +102,7 @@ def calculate_card_data(df: DataFrame, end_month: str) -> Dict:
         ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
 
     time_end = time.time()
-    print('calculate_cards: Running time:{} seconds'.format(time_end - time_start))
+    print('calculate_card_data: Running time:{} seconds'.format(time_end - time_start))
     # 封装结果数据
     return {"total_sale": total_sale, "last_month_total": last_month_total,
             "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,

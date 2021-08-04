@@ -8,5 +8,6 @@ run_simple(
     port=8080,
     application=routers.app,
     use_reloader=True,
-    use_debugger=True
+    use_debugger=True,
+    threaded=True
 )

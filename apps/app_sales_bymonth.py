@@ -107,7 +107,7 @@ def build_group_sales_fig(df: DataFrame):
     )
 
     time_end = time.time()
-    print('build_group_sales_fig: Running time:{} seconds'.format(time_start - time_end))
+    print('build_group_sales_fig: Running time:{} seconds'.format(time_end - time_start))
     return fig
 
 
@@ -136,7 +136,7 @@ def build_top_graph(order_value: int, month_value: str, filter_values: dict):
         # todo 添加显示标签
 
         time_end = time.time()
-        print('build_top_graph: Running time:{} seconds'.format(time_start - time_end))
+        print('build_top_graph: Running time:{} seconds'.format(time_end - time_start))
         return fig
     else:
         return {}
