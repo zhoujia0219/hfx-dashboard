@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Dict
+from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -18,7 +18,7 @@ default_dbname = "data_analysis"
 ###########################
 
 @cache.memoize()
-def global_store(filter_values: dict) -> List[Dict]:
+def global_store(filter_values: dict) -> DataFrame:
     """
     全局缓存
     @:param filter_values: 筛选值 json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
@@ -57,8 +57,7 @@ def calculate_cards(filter_values: dict) -> Dict:
             "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
             "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
     """
-    data_list = global_store(filter_values)
-    df = pd.DataFrame(data_list)
+    df = global_store(filter_values)
 
     # 总营业额
     total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
@@ -121,9 +120,8 @@ def calculate_graph_data(filter_values: dict) -> DataFrame:
     :param filter_values: 过滤值
     :return:
     """
-    data_list = global_store(filter_values)
-    if len(data_list) > 0:
-        df = pd.DataFrame(data_list)
+    df = global_store(filter_values)
+    if len(df) > 0:
         # 转换0值
         df.replace(0, np.nan, inplace=True)
         df['areasize'] = df['areasize'].astype('float')
@@ -153,10 +151,8 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
     :return: 返回一组Dataframe类型的数据
     """
     # 取数据
-    data_list = global_store(filter_values)
-    if len(data_list) > 0:
-        df = pd.DataFrame(data_list)
-
+    df = global_store(filter_values)
+    if len(df) > 0:
         group_df = df
         # 当月数据
         c_month = datetime.strptime(month_value, "%Y-%m")
@@ -201,7 +197,7 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
 # 数据库取数
 ###########################
 
-def find_sales_list(filter_values: dict) -> List[Dict]:
+def find_sales_list(filter_values: dict) -> DataFrame:
     query_sql = """
                    SELECT  {}
                    FROM chunbaiwei.fact_storesale_weather
@@ -246,7 +242,7 @@ def find_sales_list(filter_values: dict) -> List[Dict]:
     return df
 
 
-def find_channel_list() -> List[Dict]:
+def find_channel_list() -> DataFrame:
     query_sql = """
         select distinct businessname as {} from  chunbaiwei.fact_storesale_weather
     """.format("channel")
