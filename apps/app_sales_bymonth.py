@@ -170,7 +170,7 @@ def build_sales_graph(filter_values, val_graph, val_cate, val_agg):
         fig.update_layout(barmode='group', template='plotly_white')
 
         time_end = time.time()
-        print('build_sales_graph: Running time:{} seconds'.format(time_start - time_end))
+        print('build_sales_graph: Running time:{} seconds'.format(time_end - time_start))
         return fig
     else:
         dff = df.groupby(['month', val_cate], as_index=False)['dealtotal']
