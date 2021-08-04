@@ -1,5 +1,6 @@
 import logging
 
+import pandas as pd
 import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
@@ -49,6 +50,25 @@ def query_list(sql: str, dbname: str):
     try:
         cur.execute(sql)
         return cur.fetchall()
+    except Exception as e:
+        logging.error("查询异常：{}, sql {}", str(e), sql)
+        raise e
+    finally:
+        conn.close()
+
+
+# 查询数据
+def read_by_pd(sql: str, dbname: str):
+    """
+    查询列表
+    :param sql: 要执行的sql
+    :param dbname:  默认的schema
+    :return:
+    """
+    conn = gp_connect(dbname=dbname)
+    try:
+        df = pd.read_sql(sql, conn)
+        return df
     except Exception as e:
         logging.error("查询异常：{}, sql {}", str(e), sql)
         raise e
