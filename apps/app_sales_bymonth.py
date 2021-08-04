@@ -88,50 +88,6 @@ dim_aggs = srv_comm_dim.get_dim_graph_agg()
 # 页面内容构建刷新函数
 ###############
 
-def build_layout_title_cards(filter_values: dict):
-    """
-    头部卡片
-    :param filter_values: 筛选值
-    :return 卡片内容
-    """
-    # 封装结果数据
-    datas = srv_sales_bymonth.calculate_cards(filter_values)
-
-    total_sale = datas["total_sale"] if datas else '0'
-    begin_month = filter_values["begin_month"] if filter_values else ''
-    end_month = filter_values["end_month"] if filter_values else ''
-    last_month_total = datas["last_month_total"] if datas else '0'
-
-    tb_percentage = datas["tb_percentage"] if datas else '0'
-    hb_percentage = datas["hb_percentage"] if datas else '0'
-    c_month_total_sale = datas["c_month_total_sale"] if datas else '0'
-    m_growth_rate = datas["m_growth_rate"] if datas else '0'
-    group_sales = datas["group_sales"] if datas else []
-    fig = build_group_sales_fig(group_sales) if len(group_sales) > 0 else {}
-
-    return [
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6("总销售额"),
-            html.H4(['￥', total_sale, 'M'], id='title_1', style={"color": "darkred"}),
-            html.Label(begin_month + " - " + end_month),
-        ]), className='title-card'), className='title-col mr-2'),
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6("上月销售额"),
-            html.H4(['￥', last_month_total, 'M'], id='title_2', style={"color": "darkred"}),
-            html.Label("同比:" + tb_percentage + "  环比：" + hb_percentage),
-        ]), className='title-card'), className='title-col mr-2'),
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6(["本月销售额", "(", end_month, ")"]),
-            html.H4(['￥', c_month_total_sale, 'M'], id='title_3', style={"color": "darkred"}),
-            html.Label("增长率：" + m_growth_rate),
-        ]), className='title-card'), className='title-col mr-2'),
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6(["近12月销售趋势", "(", begin_month + " - " + end_month, ")"]),
-            dcc.Graph(id='title_4', figure=fig, style={"height": "60px"}),
-        ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
-    ]
-
-
 # 顶部 12月趋势图
 def build_group_sales_fig(df: DataFrame):
     """
@@ -139,6 +95,8 @@ def build_group_sales_fig(df: DataFrame):
     :param df: 包含月份和销售额的dataframe 数据
     :return 返回图形
     """
+
+    time_start = time.time()
     fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=60)
     fig.update_xaxes(visible=False, fixedrange=True)
     fig.update_yaxes(visible=False, fixedrange=True)
@@ -147,6 +105,9 @@ def build_group_sales_fig(df: DataFrame):
         plot_bgcolor="white",
         margin=dict(t=10, l=10, b=10, r=10)
     )
+
+    time_end = time.time()
+    print('build_group_sales_fig: Running time:{} seconds'.format(time_start - time_end))
     return fig
 
 
@@ -161,6 +122,7 @@ def build_top_graph(order_value: int, month_value: str, filter_values: dict):
     :return:
     """
 
+    time_start = time.time()
     fig_df = srv_sales_bymonth.calculate_top_graph(filter_values, month_value, order_value)
     if len(fig_df) > 0:
         fig = px.bar(fig_df, x="dealtotal", y="areaname3", color='month_group', orientation='h', height=300,
@@ -173,6 +135,8 @@ def build_top_graph(order_value: int, month_value: str, filter_values: dict):
 
         # todo 添加显示标签
 
+        time_end = time.time()
+        print('build_top_graph: Running time:{} seconds'.format(time_start - time_end))
         return fig
     else:
         return {}
@@ -188,9 +152,10 @@ def build_sales_graph(filter_values, val_graph, val_cate, val_agg):
     :param val_agg:
     :return:
     """
+    time_start = time.time()
     df = srv_sales_bymonth.calculate_graph_data(filter_values)
     if len(df) < 1:
-        return {}
+        return dash.no_update
     if val_graph == 'px.bar':
         dff = df.groupby(['month', val_cate], as_index=False)['dealtotal']
         dff = eval(val_agg)
@@ -203,6 +168,9 @@ def build_sales_graph(filter_values, val_graph, val_cate, val_agg):
                             for lab in dff[val_cate].unique()] +
                         [go.Scatter(name='平均值', x=dff_line['month'], y=dff_line['dealtotal'], mode="lines")])
         fig.update_layout(barmode='group', template='plotly_white')
+
+        time_end = time.time()
+        print('build_sales_graph: Running time:{} seconds'.format(time_start - time_end))
         return fig
     else:
         dff = df.groupby(['month', val_cate], as_index=False)['dealtotal']
@@ -216,6 +184,9 @@ def build_sales_graph(filter_values, val_graph, val_cate, val_agg):
             title='销售额分析',
             template='plotly_white'
         )
+
+        time_end = time.time()
+        print('build_sales_graph: Running time:{} seconds'.format(time_end - time_start))
         return fig
 
 
@@ -229,9 +200,10 @@ def build_city_graph(filter_values, val_x, val_cate, val_agg):
     :param val_agg:
     :return:
     """
+    time_start = time.time()
     df = srv_sales_bymonth.calculate_graph_data(filter_values)
     if len(df) < 1:
-        return {}
+        return dash.no_update
     if val_x == val_cate:
         return dash.no_update
     else:
@@ -249,6 +221,8 @@ def build_city_graph(filter_values, val_x, val_cate, val_agg):
             template='plotly_white'
         )
         fig.update_traces(texttemplate='%{text:.2s}', textposition='inside')
+        time_end = time.time()
+        print('build_city_graph: Running time:{} seconds'.format(time_end - time_start))
         return fig
 
 
@@ -278,6 +252,58 @@ sidebar = html.Div(
 ###############
 # content
 ###############
+card_list = [
+    dbc.Col(dbc.Card(dbc.CardBody([
+        html.H6("总销售额"),
+        html.H4(children=[html.Span('￥'),
+                          html.Span(children=['0.00'], id='total_sales'),
+                          html.Span('M')],
+                id='total_sale_title',
+                style={"color": "darkred"}),
+        html.Label(children=[html.Span(children=[start_month], id="total_sales_start_month"),
+                             " - ",
+                             html.Span(children=[stop_month], id="total_sales_stop_month"), ],
+                   id="total_sale_label"),
+    ]), className='title-card'), className='title-col mr-2'),
+    dbc.Col(dbc.Card(dbc.CardBody([
+        html.H6("上月销售额"),
+        html.H4(children=[html.Span('￥'),
+                          html.Span(children=['0.00'], id='last_month_sales'),
+                          html.Span('M')],
+                id='last_month_title',
+                style={"color": "darkred"}),
+        html.Label(children=["同比: ",
+                             html.Span(children=['0.00%'], id="last_month_tb"),
+                             "  环比： ",
+                             html.Span(children=['0.00%'], id="last_month_hb")],
+                   id="last_month_label"),
+    ]), className='title-card'), className='title-col mr-2'),
+    dbc.Col(dbc.Card(dbc.CardBody([
+        html.H6(["本月销售额", "(", html.Span(children=[stop_month], id="current_month_sign"), ")"]),
+
+        html.H4(children=[html.Span('￥'),
+                          html.Span(children=['0.00'],
+                                    id="current_month_sales"),
+                          html.Span('M')],
+                id='current_month_title',
+                style={"color": "darkred"}),
+
+        html.Label(children=["增长率：",
+                             html.Span(children=["0.00%"], id="growth_rate")],
+                   id="current_month_label"),
+    ]), className='title-card'), className='title-col mr-2'),
+    dbc.Col(dbc.Card(dbc.CardBody([
+        html.H6(["近12月销售趋势",
+                 "(",
+                 html.Span(children=[start_month], id="group_start_month"),
+                 " - ",
+                 html.Span(children=[stop_month], id="group_end_month"),
+                 ")"],
+                id="month_group_title"),
+        dcc.Graph(id='graph_month_group', style={"height": "60px"}),
+    ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
+]
+
 # 战区分析 -- dengxiaohu
 c_fig_01 = dbc.Card(dbc.CardBody([
     # 用户选项
@@ -309,10 +335,8 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     # 图
     dcc.Loading(id='loading-1',
                 type='circle',
-                children=[dcc.Graph(
-                    id="graph_out_qs",
-                    figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()"))
-                ], style={'width': '1022px', 'height': '450px'}),
+                children=[dcc.Graph(id="graph_out_qs")],
+                style={'width': '1022px', 'height': '450px'}),
 
     # 用户选项
     html.Div([
@@ -343,15 +367,16 @@ c_fig_01 = dbc.Card(dbc.CardBody([
     # 图
     dcc.Loading(id='loading-2',
                 type='circle',
-                children=[dcc.Graph(
-                    id="graph_out_dy",
-                    figure=build_sales_graph(default_filter_values, "px.bar", "areaname3", "dff.sum()"))
-                ], style={'width': '1022px', 'height': '450px'}),
+                children=[dcc.Graph(id="graph_out_dy")],
+                style={'width': '1022px', 'height': '450px'}),
 
     html.Hr(),
     html.Div([
-        html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='button-1', n_clicks=0)),
+        html.Div(children=[html.Span('最近更新:'),
+                           html.Span('2021-07-23 12:30:00', id="sales_update_time")
+                           ], className='media-body'),
+        html.Div(
+            dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='sales_update_button', n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -387,15 +412,14 @@ c_fig_02 = dbc.Card(dbc.CardBody([
     # 图
     dcc.Loading(id='loading-3',
                 type='circle',
-                children=[dcc.Graph(
-                    id='graph_out_wd',
-                    figure=build_city_graph(default_filter_values, 'businessname', 'areaname3', 'dff.sum()'))
-                ], style={'width': '1022px', 'height': '450px'}),
+                children=[dcc.Graph(id='graph_out_wd')],
+                style={'width': '1022px', 'height': '450px'}),
 
     html.Hr(),
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
-        html.Div(dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='button-2', n_clicks=0)),
+        html.Div(
+            dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='city_update_button', n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -418,8 +442,10 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     # 图
     dcc.Loading(id='loading-4',
                 type='circle',
-                children=[dcc.Graph(id="graph_top", figure=build_top_graph(1, stop_month, default_filter_values))
-                          ], style={'width': '460px', 'height': '450px'}),
+                children=[
+                    dcc.Graph(id="graph_top")
+                ],
+                style={'width': '460px', 'height': '450px'}),
 
     html.Hr(),
     html.Div([
@@ -431,8 +457,7 @@ c_fig_03 = dbc.Card(dbc.CardBody([
 content = html.Div(
     className='content-style',
     children=[
-        dbc.Row(id="card_data",
-                children=build_layout_title_cards(default_filter_values)),
+        dbc.Row(id="card_data", children=card_list),
         dbc.Row([
             dbc.Col([
                 dbc.Row(c_fig_01),
@@ -500,14 +525,39 @@ def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_a
     return filter_values
 
 
-@sales_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
-def update_card_data(filter_values):
+@sales_app.callback(
+    [
+        Output('total_sales', 'children'),
+        Output('total_sales_start_month', 'children'),
+        Output('total_sales_stop_month', 'children'),
+        Output('last_month_sales', 'children'),
+        Output('last_month_tb', 'children'),
+        Output('last_month_hb', 'children'),
+        Output('current_month_sign', 'children'),
+        Output('current_month_sales', 'children'),
+        Output('growth_rate', 'children'),
+        Output('group_start_month', 'children'),
+        Output('group_end_month', 'children'),
+        Output('graph_month_group', 'figure'),
+    ],
+    [Input('signal', 'data')])
+def update_card_group_month_graph(filter_values):
     """
-    更新card数值
-    :param filter_values: 筛选值
-    :return  返回顶部的card
+    更新 12个月趋势图卡片
+    :param filter_values:
+    :return:
     """
-    return build_layout_title_cards(filter_values)
+    # 获取基础数据
+    df = srv_sales_bymonth.global_store(filter_values)
+    begin_month = filter_values["begin_month"]
+    end_month = filter_values["end_month"]
+    # 计算卡片数据
+    card_df = srv_sales_bymonth.calculate_card_data(df, end_month)
+    graph_df = srv_sales_bymonth.calculate_card_graph(df)
+    return [[card_df["total_sale"]], [begin_month], [end_month],
+            [card_df["last_month_total"]], [card_df["tb_percentage"]], [card_df["hb_percentage"]],
+            [end_month], [card_df["c_month_total_sale"]], [card_df["m_growth_rate"]],
+            [begin_month], [end_month], build_group_sales_fig(graph_df)]
 
 
 @sales_app.callback(
@@ -545,15 +595,17 @@ def update_top_choices_month_value(month_value):
 @sales_app.callback(
     Output('graph_out_qs', 'figure'),
     [
+        Input('sales_update_button', 'n_clicks'),
         Input('cate_choice', 'value'),
         Input('agg_choice', 'value'),
         Input('graph_choice', 'value'),
         Input('signal', 'data'),
     ],
 )
-def update_sales_graph(val_cate, val_agg, val_graph, filter_values):
+def update_sales_graph(n_clicks, val_cate, val_agg, val_graph, filter_values):
     """
 
+    :param n_clicks
     :param val_cate:
     :param val_agg:
     :param val_graph:
@@ -567,15 +619,17 @@ def update_sales_graph(val_cate, val_agg, val_graph, filter_values):
 @sales_app.callback(
     Output('graph_out_wd', 'figure'),
     [
+        Input('city_update_button', 'n_clicks'),
         Input('x_choice_2', 'value'),
         Input('cate_choice_2', 'value'),
         Input('agg_choice_2', 'value'),
         Input('signal', 'data'),
     ],
 )
-def update_city_graph(val_x, val_cate, val_agg, filter_values):
+def update_city_graph(n_clicks, val_x, val_cate, val_agg, filter_values):
     """
 
+    :param n_clicks
     :param val_x:
     :param val_cate:
     :param val_agg:
@@ -589,14 +643,17 @@ def update_city_graph(val_x, val_cate, val_agg, filter_values):
 @sales_app.callback(
     Output('graph_out_dy', 'figure'),
     [
+        Input('sales_update_button', 'n_clicks'),
         Input('x_choice_1', 'value'),
         Input('cate_choice_1', 'value'),
         Input('agg_choice_1', 'value'),
         Input('signal', 'data'),
     ],
 )
-def update_my_graph(val_x, val_cate, val_agg, filter_values):
+def update_my_graph(n_clicks, val_x, val_cate, val_agg, filter_values):
     """
+
+    :param n_clicks
     :param val_x:
     :param val_cate:
     :param val_agg:
@@ -605,21 +662,3 @@ def update_my_graph(val_x, val_cate, val_agg, filter_values):
     """
 
     return build_city_graph(filter_values, val_x, val_cate, val_agg)
-
-
-@sales_app.callback(Output('graph_out_dy', 'figure'), Input('button-1', 'n_clicks'))
-def loading_ceshi1(n_clicks1):
-    time.sleep(1)
-    return n_clicks1
-
-
-@sales_app.callback(Output('graph_out_wd', 'figure'), Input('button-2', 'n_clicks'))
-def loading_ceshi2(n_clicks2):
-    time.sleep(1)
-    return n_clicks2
-
-
-@sales_app.callback(Output('graph_top', 'figure'), Input('button-3', 'n_clicks'))
-def loading_ceshi3(n_clicks3):
-    time.sleep(1)
-    return n_clicks3

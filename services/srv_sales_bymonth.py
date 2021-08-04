@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import Dict
 
@@ -26,7 +27,12 @@ def global_store(filter_values: dict) -> DataFrame:
                                 'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
     @:return:
     """
-    return find_sales_list(filter_values)
+    time_start = time.time()
+    df = find_sales_list(filter_values)
+
+    time_end = time.time()
+    print('global_store: Running time:{} seconds'.format(time_end - time_start))
+    return df
 
 
 ###########################
@@ -37,32 +43,25 @@ def global_store(filter_values: dict) -> DataFrame:
 trans_num = 100000
 
 
-def calculate_cards(filter_values: dict) -> Dict:
+def calculate_card_data(df: DataFrame, end_month: str) -> Dict:
     """
     计算头部的4个card 的数据
-    :param filter_values :
-                    { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
-                      'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
-                      'city_level': 城市级别: List类型,
-                      'channel': 渠道: List类型,
-                      'store_age': 店龄: List类型 ,
-                      'store_area': 门店面积: List类型,
-                      'store_star': 门店星级: List类型}
+    :param df: 处理数据
+    :param end_month: 筛选结束月份
     :return dict :
             {"total_sale": 总销售量: 浮点类型，单位百万(M),
             "last_month_total": 上月销售量：浮点类型，单位百万(M),
             "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
             "hb_percentage": 环比百分比（上月的数据比上上月的数据）：字符串类型，单位%,
             "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
-            "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
-            "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
+            "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%}
     """
-    df = global_store(filter_values)
+    time_start = time.time()
 
     # 总营业额
     total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
     # 当前月份(以时间筛选的截止日期为准)的上月数据
-    ve_date = datetime.strptime(filter_values["end_month"], "%Y-%m")
+    ve_date = datetime.strptime(end_month, "%Y-%m")
     s_date = date_util.get_last_month_first_day(ve_date).date()
     e_date = date_util.get_last_month_last_day(ve_date).date()
     last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)] if len(df) > 0 else []
@@ -102,24 +101,47 @@ def calculate_cards(filter_values: dict) -> Dict:
     m_growth_rate = "%.2f%%" % round(
         ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
 
-    # 近12月销售趋势
-    group_df = df
-    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum() if len(group_df) > 0 else []
-    group_sales = pd.DataFrame(month_groups)
+    time_end = time.time()
+    print('calculate_cards: Running time:{} seconds'.format(time_end - time_start))
     # 封装结果数据
     return {"total_sale": total_sale, "last_month_total": last_month_total,
             "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
-            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate,
-            "group_sales": group_sales}
+            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate}
+
+
+def calculate_card_graph(df: DataFrame) -> DataFrame:
+    """
+    计算卡片图-近12月趋势图数据
+    :param df:
+    :return: dataframe
+    """
+
+    time_start = time.time()
+    group_df = df
+    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum() if len(group_df) > 0 else []
+    group_sales = pd.DataFrame(month_groups)
+
+    time_end = time.time()
+    print('calculate_card_graph: Running time:{} seconds'.format(time_end - time_start))
+    return group_sales
 
 
 # 展示图数据
+@cache.memoize()
 def calculate_graph_data(filter_values: dict) -> DataFrame:
     """
     计算销售图的数据
     :param filter_values: 过滤值
+            { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
+              'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
+              'city_level': 城市级别: List类型,
+              'channel': 渠道: List类型,
+              'store_age': 店龄: List类型 ,
+              'store_area': 门店面积: List类型,
+              'store_star': 门店星级: List类型}
     :return:
     """
+    time_start = time.time()
     df = global_store(filter_values)
     if len(df) > 0:
         # 转换0值
@@ -138,7 +160,10 @@ def calculate_graph_data(filter_values: dict) -> DataFrame:
         df = df[df['businessname'].isin(['到店销售', '开放平台-扫码点餐'])]
         df['month_str'] = df['month'].map({1: '1月', 2: '2月', 3: '3月', 4: '4月', 5: '5月'})
         df['month'] = df['month'].astype('str')
+        time_end = time.time()
+        print('calculate_graph_data: Running time:{} seconds'.format(time_end - time_start))
         return df
+
     return []
 
 
@@ -150,6 +175,7 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
     :param order_value: 排序
     :return: 返回一组Dataframe类型的数据
     """
+    time_start = time.time()
     # 取数据
     df = global_store(filter_values)
     if len(df) > 0:
@@ -189,6 +215,8 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
         # 合并数据
         fig_df = c_df.append(l_df)
 
+        time_end = time.time()
+        print('calculate_top_graph: Running time:{} seconds'.format(time_end - time_start))
         return fig_df
     return []
 
@@ -198,6 +226,7 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
 ###########################
 
 def find_sales_list(filter_values: dict) -> DataFrame:
+    time_start = time.time()
     query_sql = """
                    SELECT  {}
                    FROM chunbaiwei.fact_storesale_weather
@@ -221,8 +250,6 @@ def find_sales_list(filter_values: dict) -> DataFrame:
         # if values["store_age"]:
         #     query_sql += """
         #     """
-    # 从数据库查询
-    # data = db_util.query_list(query_sql, default_dbname)
 
     query_cols = """areauid3, areaname3, areauid4, areaname4, storeuid, storename, weeks, rdate :: date, province, 
                    province_name, city, city_name, county, county_name, businessname, vctype, areasize, 
@@ -231,21 +258,18 @@ def find_sales_list(filter_values: dict) -> DataFrame:
     query_sql = query_sql.format(query_cols)
     df = db_util.read_by_pd(query_sql, default_dbname)
 
-    # result = [{"areauid3": d[0], "areaname3": d[1], "areauid4": d[2], "areaname4": d[3], "storeuid": d[4],
-    #            "storename": d[5], "weeks": d[6], "rdate": datetime.strptime(str(d[7]), '%Y-%m-%d').date(),
-    #            "province": d[8], "province_name": d[9], "city": d[10], "city_name": d[11], "county": d[12],
-    #            "county_name": d[13], "businessname": d[14], "vctype": d[15], "areasize": d[16],
-    #            "billcount": d[17], "dealtotal": d[18], "rebillcount": d[19], "redealtotal": float(d[20]),
-    #            "weather": d[21], "weather_desc": d[22], "temperature": d[23], "wind_direction": d[24],
-    #            "month": d[25], "year": d[26], "city_level": int(d[27]) if d[27] else 0, "month_group": d[28]} for d in
-    #           data]
+    time_end = time.time()
+    print('find_sales_list: Running time:{} seconds'.format(time_end - time_start))
     return df
 
 
 def find_channel_list() -> DataFrame:
+    time_start = time.time()
     query_sql = """
         select distinct businessname as {} from  chunbaiwei.fact_storesale_weather
     """.format("channel")
 
     channels = db_util.read_by_pd(query_sql, default_dbname)
+    time_end = time.time()
+    print('find_channel_list: Running time:{} seconds'.format(time_end - time_start))
     return channels
