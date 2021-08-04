@@ -214,7 +214,7 @@ app = DispatcherMiddleware(flask_server, {
 连接示例参考 utils/db_util:
 
 ```python
-import logging
+        import logging
 
 import psycopg2
 import psycopg2.extensions
@@ -277,14 +277,32 @@ def query_list(sql: str, dbname: str):
     finally:
         conn.close()
 
+
+# 查询数据
+def read_by_pd(sql: str, dbname: str):
+    """
+    查询列表
+    :param sql: 要执行的sql
+    :param dbname:  默认的schema
+    :return:
+    """
+    conn = gp_connect(dbname=dbname)
+    try:
+        df = pd.read_sql(sql, conn)
+        return df
+    except Exception as e:
+        logging.error("查询异常：{}, sql {}", str(e), sql)
+        raise e
+    finally:
+        conn.close()
 ```
 
 根据上面的封装工具，测试一个查询（目前暂时只封装了查询方法）：
-
+> 示例1：
 ```python
 from utils import db_util
 
-# 查询渠道列表
+# 直接从数据库查询渠道列表
 channel_list = db_util.query_list(""" 
                 select distinct businessname 
                 from  chunbaiwei.fact_storesale_weather
@@ -306,6 +324,22 @@ print(channels)
 ```
 
 > 执行结果: [{'channel': '开放平台-扫码点餐'}, {'channel': '到店销售'}, {'channel': '开放平台-淳乐送'}, {'channel': '堂食销售'}, {'channel': '网络销售'}]
+
+> 示例2： 使用pandas直接读取， 该方法返回的是一个Dataframe
+
+```python
+from utils import db_util
+
+# 直接用pandas 从数据库查询渠道列表
+query_sql = """
+    select distinct businessname as {} from  chunbaiwei.fact_storesale_weather
+""".format("channel")
+
+channels = db_util.read_by_pd(query_sql, "data_analysis")
+
+print(channels)
+
+```
 
 ## 缓存使用
 
@@ -401,159 +435,172 @@ print(channels)
 
 
 - 第三步： 将触发取数的值缓存到dcc.Store, 并以此触发缓存方法和其他的回调计算
-  > 代码位置： apps/app_sales_bymonth.py
-  > 在此方法中，Input参数会动态实时的调用此回调方法，State表示只取值，不触发回调。
-  > 此函数表示点击提交按钮后，根据所有筛选值作为dcc.Store的值，会触发其他回调方法的计算
-    ```python
-    @sales_app.callback(
-        Output('signal', 'data'),
-        [
-            Input("f_submit", "n_clicks"),
-            # 日期筛选
-            State('f_begin_month', 'value'),
-            State('f_end_month', 'value'),
-            # 城市筛选
-            State('f_cities', 'value'),
-            # 渠道筛选
-            State('f_channels', 'value'),
-            # 店龄筛选
-            State('f_store_age', 'value'),
-            # 门店面积筛选
-            State('f_store_area', 'value'),
-            # 门店星级筛选
-            State('f_store_star', 'value'),
-        ]
-    )
-    def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_age, store_area, store_star):
-        """
-        点击提交按钮后，保存筛选值到signal
-        :param n_clicks 提交按钮点击次数
-        :param begin_month 结束日期
-        :param end_month 开始日期
-        :param city_level  城市级别
-        :param channel 渠道
-        :param store_age 店龄
-        :param store_area 店面积
-        :param store_star 门店星级
-        :return 返回筛选的所有选中值（用于取缓存）
-    
-        """
-        filter_values = {'begin_month': begin_month, 'end_month': end_month,
-                         'city_level': city_level, 'channel': channel,
-                         'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
-        # compute value and send a signal when done
-        srv_sales_bymonth.global_store(filter_values)
-        return filter_values
-    ```
+    * 代码位置： apps/app_sales_bymonth.py
+    * 在此方法中，Input参数会动态实时的调用此回调方法，State表示只取值，不触发回调。
+    * 此函数表示点击提交按钮后，根据所有筛选值作为dcc.Store的值，会触发其他回调方法的计算
+      ```python
+          @sales_app.callback(
+              Output('signal', 'data'),
+              [
+                  Input("f_submit", "n_clicks"),
+                  # 日期筛选
+                  State('f_begin_month', 'value'),
+                  State('f_end_month', 'value'),
+                  # 城市筛选
+                  State('f_cities', 'value'),
+                  # 渠道筛选
+                  State('f_channels', 'value'),
+                  # 店龄筛选
+                  State('f_store_age', 'value'),
+                  # 门店面积筛选
+                  State('f_store_area', 'value'),
+                  # 门店星级筛选
+                  State('f_store_star', 'value'),
+              ]
+          )
+          def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_age, store_area, store_star):
+              """
+              点击提交按钮后，保存筛选值到signal
+              :param n_clicks 提交按钮点击次数
+              :param begin_month 结束日期
+              :param end_month 开始日期
+              :param city_level  城市级别
+              :param channel 渠道
+              :param store_age 店龄
+              :param store_area 店面积
+              :param store_star 门店星级
+              :return 返回筛选的所有选中值（用于取缓存）
+          
+              """
+              filter_values = {'begin_month': begin_month, 'end_month': end_month,
+                               'city_level': city_level, 'channel': channel,
+                               'store_age': store_age, 'store_area': store_area, 'store_star': store_star}
+              # compute value and send a signal when done
+              srv_sales_bymonth.global_store(filter_values)
+              return filter_values
+      ```
 
 - 第四步： 添加全局缓存方法
-  > 具体内容位置在 services/srv_sales_bymonth.py.
-  > 根据dcc.Store的值, 从数据库或者从缓存中取得计算数据
-    ```python
-    from flask_app import cache
-    from utils import db_util
-    from typing import List, Dict
-    @cache.memoize()
-    def global_store(filter_values: dict) -> List[Dict]:
-        """
-        全局缓存
-        @:param filter_values: 筛选值 json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
-                                    'city_level':city_level, 'channel':channel,
-                                    'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
-        @:return:
-        """
-        d = cache.get(str(filter_values))
-        if d:
-            return d
-        else:
-            # 取数据库的值
-            result = find_sales_list(filter_values)
-            if result:
-                cache.set(str(filter_values), result)
-            return result
-    
-    ```
+    * 具体内容位置在 services/srv_sales_bymonth.py.
+    * 根据dcc.Store的值, 从数据库或者从缓存中取得计算数据
+      ```python
+      
+          @cache.memoize()
+          def global_store(filter_values: dict) -> DataFrame:
+              """
+              全局缓存
+              @:param filter_values: 筛选值 json类型参数 { 'begin_month': begin_month, 'end_month': end_month,
+                                          'city_level':city_level, 'channel':channel,
+                                          'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
+              @:return:
+              """
+              return find_sales_list(filter_values)
+      
+      ```
+        * cache 主要方法
+      ```text
+      cache.cached：装饰器，装饰无参数函数，使得该函数结果可以缓存
+      参数:
+      timeout:超时时间
+      key_prefix：设置该函数的标志
+      unless：设置是否启用缓存，如果为True，不启用缓存
+      forced_update：设置缓存是否实时更新，如果为True，无论是否过期都将更新缓存
+      query_string：为True时，缓存键是先将参数排序然后哈希的结果
+      
+      cache.memoize：装饰器，装饰有参数函数，使得该函数结果可以缓存
+      make_name：设置函数的标志，如果没有就使用装饰的函数
+      # 其他参数同cached
+      
+      cache.delete_memoized：删除缓存
+      参数：
+      fname：缓存函数的名字或引用
+      *args：函数参数
+      
+      cache.clear() # 清除缓存所有的缓存，这个操作需要慎重
+      cache.cache # 获取缓存对象
+      
+      ```
 
 ## 回调函数取数
 
 根据上面的dcc.Store的值作为输入参数，取出缓存的计算数据，然后输出card_data的内容。
 > 具体内容位置： apps/app_sales_bymonth.py
 
-```python
-
-def build_layout_title_cards(filter_values: dict):
-    """
-    头部卡片
-    :param filter_values: 筛选值
-    :return 卡片内容
-    """
-    # 封装结果数据
-    datas = srv_sales_bymonth.calculate_cards(filter_values)
-
-    total_sale = datas["total_sale"] if datas else '0'
-    begin_month = filter_values["begin_month"] if filter_values else ''
-    end_month = filter_values["end_month"] if filter_values else ''
-    last_month_total = datas["last_month_total"] if datas else '0'
-
-    tb_percentage = datas["tb_percentage"] if datas else '0'
-    hb_percentage = datas["hb_percentage"] if datas else '0'
-    c_month_total_sale = datas["c_month_total_sale"] if datas else '0'
-    m_growth_rate = datas["m_growth_rate"] if datas else '0'
-    group_sales = datas["group_sales"] if datas else []
-    fig = build_group_sales_fig(group_sales) if len(group_sales) > 0 else {}
-
-    return [
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6("总销售额"),
-            html.H4(['￥', total_sale, 'M'], id='title_1', style={"color": "darkred"}),
-            html.Label(begin_month + " - " + end_month),
-        ]), className='title-card'), className='title-col mr-2'),
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6("上月销售额"),
-            html.H4(['￥', last_month_total, 'M'], id='title_2', style={"color": "darkred"}),
-            html.Label("同比:" + tb_percentage + "  环比：" + hb_percentage),
-        ]), className='title-card'), className='title-col mr-2'),
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6(["本月销售额", "(", end_month, ")"]),
-            html.H4(['￥', c_month_total_sale, 'M'], id='title_3', style={"color": "darkred"}),
-            html.Label("增长率：" + m_growth_rate),
-        ]), className='title-card'), className='title-col mr-2'),
-        dbc.Col(dbc.Card(dbc.CardBody([
-            html.H6(["近12月销售趋势", "(", begin_month + " - " + end_month, ")"]),
-            dcc.Graph(id='title_4', figure=fig, style={"height": "60px"}),
-        ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
-    ]
-
-
-# 顶部 12月趋势图
-def build_group_sales_fig(df: DataFrame):
-    """
-    12个月销售趋势图
-    :param df: 包含月份和销售额的dataframe 数据
-    :return 返回图形
-    """
-    fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=60)
-    fig.update_xaxes(visible=False, fixedrange=True)
-    fig.update_yaxes(visible=False, fixedrange=True)
-    fig.update_layout(
-        showlegend=False,
-        plot_bgcolor="white",
-        margin=dict(t=10, l=10, b=10, r=10)
-    )
-    return fig
+    ```python
+    
+        def build_layout_title_cards(filter_values: dict):
+            """
+            头部卡片
+            :param filter_values: 筛选值
+            :return 卡片内容
+            """
+            # 封装结果数据
+            datas = srv_sales_bymonth.calculate_cards(filter_values)
+        
+            total_sale = datas["total_sale"] if datas else '0'
+            begin_month = filter_values["begin_month"] if filter_values else ''
+            end_month = filter_values["end_month"] if filter_values else ''
+            last_month_total = datas["last_month_total"] if datas else '0'
+        
+            tb_percentage = datas["tb_percentage"] if datas else '0'
+            hb_percentage = datas["hb_percentage"] if datas else '0'
+            c_month_total_sale = datas["c_month_total_sale"] if datas else '0'
+            m_growth_rate = datas["m_growth_rate"] if datas else '0'
+            group_sales = datas["group_sales"] if datas else []
+            fig = build_group_sales_fig(group_sales) if len(group_sales) > 0 else {}
+        
+            return [
+                dbc.Col(dbc.Card(dbc.CardBody([
+                    html.H6("总销售额"),
+                    html.H4(['￥', total_sale, 'M'], id='title_1', style={"color": "darkred"}),
+                    html.Label(begin_month + " - " + end_month),
+                ]), className='title-card'), className='title-col mr-2'),
+                dbc.Col(dbc.Card(dbc.CardBody([
+                    html.H6("上月销售额"),
+                    html.H4(['￥', last_month_total, 'M'], id='title_2', style={"color": "darkred"}),
+                    html.Label("同比:" + tb_percentage + "  环比：" + hb_percentage),
+                ]), className='title-card'), className='title-col mr-2'),
+                dbc.Col(dbc.Card(dbc.CardBody([
+                    html.H6(["本月销售额", "(", end_month, ")"]),
+                    html.H4(['￥', c_month_total_sale, 'M'], id='title_3', style={"color": "darkred"}),
+                    html.Label("增长率：" + m_growth_rate),
+                ]), className='title-card'), className='title-col mr-2'),
+                dbc.Col(dbc.Card(dbc.CardBody([
+                    html.H6(["近12月销售趋势", "(", begin_month + " - " + end_month, ")"]),
+                    dcc.Graph(id='title_4', figure=fig, style={"height": "60px"}),
+                ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
+            ]
 
 
-@sales_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
-def update_card_data(filter_values):
-    """
-    更新card数值
-    :param filter_values: 筛选值
-    :return  返回顶部的card
-    """
-    return build_layout_title_cards(filter_values)
+        # 顶部 12月趋势图
+        def build_group_sales_fig(df: DataFrame):
+            """
+            12个月销售趋势图
+            :param df: 包含月份和销售额的dataframe 数据
+            :return 返回图形
+            """
+            fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=60)
+            fig.update_xaxes(visible=False, fixedrange=True)
+            fig.update_yaxes(visible=False, fixedrange=True)
+            fig.update_layout(
+                showlegend=False,
+                plot_bgcolor="white",
+                margin=dict(t=10, l=10, b=10, r=10)
+            )
+            return fig
 
 
-```
+        @sales_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
+        def update_card_data(filter_values):
+            """
+            更新card数值
+            :param filter_values: 筛选值
+            :return  返回顶部的card
+            """
+            return build_layout_title_cards(filter_values)
+    
+    
+    ```
 
 > 回调数据的计算逻辑： services/srv_sales_bymonth.py
 
@@ -579,8 +626,7 @@ def calculate_cards(filter_values: dict) -> Dict:
             "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
             "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
     """
-    card_datas = global_store(filter_values)
-    df = pd.DataFrame(card_datas)
+    df = global_store(filter_values)
 
     # 总营业额
     total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
