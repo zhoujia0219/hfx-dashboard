@@ -26,14 +26,7 @@ def global_store(filter_values: dict) -> List[Dict]:
                                 'store_age':store_age, 'store_area':store_area, 'store_star':store_star}
     @:return:
     """
-    # d = cache.get(str(filter_values))
-    # if d:
-    #     return d
-    # else:
-    result = find_sales_list(filter_values)
-    # if len(result) > 0:
-    #     cache.set(str(filter_values), result)
-    return result
+    return find_sales_list(filter_values)
 
 
 ###########################
