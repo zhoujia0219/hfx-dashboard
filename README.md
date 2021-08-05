@@ -499,25 +499,25 @@ print(channels)
       ```
         * cache 主要方法
       ```text
-      cache.cached：装饰器，装饰无参数函数，使得该函数结果可以缓存
-      参数:
-      timeout:超时时间
-      key_prefix：设置该函数的标志
-      unless：设置是否启用缓存，如果为True，不启用缓存
-      forced_update：设置缓存是否实时更新，如果为True，无论是否过期都将更新缓存
-      query_string：为True时，缓存键是先将参数排序然后哈希的结果
-      
-      cache.memoize：装饰器，装饰有参数函数，使得该函数结果可以缓存
-      make_name：设置函数的标志，如果没有就使用装饰的函数
-      # 其他参数同cached
-      
-      cache.delete_memoized：删除缓存
-      参数：
-      fname：缓存函数的名字或引用
-      *args：函数参数
-      
-      cache.clear() # 清除缓存所有的缓存，这个操作需要慎重
-      cache.cache # 获取缓存对象
+          cache.cached：装饰器，装饰无参数函数，使得该函数结果可以缓存
+          参数:
+          timeout:超时时间
+          key_prefix：设置该函数的标志
+          unless：设置是否启用缓存，如果为True，不启用缓存
+          forced_update：设置缓存是否实时更新，如果为True，无论是否过期都将更新缓存
+          query_string：为True时，缓存键是先将参数排序然后哈希的结果
+          
+          cache.memoize：装饰器，装饰有参数函数，使得该函数结果可以缓存
+          make_name：设置函数的标志，如果没有就使用装饰的函数
+          # 其他参数同cached
+          
+          cache.delete_memoized：删除缓存
+          参数：
+          fname：缓存函数的名字或引用
+          *args：函数参数
+          
+          cache.clear() # 清除缓存所有的缓存，这个操作需要慎重
+          cache.cache # 获取缓存对象
       
       ```
 
@@ -526,112 +526,86 @@ print(channels)
 根据上面的dcc.Store的值作为输入参数，取出缓存的计算数据，然后输出card_data的内容。
 > 具体内容位置： apps/app_sales_bymonth.py
 
-    ```python
-    
-        def build_layout_title_cards(filter_values: dict):
-            """
-            头部卡片
-            :param filter_values: 筛选值
-            :return 卡片内容
-            """
-            # 封装结果数据
-            datas = srv_sales_bymonth.calculate_cards(filter_values)
-        
-            total_sale = datas["total_sale"] if datas else '0'
-            begin_month = filter_values["begin_month"] if filter_values else ''
-            end_month = filter_values["end_month"] if filter_values else ''
-            last_month_total = datas["last_month_total"] if datas else '0'
-        
-            tb_percentage = datas["tb_percentage"] if datas else '0'
-            hb_percentage = datas["hb_percentage"] if datas else '0'
-            c_month_total_sale = datas["c_month_total_sale"] if datas else '0'
-            m_growth_rate = datas["m_growth_rate"] if datas else '0'
-            group_sales = datas["group_sales"] if datas else []
-            fig = build_group_sales_fig(group_sales) if len(group_sales) > 0 else {}
-        
-            return [
-                dbc.Col(dbc.Card(dbc.CardBody([
-                    html.H6("总销售额"),
-                    html.H4(['￥', total_sale, 'M'], id='title_1', style={"color": "darkred"}),
-                    html.Label(begin_month + " - " + end_month),
-                ]), className='title-card'), className='title-col mr-2'),
-                dbc.Col(dbc.Card(dbc.CardBody([
-                    html.H6("上月销售额"),
-                    html.H4(['￥', last_month_total, 'M'], id='title_2', style={"color": "darkred"}),
-                    html.Label("同比:" + tb_percentage + "  环比：" + hb_percentage),
-                ]), className='title-card'), className='title-col mr-2'),
-                dbc.Col(dbc.Card(dbc.CardBody([
-                    html.H6(["本月销售额", "(", end_month, ")"]),
-                    html.H4(['￥', c_month_total_sale, 'M'], id='title_3', style={"color": "darkred"}),
-                    html.Label("增长率：" + m_growth_rate),
-                ]), className='title-card'), className='title-col mr-2'),
-                dbc.Col(dbc.Card(dbc.CardBody([
-                    html.H6(["近12月销售趋势", "(", begin_month + " - " + end_month, ")"]),
-                    dcc.Graph(id='title_4', figure=fig, style={"height": "60px"}),
-                ]), className='title-card'), className='title-col col-5', style={'paddingRight': 15}),
-            ]
+```python
+
+# 顶部 12月趋势图
+def build_group_sales_fig(df: DataFrame):
+    """
+    12个月销售趋势图
+    :param df: 包含月份和销售额的dataframe 数据
+    :return 返回图形
+    """
+    fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=60)
+    fig.update_xaxes(visible=False, fixedrange=True)
+    fig.update_yaxes(visible=False, fixedrange=True)
+    fig.update_layout(
+        showlegend=False,
+        plot_bgcolor="white",
+        margin=dict(t=10, l=10, b=10, r=10)
+    )
+    return fig
 
 
-        # 顶部 12月趋势图
-        def build_group_sales_fig(df: DataFrame):
-            """
-            12个月销售趋势图
-            :param df: 包含月份和销售额的dataframe 数据
-            :return 返回图形
-            """
-            fig = px.bar(df, x="month_group", y="dealtotal", width=200, height=60)
-            fig.update_xaxes(visible=False, fixedrange=True)
-            fig.update_yaxes(visible=False, fixedrange=True)
-            fig.update_layout(
-                showlegend=False,
-                plot_bgcolor="white",
-                margin=dict(t=10, l=10, b=10, r=10)
-            )
-            return fig
+@sales_app.callback(
+    [
+        Output('total_sales', 'children'),
+        Output('total_sales_start_month', 'children'),
+        Output('total_sales_stop_month', 'children'),
+        Output('last_month_sales', 'children'),
+        Output('last_month_tb', 'children'),
+        Output('last_month_hb', 'children'),
+        Output('current_month_sign', 'children'),
+        Output('current_month_sales', 'children'),
+        Output('growth_rate', 'children'),
+        Output('group_start_month', 'children'),
+        Output('group_end_month', 'children'),
+        Output('graph_month_group', 'figure'),
+    ],
+    [Input('signal', 'data')])
+def update_card_group_month_graph(filter_values):
+    """
+    更新 12个月趋势图卡片
+    :param filter_values:
+    :return:
+    """
+    # 获取基础数据
+    df = srv_sales_bymonth.global_store(filter_values)
+    begin_month = filter_values["begin_month"]
+    end_month = filter_values["end_month"]
+    # 计算卡片数据
+    card_df = srv_sales_bymonth.calculate_card_data(df, end_month)
+    graph_df = srv_sales_bymonth.calculate_card_graph(df)
+    return [[card_df["total_sale"]], [begin_month], [end_month],
+            [card_df["last_month_total"]], [card_df["tb_percentage"]], [card_df["hb_percentage"]],
+            [end_month], [card_df["c_month_total_sale"]], [card_df["m_growth_rate"]],
+            [begin_month], [end_month], build_group_sales_fig(graph_df)]
 
 
-        @sales_app.callback(Output('card_data', 'children'), Input('signal', 'data'))
-        def update_card_data(filter_values):
-            """
-            更新card数值
-            :param filter_values: 筛选值
-            :return  返回顶部的card
-            """
-            return build_layout_title_cards(filter_values)
-    
-    
-    ```
+
+```
 
 > 回调数据的计算逻辑： services/srv_sales_bymonth.py
 
 ```python
-
-def calculate_cards(filter_values: dict) -> Dict:
+    def calculate_card_data(df: DataFrame, end_month: str) -> Dict:
     """
     计算头部的4个card 的数据
-    :param filter_values :
-                    { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
-                      'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
-                      'city_level': 城市级别: List类型,
-                      'channel': 渠道: List类型,
-                      'store_age': 店龄: List类型 ,
-                      'store_area': 门店面积: List类型,
-                      'store_star': 门店星级: List类型}
+    :param df: 处理数据
+    :param end_month: 筛选结束月份
     :return dict :
             {"total_sale": 总销售量: 浮点类型，单位百万(M),
             "last_month_total": 上月销售量：浮点类型，单位百万(M),
             "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
             "hb_percentage": 环比百分比（上月的数据比上上月的数据）：字符串类型，单位%,
             "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
-            "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
-            "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
+            "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%}
     """
-    df = global_store(filter_values)
+    time_start = time.time()
 
     # 总营业额
     total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
     # 当前月份(以时间筛选的截止日期为准)的上月数据
-    ve_date = datetime.strptime(filter_values["end_month"], "%Y-%m")
+    ve_date = datetime.strptime(end_month, "%Y-%m")
     s_date = date_util.get_last_month_first_day(ve_date).date()
     e_date = date_util.get_last_month_last_day(ve_date).date()
     last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)] if len(df) > 0 else []
@@ -671,14 +645,29 @@ def calculate_cards(filter_values: dict) -> Dict:
     m_growth_rate = "%.2f%%" % round(
         ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
 
-    # 近12月销售趋势
-    group_df = df
-    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum() if len(group_df) > 0 else []
-    group_sales = pd.DataFrame(month_groups)
+    time_end = time.time()
+    print('calculate_card_data: Running time:{} seconds'.format(time_end - time_start))
     # 封装结果数据
     return {"total_sale": total_sale, "last_month_total": last_month_total,
             "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
-            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate,
-            "group_sales": group_sales}
+            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate}
+
+
+def calculate_card_graph(df: DataFrame) -> DataFrame:
+    """
+    计算卡片图-近12月趋势图数据
+    :param df:
+    :return: dataframe
+    """
+
+    time_start = time.time()
+    group_df = df
+    month_groups = group_df.groupby(by=["month_group"], as_index=False)["dealtotal"].sum() if len(group_df) > 0 else []
+    group_sales = pd.DataFrame(month_groups)
+
+    time_end = time.time()
+    print('calculate_card_graph: Running time:{} seconds'.format(time_end - time_start))
+    return group_sales
+
 
 ```
