@@ -43,6 +43,7 @@ def global_store(filter_values: dict) -> DataFrame:
 trans_num = 100000
 
 
+@cache.memoize()
 def calculate_card_data(df: DataFrame, end_month: str) -> Dict:
     """
     计算头部的4个card 的数据
@@ -109,6 +110,7 @@ def calculate_card_data(df: DataFrame, end_month: str) -> Dict:
             "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate}
 
 
+@cache.memoize()
 def calculate_card_graph(df: DataFrame) -> DataFrame:
     """
     计算卡片图-近12月趋势图数据
@@ -141,8 +143,9 @@ def calculate_graph_data(filter_values: dict) -> DataFrame:
               'store_star': 门店星级: List类型}
     :return:
     """
+    # df = global_store(filter_values)
     time_start = time.time()
-    df = global_store(filter_values)
+    df = find_sales_list(filter_values)
     if len(df) > 0:
         # 转换0值
         df.replace(0, np.nan, inplace=True)
@@ -167,6 +170,7 @@ def calculate_graph_data(filter_values: dict) -> DataFrame:
     return []
 
 
+@cache.memoize()
 def calculate_top_graph(filter_values: dict, month_value: str, order_value: int) -> DataFrame:
     """
     计算排名图数据
@@ -177,7 +181,7 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
     """
     time_start = time.time()
     # 取数据
-    df = global_store(filter_values)
+    df = find_sales_list(filter_values)
     if len(df) > 0:
         group_df = df
         # 当月数据
