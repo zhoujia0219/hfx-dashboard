@@ -65,11 +65,7 @@ default_area_values = [r["value"] for r in store_areas]
 # 门店星级
 store_stars = srv_comm_dim.get_dim_store_star()
 default_star_values = [r["value"] for r in store_stars]
-# 默认筛选值
-default_filter_values = {'begin_month': start_month, 'end_month': stop_month,
-                         'city_level': default_city_values, 'channel': default_channel_values,
-                         'store_age': default_age_values, 'store_area': default_area_values,
-                         'store_star': default_star_values}
+
 
 ###############
 # 图形维度初始值
@@ -376,7 +372,7 @@ c_fig_01 = dbc.Card(dbc.CardBody([
                            html.Span('2021-07-23 12:30:00', id="sales_update_time")
                            ], className='media-body'),
         html.Div(
-            dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='sales_update_button', n_clicks=0)),
+            dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='btn_sales_update', n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -419,7 +415,7 @@ c_fig_02 = dbc.Card(dbc.CardBody([
     html.Div([
         html.Div('最近更新: 2021-07-23 12:30:00', className='media-body'),
         html.Div(
-            dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='city_update_button', n_clicks=0)),
+            dbc.Button('立即刷新', color='secondary', className='mr-1', size='sm', id='btn_city_update', n_clicks=0)),
     ], className='media flex-wrap align-items-center'),
 ]), style={"width": "100%"})
 
@@ -429,10 +425,10 @@ c_fig_03 = dbc.Card(dbc.CardBody([
     html.Div([
         html.H5('销售额-战区排名', className='media-body'),
         html.Div([
-            dcc.Dropdown(id='top_choices_order', options=order_types, value=2, searchable=False,
+            dcc.Dropdown(id='choices_top_order', options=order_types, value=2, searchable=False,
                          clearable=False,
                          style={'width': 120}),
-            dcc.Dropdown(id='top_choices_month', options=[{"label": x, "value": x} for x in date_range],
+            dcc.Dropdown(id='choices_top_month', options=[{"label": x, "value": x} for x in date_range],
                          value=stop_month, searchable=False, clearable=False,
                          style={'width': 100}),
         ], className='media-right block-inline')
@@ -563,8 +559,8 @@ def update_card_group_month_graph(filter_values):
 @sales_app.callback(
     Output('graph_top', 'figure'),
     [
-        Input('top_choices_order', 'value'),
-        Input('top_choices_month', 'value'),
+        Input('choices_top_order', 'value'),
+        Input('choices_top_month', 'value'),
         Input('signal', 'data'),
     ])
 def update_top_graph(order_value, month_value, filter_values):
@@ -579,10 +575,10 @@ def update_top_graph(order_value, month_value, filter_values):
 
 
 @sales_app.callback(
-    Output('top_choices_month', 'value'),
+    Output('choices_top_month', 'value'),
     Input('f_end_month', 'value'),
 )
-def update_top_choices_month_value(month_value):
+def update_choices_top_month_value(month_value):
     """
     更新排名月份选项值 -- 用于页面初始化时，默认展示排名月份的展示
     :param month_value : 过滤结束月份时间
@@ -595,7 +591,7 @@ def update_top_choices_month_value(month_value):
 @sales_app.callback(
     Output('graph_out_qs', 'figure'),
     [
-        Input('sales_update_button', 'n_clicks'),
+        Input('btn_sales_update', 'n_clicks'),
         Input('cate_choice', 'value'),
         Input('agg_choice', 'value'),
         Input('graph_choice', 'value'),
@@ -619,7 +615,7 @@ def update_sales_graph(n_clicks, val_cate, val_agg, val_graph, filter_values):
 @sales_app.callback(
     Output('graph_out_wd', 'figure'),
     [
-        Input('city_update_button', 'n_clicks'),
+        Input('btn_city_update', 'n_clicks'),
         Input('x_choice_2', 'value'),
         Input('cate_choice_2', 'value'),
         Input('agg_choice_2', 'value'),
@@ -643,7 +639,7 @@ def update_city_graph(n_clicks, val_x, val_cate, val_agg, filter_values):
 @sales_app.callback(
     Output('graph_out_dy', 'figure'),
     [
-        Input('sales_update_button', 'n_clicks'),
+        Input('btn_sales_update', 'n_clicks'),
         Input('x_choice_1', 'value'),
         Input('cate_choice_1', 'value'),
         Input('agg_choice_1', 'value'),
