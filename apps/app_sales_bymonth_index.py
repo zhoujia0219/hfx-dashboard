@@ -1,6 +1,7 @@
 import dash
 from flask_login import login_required
 
+from apps.base_html_string import base_html_string
 from conf.hfx_dashboard import BOOTSTRAP_THEME
 from conf.router_conts import URL_SALES_BYMONTH
 

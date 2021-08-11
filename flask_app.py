@@ -69,4 +69,5 @@ def create_app(config, selenium=False):
     register_extensions(app)
     register_blueprints(app)
 
+    apply_themes(app)
     return app
