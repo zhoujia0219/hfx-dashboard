@@ -181,48 +181,61 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
     """
     time_start = time.time()
     # 取数据
-    df = find_sales_list(filter_values)
-    if len(df) > 0:
-        group_df = df
-        # 当月数据
-        c_month = datetime.strptime(month_value, "%Y-%m")
-        cs_date = date_util.get_month_first_day(c_month).date()
-        ce_date = date_util.get_month_last_day(c_month).date()
-        current_month_df = group_df[(group_df["rdate"] >= cs_date) &
-                                    (group_df["rdate"] < ce_date)]
+    # df = find_sales_list(filter_values)
+    c_month = datetime.strptime(month_value, "%Y-%m")
+    ce_date = date_util.get_month_last_day(c_month).date()
 
-        # 上月数据
-        ls_date = date_util.get_last_month_first_day(c_month).date()
-        le_date = date_util.get_last_month_last_day(c_month).date()
-        last_month_df = group_df[(group_df["rdate"] >= ls_date) &
-                                 (group_df["rdate"] < le_date)]
-
-        # 本月战区分组聚合
-        c_group_data = current_month_df.groupby(by=["areaname3", "month_group"],
-                                                as_index=False)["dealtotal"].sum()
-        c_df = pd.DataFrame(c_group_data)
-
-        # 上月战区分组聚合
-        l_group_data = last_month_df.groupby(by=["areaname3", "month_group"],
-                                             as_index=False)["dealtotal"].sum()
-        l_df = pd.DataFrame(l_group_data)
-
-        l_df["dealtotal"] = l_df["dealtotal"] * (-1)
-        # 根据战区分组并排序
-        if order_value == 1:
-            c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
-            l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
-        elif order_value == 2:
-            c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
-            l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
-
-        # 合并数据
-        fig_df = c_df.append(l_df)
-
-        time_end = time.time()
-        print('calculate_top_graph: Running time:{} seconds'.format(time_end - time_start))
-        return fig_df
-    return []
+    ls_date = date_util.get_last_month_first_day(c_month).date()
+    filter_values["start_date"] = ls_date
+    filter_values["end_date"] = ce_date
+    filter_values["order_type"] = """order by month_group asc,dealtotal asc""" if order_value == 1 \
+        else """order by month_group asc, dealtotal desc"""
+    df = find_top_list(filter_values)
+    c_month_group = month_value.replace("-", "年") + "月"
+    df.loc[df["month_group"] != c_month_group, "dealtotal"] = df[df["month_group"] != c_month_group]["dealtotal"] * (-1)
+    # if len(df) > 0:
+    #     group_df = df
+    #     # 当月数据
+    #     c_month = datetime.strptime(month_value, "%Y-%m")
+    #     cs_date = date_util.get_month_first_day(c_month).date()
+    #     ce_date = date_util.get_month_last_day(c_month).date()
+    #     current_month_df = group_df[(group_df["rdate"] >= cs_date) &
+    #                                 (group_df["rdate"] < ce_date)]
+    #
+    #     # 上月数据
+    #     ls_date = date_util.get_last_month_first_day(c_month).date()
+    #     le_date = date_util.get_last_month_last_day(c_month).date()
+    #     last_month_df = group_df[(group_df["rdate"] >= ls_date) &
+    #                              (group_df["rdate"] < le_date)]
+    #
+    #     # 本月战区分组聚合
+    #     c_group_data = current_month_df.groupby(by=["areaname3", "month_group"],
+    #                                             as_index=False)["dealtotal"].sum()
+    #     c_df = pd.DataFrame(c_group_data)
+    #
+    #     # 上月战区分组聚合
+    #     l_group_data = last_month_df.groupby(by=["areaname3", "month_group"],
+    #                                          as_index=False)["dealtotal"].sum()
+    #     l_df = pd.DataFrame(l_group_data)
+    #
+    #     l_df["dealtotal"] = l_df["dealtotal"] * (-1)
+    #     # 根据战区分组并排序
+    #     if order_value == 1:
+    #         c_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+    #         l_df.sort_values(by="dealtotal", ascending=True, inplace=False)
+    #     elif order_value == 2:
+    #         c_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+    #         l_df.sort_values(by="dealtotal", ascending=False, inplace=False)
+    #
+    #     # 合并数据
+    #     fig_df = c_df.append(l_df)
+    #
+    #     time_end = time.time()
+    #     print('calculate_top_graph: Running time:{} seconds'.format(time_end - time_start))
+    #     return fig_df
+    time_end = time.time()
+    print('calculate_top_graph: Running time:{} seconds'.format(time_end - time_start))
+    return df
 
 
 ###########################
@@ -237,24 +250,7 @@ def find_sales_list(filter_values: dict) -> DataFrame:
                    WHERE areauid3 is not null  and areauid4 is not null and province is not null and city is not null 
                    and county is not null
            """
-    if filter_values:
-        if filter_values["begin_month"] and filter_values["end_month"]:
-            query_sql += """  and to_char(rdate,'YYYY-MM') >= '{begin_month}'
-                                     and to_char(rdate,'YYYY-MM') <= '{end_month}'
-                   """.format(begin_month=filter_values["begin_month"], end_month=filter_values["end_month"])
-        if filter_values["city_level"]:
-            # 长度大于1 循环处理
-            citys = tuple(str(c) for c in filter_values["city_level"]) if len(filter_values['city_level']) > 1 \
-                else "(" + str(filter_values['city_level'][0]) + ")"
-            query_sql += """ and city_level in {city_level}""".format(city_level=citys)
-        if filter_values["channel"]:
-            channels = tuple(c for c in filter_values["channel"]) if len(filter_values['channel']) > 1 \
-                else "(" + filter_values['channel'][0] + ")"
-            query_sql += """ and businessname in {channel}""".format(channel=channels)
-        # if values["store_age"]:
-        #     query_sql += """
-        #     """
-
+    query_sql = add_sub_sql(filter_values, query_sql)
     query_cols = """ areaname3,  areaname4,  storename, weeks, rdate :: date,  
                    province_name,  city_name,  county_name, businessname, vctype, areasize, 
                    billcount, dealtotal::float, rebillcount, redealtotal, weather,   
@@ -277,3 +273,53 @@ def find_channel_list() -> DataFrame:
     time_end = time.time()
     print('find_channel_list: Running time:{} seconds'.format(time_end - time_start))
     return channels
+
+
+def find_top_list(filter_values: dict) -> DataFrame:
+    time_start = time.time()
+    query_sql = """
+        SELECT 
+            {}
+        FROM chunbaiwei.fact_storesale_weather
+        where  areaname3 is not null 
+    """
+    query_sql = add_sub_sql(filter_values, query_sql)
+    query_sql += """
+        group by month_group , areaname3  
+    """ + filter_values["order_type"]
+    query_cols = """
+         to_char(rdate,'YYYY年MM月') as month_group , areaname3, sum(dealtotal) as dealtotal
+    """
+    query_sql = query_sql.format(query_cols)
+    top_list = db_util.read_by_pd(query_sql, default_dbname)
+    time_end = time.time()
+    print('find_channel_list: Running time:{} seconds'.format(time_end - time_start))
+    return top_list
+
+
+def add_sub_sql(filter_values: dict, query_sql: str) -> str:
+    if filter_values:
+        if "start_date" in filter_values.keys() and "end_date" in filter_values.keys() and \
+                filter_values["start_date"] and filter_values["end_date"]:
+            query_sql += """  and rdate >= '{start_date}'
+                                     and rdate <= '{end_date}'
+                   """.format(start_date=filter_values["start_date"], end_date=filter_values["end_date"])
+        if "begin_month" in filter_values.keys() and "end_month" in filter_values.keys() and \
+                filter_values["begin_month"] and filter_values["end_month"]:
+            query_sql += """  and to_char(rdate,'YYYY-MM') >= '{begin_month}'
+                                     and to_char(rdate,'YYYY-MM') <= '{end_month}'
+                   """.format(begin_month=filter_values["begin_month"], end_month=filter_values["end_month"])
+        if "city_level" in filter_values.keys() and filter_values["city_level"]:
+            # 长度大于1 循环处理
+            citys = tuple(str(c) for c in filter_values["city_level"]) if len(filter_values['city_level']) > 1 \
+                else "(" + str(filter_values['city_level'][0]) + ")"
+            query_sql += """ and city_level in {city_level}""".format(city_level=citys)
+        if "channel" in filter_values.keys() and filter_values["channel"]:
+            channels = tuple(c for c in filter_values["channel"]) if len(filter_values['channel']) > 1 \
+                else "(" + filter_values['channel'][0] + ")"
+            query_sql += """ and businessname in {channel}""".format(channel=channels)
+
+        # if values["store_age"]:
+        #     query_sql += """
+        #     """
+    return query_sql

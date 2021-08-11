@@ -1,13 +1,6 @@
-from werkzeug.serving import run_simple
+from flask_app import create_app
 
-import routers
+app = create_app({})
 
-# 启动 WSGI Web 服务器
-run_simple(
-    hostname='0.0.0.0',
-    port=8080,
-    application=routers.app,
-    use_reloader=True,
-    use_debugger=True,
-    threaded=True
-)
+if __name__ == "__main__":
+    app.run()

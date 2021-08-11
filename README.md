@@ -113,38 +113,46 @@ hfx-dashboard
 2. 每一个图形的ID命名规则为：[graph_]+[图形作用]
    > 如 排名图： graph_top
 
-3. 每一个图形上的筛选组件命名规则为：[图形作用_]+[choices_]+[筛选作用]
-   > 如 排名图上的月份筛选： top_choices_month
+3. 每一个图形上的筛选组件命名规则为：[choices_]+[图形作用_]+[筛选作用]
+   > 如 排名图上的月份筛选： choices_top_month
 
 4. 回调函数命名规则为： [update_] + [图形作用_] + [graph]
    > 如 更新排名图的回调方法： update_top_graph
+
+### 常用组件命名规则：
+
+| 组件 | 命名规则 | 示例 |示例说明| 
+| --- | --- | --- | --- |
+|dbc.Button| btn_[作用] | btn_filter_submit | 表示该button是用于过滤后提交查询 |
+|dcc.Dropdown|choices_[作用] |choices_top_order| 表示该下拉框是用于选择top组件排序 |
 
 ### 注释规范
 
 1. 每一个函数方法, 必须要有方法说明、方法参数、方法返回值都必须有说明，并且需要规定返回值类型(页面组件元素除外)
 
 > 示例：
+
    ```python
         def calculate_cards(filter_values: dict) -> Dict:
-            """
-            计算头部的4个card 的数据
-            :param filter_values :
-                        { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
-                          'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
-                          'city_level': 城市级别: List类型,
-                          'channel': 渠道: List类型,
-                          'store_age': 店龄: List类型 ,
-                          'store_area': 门店面积: List类型,
-                          'store_star': 门店星级: List类型}
-            :return dict :
-                    {"total_sale": 总销售量: 浮点类型，单位百万(M),
-                    "last_month_total": 上月销售量：浮点类型，单位百万(M),
-                    "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
-                    "hb_percentage": 环比百分比（上月的数据比上上月的数据）：字符串类型，单位%,
-                    "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
-                    "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
-                    "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
-            """
+    """
+    计算头部的4个card 的数据
+    :param filter_values :
+                { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
+                  'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
+                  'city_level': 城市级别: List类型,
+                  'channel': 渠道: List类型,
+                  'store_age': 店龄: List类型 ,
+                  'store_area': 门店面积: List类型,
+                  'store_star': 门店星级: List类型}
+    :return dict :
+            {"total_sale": 总销售量: 浮点类型，单位百万(M),
+            "last_month_total": 上月销售量：浮点类型，单位百万(M),
+            "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
+            "hb_percentage": 环比百分比（上月的数据比上上月的数据）：字符串类型，单位%,
+            "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
+            "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
+            "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
+    """
             # ...省略计算处理逻辑
             # 返回示例
             return {"total_sale": 15.00,
@@ -352,16 +360,13 @@ print(channels)
     from flask_caching import Cache
     
     from conf import hfx_dashboard
-    
     #########################
     # flask
     #########################
     flask_server = flask.Flask(__name__)
-    
     #########################
     # 缓存
     #########################
-    
     cache = Cache()
     CACHE_CONFIG = {
         # try 'filesystem' if you don't want to setup redis
@@ -378,19 +383,15 @@ print(channels)
         import dash_bootstrap_components as dbc
         import dash_html_components as html
         from flask_caching import Cache
-        
         from conf import hfx_dashboard
-        
         #########################
         # dash
         #########################
         app = dash.Dash(__name__, external_stylesheets=hfx_dashboard.BOOTSTRAP_THEME)
         server = app.server
-        
         #########################
         # 缓存
         #########################
-        
         cache = Cache()
         CACHE_CONFIG = {
             # try 'filesystem' if you don't want to setup redis
@@ -412,8 +413,7 @@ print(channels)
         from conf.router_conts import URL_SALES_BYMONTH
         ###############
         # dash
-        ###############
-        
+        ############### 
         sales_app = dash.Dash(__name__,
                               server=flask_server,
                               title="门店月度销售分析",
@@ -424,7 +424,6 @@ print(channels)
         # 侧边栏和内容省略，具体参看apps/app_sales_bymonth.py
         sidebar = html.Div()
         content = html.Div()
-        
         sales_app.layout = html.Div([
             sidebar,
             content,
