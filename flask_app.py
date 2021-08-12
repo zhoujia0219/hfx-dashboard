@@ -59,12 +59,8 @@ def apply_themes(app):
         return url_for(endpoint, **values)
 
 
-def create_app(config, selenium=False):
+def create_app():
     app = Flask(__name__, static_folder='base/static')
-    app.config.from_object(config)
-    if selenium:
-        app.config['LOGIN_DISABLED'] = True
-
     register_sales_app(app)
     register_extensions(app)
     register_blueprints(app)

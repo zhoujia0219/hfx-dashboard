@@ -1,18 +1,18 @@
 import dash_bootstrap_components as dbc
 
+from services.srv_comm_dim import get_dim_city_levels
 
-def filter_city_level(label_name,
-                      options: list,
-                      default_values: list):
+
+def filter_city_level():
     """
       城市级别筛选组件
-      :param label_name ： 组件标签名称
-      :param options: 选项
-      :param default_values: 默认选中值
       :return 组件
     """
+    # 门店级别定义
+    options = get_dim_city_levels()
+    default_values = [r["value"] for r in options]
     return dbc.FormGroup([
-        dbc.Label(label_name, className='sidebar-label'),
+        dbc.Label("门店所属城市", className='sidebar-label'),
         dbc.Checklist(
             id="f_cities",
             options=options,

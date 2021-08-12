@@ -34,23 +34,35 @@ hfx-dashboard
 │  requirements.txt                       # 项目依赖
 │  routers.py                             # 项目路由定义
 │                      
-├─apps                                    # dash应用
-│  │  __init__.py
-│  │  app_sales_bymonth.py                # 门店月度销售分析页面代码
-│  │  
-│  ├─assets                               # 通用样式定义
+├─apps                                     # dash应用
+│  │  __init__.py                        
+│  │  app_sales_bymonth_index.py         
+│  │  base_html_string.py
+│  ├─assets
 │  │      content.css
 │  │      siderbar.css
+│  ├─base                                 # 路由蓝图注册
+│  │  │  __init__.py
+│  │  │  routers.py
+│  │  └─static
+│  │      │  __init__.py
+│  │      └─ assets
+│  ├─callbacks                            # 回调
+│  │      __init__.py
+│  │      app_sales_by_month_callbacks.py
 │  │      
-│  └─components                           # 通用组件定义
+│  ├─components                           # 通用组件
+│  │      __init__.py
+│  │      filter_channels.py
+│  │      filter_city_level.py
+│  │      filter_date_range.py
+│  │      filter_store_age.py
+│  │      filter_store_area.py
+│  │      filter_store_star.py
+│  │      
+│  └─layouts                              # 布局代码
 │          __init__.py
-│          filter_channels.py
-│          filter_city_level.py
-│          filter_date_range.py
-│          filter_store_age.py
-│          filter_store_area.py
-│          filter_store_star.py
-│          
+│          app_sales_bymonth_layout.py       
 ├─conf                                    # 项目配置
 │  │  hfx_dashboard.py                    # 项目核心配置
 │  └─ router_conts.py                     # 路由常量定义
@@ -81,7 +93,10 @@ hfx-dashboard
     - UI视图层 - apps  包含：
         - assets: 通用样式
         - components: 通用组件
-        - *.py: 可视化应用代码（只包含页面布局代码）
+        - callbacks: 回调方法
+        - layouts: 布局页面
+        - base:  路由蓝图
+        - *index.py: dash实例化
     - 数据处理层 - services  包含:
         - srv_comm_dim.py : 通用维度定义
         - srv_sales_bymonth.py ： 对应可视化应用代码的数据处理逻辑（数据库sql查询代码,和计算处理逻辑代码都在这个文件中）
@@ -96,8 +111,8 @@ hfx-dashboard
 1. 每一个dash.Dash()方法创建的server称之为一个app，其命名方法为: 模块+页面名称.
    > 如 sales_bymonth 表示：销售分析模块的月度分析页面
 
-2. 每一个app的文件命名为：[ app_ ] + [app名称].
-   > 如 app_sales_bymonth.py
+2. 每一个app的文件命名为：[ app_ ] + [app名称] + [后缀].
+   > 如 app_sales_bymonth_index.py
 
 3. 每一个app对应于一个 URL 路径（不含基地址)，其 URL 路径为 [模块名] + / + [页面名].
    > 如, 月度销售分析页面的地址为 http://host:port/sales/bymonth
@@ -123,8 +138,9 @@ hfx-dashboard
 
 | 组件 | 命名规则 | 示例 |示例说明| 
 | --- | --- | --- | --- |
-|dbc.Button| btn_[作用] | btn_filter_submit | 表示该button是用于过滤后提交查询 |
-|dcc.Dropdown|choices_[作用] |choices_top_order| 表示该下拉框是用于选择top组件排序 |
+|dbc.Button| btn_[模块/组件]_[作用] | btn_filter_submit | 表示该button是用于过滤后提交查询 |
+|dcc.Dropdown|choices_[模块/组件]_[作用] |choices_top_order| 表示该下拉框是用于选择top组件排序 |
+|dcc.Graph| graph_[作用] | graph_top | 表示该图为排名图|
 
 ### 注释规范
 
@@ -184,8 +200,12 @@ pip install -r requirements.txt
 
 ### 第一步： 在apps下，按照规则添加页面布局文件(通用组件可直接新增在components下或引入现有的)
 
-- 例如 apps/app_sales_bymonth.py
-    - 主要包含代码说明： dash实例化 、初始值变量及数据、默认页面布局构建函数、页面布局代码、回调函数
+- apps/app_sales_bymonth_index.py
+    - 主要包含代码说明： dash实例化
+- apps/layouts/app_sales_bymonth_layout.py
+    - 主要包含代码说明： 所有的页面布局代码
+- apps/callbacks/app_sales_bymonth_callback.py
+    - 主要包含代码说明： 页面对应的回调函数
 
 ### 第二步：在services下，添加对应的数据处理逻辑文件
 
@@ -196,22 +216,16 @@ pip install -r requirements.txt
 
 ### 第四步： 在 routers.py 下 注册访问路由
 
+- base/routers.py
+
 - 示例
 
 ```python
 
-@flask_server.route(URL_SALES_BYMONTH)
-def sales_bymonth():
-    """
-    仅用于测试
-    """
-    return flask.redirect('/sales_bymonth')
+@blueprint.route('/')
+def index():
+    return redirect(URL_SALES_BYMONTH)
 
-
-# 将dash应用绑定到flask
-app = DispatcherMiddleware(flask_server, {
-    '/sales_bymonth': sales_app.server
-})
 
 
 ```
@@ -222,8 +236,7 @@ app = DispatcherMiddleware(flask_server, {
 连接示例参考 utils/db_util:
 
 ```python
-        import logging
-
+import logging
 import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
@@ -356,17 +369,15 @@ print(channels)
 - 第一步：首先需要进行配置
   > 配置内容位置在 flask_app.py 中
     ```python
-    import flask
+    from importlib import import_module
+    from os import path
+    from flask import Flask, url_for
     from flask_caching import Cache
-    
+    from apps.app_sales_bymonth_index import register_sales_app
     from conf import hfx_dashboard
-    #########################
-    # flask
-    #########################
-    flask_server = flask.Flask(__name__)
-    #########################
-    # 缓存
-    #########################
+    # #########################
+    # # 缓存
+    # #########################
     cache = Cache()
     CACHE_CONFIG = {
         # try 'filesystem' if you don't want to setup redis
@@ -374,57 +385,70 @@ print(channels)
         'CACHE_REDIS_URL': hfx_dashboard.REDIS_URL,
         'CACHE_DEFAULT_TIMEOUT': hfx_dashboard.REDIS_CACHE_DEFAULT_TIMEOUT
     }
-    cache.init_app(flask_server, config=CACHE_CONFIG)
+
+    def register_extensions(app):
+        cache.init_app(app, config=CACHE_CONFIG)
     
-    ```
-  > 如果是纯dash应用，则配置如下
-    ```python
-        import dash
-        import dash_bootstrap_components as dbc
-        import dash_html_components as html
-        from flask_caching import Cache
-        from conf import hfx_dashboard
-        #########################
-        # dash
-        #########################
-        app = dash.Dash(__name__, external_stylesheets=hfx_dashboard.BOOTSTRAP_THEME)
-        server = app.server
-        #########################
-        # 缓存
-        #########################
-        cache = Cache()
-        CACHE_CONFIG = {
-            # try 'filesystem' if you don't want to setup redis
-            'CACHE_TYPE': 'redis',
-            'CACHE_REDIS_URL': hfx_dashboard.REDIS_URL,
-            'CACHE_DEFAULT_TIMEOUT': hfx_dashboard.REDIS_CACHE_DEFAULT_TIMEOUT
-        }
-        cache.init_app(server, config=CACHE_CONFIG)
+    
+    def register_blueprints(app):
+        module = import_module('apps.{}.routers'.format("base"))
+        app.register_blueprint(module.blueprint)
+
+
+    def apply_themes(app):
+        """
+        Add support for themes.
+    
+        If DEFAULT_THEME is set then all calls to
+          url_for('static', filename='')
+          will modfify the url to include the theme name
+    
+        The theme parameter can be set directly in url_for as well:
+          ex. url_for('static', filename='', theme='')
+    
+        If the file cannot be found in the /static/<theme>/ location then
+          the url will not be modified and the file is expected to be
+          in the default /static/ location
+        """
+    
+        @app.context_processor
+        def override_url_for():
+            return dict(url_for=_generate_url_for_theme)
+    
+        def _generate_url_for_theme(endpoint, **values):
+            if endpoint.endswith('static'):
+                themename = values.get('theme', None) or \
+                            app.config.get('DEFAULT_THEME', None)
+                if themename:
+                    theme_file = "{}/{}".format(themename, values.get('filename', ''))
+                    if path.isfile(path.join(app.static_folder, theme_file)):
+                        values['filename'] = theme_file
+            return url_for(endpoint, **values)
+
+    def create_app():
+        app = Flask(__name__, static_folder='base/static')
+        register_sales_app(app)
+        register_extensions(app)
+        register_blueprints(app)
+    
+        apply_themes(app)
+        return app
     ```
 
+
 - 第二步：使用dcc.Store添加触发回调的信号
-  > 内容位置在 apps/app_sales_bymonth.py
+  > 内容位置在 apps/layouts/app_sales_bymonth_layout.py
     ```python
         import dash
         import dash_core_components as dcc
         import dash_html_components as html
-        from flask_app import flask_server
         from conf.hfx_dashboard import BOOTSTRAP_THEME
         from conf.router_conts import URL_SALES_BYMONTH
-        ###############
-        # dash
-        ############### 
-        sales_app = dash.Dash(__name__,
-                              server=flask_server,
-                              title="门店月度销售分析",
-                              update_title="数据载入中...",
-                              suppress_callback_exceptions=True,
-                              url_base_pathname=URL_SALES_BYMONTH,
-                              external_stylesheets=[BOOTSTRAP_THEME])
-        # 侧边栏和内容省略，具体参看apps/app_sales_bymonth.py
+
+        # 侧边栏和内容省略，具体参看apps/layouts/app_sales_bymonth_layout.py
         sidebar = html.Div()
         content = html.Div()
-        sales_app.layout = html.Div([
+        layout = html.Div([
             sidebar,
             content,
             # signal value to trigger callbacks
@@ -434,7 +458,7 @@ print(channels)
 
 
 - 第三步： 将触发取数的值缓存到dcc.Store, 并以此触发缓存方法和其他的回调计算
-    * 代码位置： apps/app_sales_bymonth.py
+    * 代码位置： apps/callbacks/app_sales_bymonth_callback.py
     * 在此方法中，Input参数会动态实时的调用此回调方法，State表示只取值，不触发回调。
     * 此函数表示点击提交按钮后，根据所有筛选值作为dcc.Store的值，会触发其他回调方法的计算
       ```python
@@ -523,7 +547,7 @@ print(channels)
 ## 回调函数取数
 
 根据上面的dcc.Store的值作为输入参数，取出缓存的计算数据，然后输出card_data的内容。
-> 具体内容位置： apps/app_sales_bymonth.py
+> 具体内容位置： apps/callbacks/app_sales_bymonth_callback.py
 
 ```python
 

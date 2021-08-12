@@ -1,18 +1,18 @@
 import dash_bootstrap_components as dbc
 
+from services.srv_comm_dim import get_dim_store_ages
 
-def filter_store_age(label_name: str,
-                     options: list,
-                     default_values: list):
+
+def filter_store_age():
     """
       店龄筛选组件
-      :param label_name ： 组件标签名称
-      :param options: 选项
-      :param default_values: 默认选中值
       :return 组件
     """
+    # 店龄
+    options = get_dim_store_ages()
+    default_values = [r["value"] for r in options]
     return dbc.FormGroup([
-        dbc.Label(label_name, className='sidebar-label'),
+        dbc.Label("店龄", className='sidebar-label'),
         dbc.Checklist(
             id="f_store_age",
             options=options,

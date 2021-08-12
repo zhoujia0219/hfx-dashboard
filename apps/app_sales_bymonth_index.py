@@ -25,7 +25,7 @@ def register_sales_app(app):
                          )
 
     with app.app_context():
-        dash_app.title = 'Dash Example'
+        dash_app.title = '门店月度销售分析'
         dash_app.layout = layout
         register_callbacks(dash_app)
 
