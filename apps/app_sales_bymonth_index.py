@@ -1,7 +1,6 @@
 import dash
 from flask_login import login_required
 
-from apps.base_html_string import base_html_string
 from conf.hfx_dashboard import BOOTSTRAP_THEME
 from conf.router_conts import URL_SALES_BYMONTH
 
@@ -20,8 +19,7 @@ def register_sales_app(app):
                          suppress_callback_exceptions=True,
                          url_base_pathname=URL_SALES_BYMONTH,
                          meta_tags=[meta_viewport],
-                         external_stylesheets=[BOOTSTRAP_THEME],
-                         # index_string=base_html_string
+                         external_stylesheets=[BOOTSTRAP_THEME]
                          )
 
     with app.app_context():

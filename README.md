@@ -36,8 +36,7 @@ hfx-dashboard
 │                      
 ├─apps                                     # dash应用
 │  │  __init__.py                        
-│  │  app_sales_bymonth_index.py         
-│  │  base_html_string.py
+│  │  app_sales_bymonth_index.py           
 │  ├─assets
 │  │      content.css
 │  │      siderbar.css
@@ -198,7 +197,7 @@ pip install -r requirements.txt
 
 ## 开发新dash_app步骤
 
-### 第一步： 在apps下，按照规则添加页面布局文件(通用组件可直接新增在components下或引入现有的)
+### 第一步： 在apps下，按照规则添加文件
 
 - apps/app_sales_bymonth_index.py
     - 主要包含代码说明： dash实例化
