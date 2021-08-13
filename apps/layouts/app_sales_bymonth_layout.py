@@ -60,7 +60,7 @@ card_list = [
         children=dbc.Card(
             children=dbc.CardBody(
                 children=[
-                    html.H6("总销售额"),
+                    html.H6(children="总销售额"),
                     html.H4(
                         children=[
                             html.Span(children='￥'),
@@ -94,7 +94,7 @@ card_list = [
         children=dbc.Card(
             children=dbc.CardBody(
                 children=[
-                    html.H6("上月销售额"),
+                    html.H6(children="上月销售额"),
                     html.H4(
                         children=[
                             html.Span(children='￥'),
@@ -160,7 +160,7 @@ card_list = [
                 children=[
                     html.H6(
                         children=[
-                            html.Span("近12月销售趋势"),
+                            html.Span(children="近12月销售趋势"),
                             html.Span(children="("),
                             html.Span(children=[start_month], id="group_start_month"),
                             html.Span(children=" - "),
