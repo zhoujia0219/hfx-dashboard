@@ -14,7 +14,6 @@ def register_sales_app(app):
 
     dash_app = dash.Dash(__name__,
                          server=app,
-                         title="门店月度销售分析",
                          update_title="数据载入中...",
                          suppress_callback_exceptions=True,
                          url_base_pathname=URL_SALES_BYMONTH,
