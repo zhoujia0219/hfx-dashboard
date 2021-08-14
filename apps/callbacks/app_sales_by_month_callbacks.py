@@ -9,7 +9,6 @@ from pandas import DataFrame
 
 from services import srv_sales_bymonth
 
-
 ###############
 # 回调
 ###############
@@ -161,7 +160,7 @@ def register_callbacks(dash_app):
         :param filter_values:
         :param data_x:
         :param data_y:
-        :param data_other:
+        :param data_sum: pic_dff.sum()
         :return:
         """
 
@@ -173,15 +172,33 @@ def register_callbacks(dash_app):
         else:
             pic_dff = pic.groupby([data_x], as_index=False)['dealtotal']
             pic_dff = eval(data_sum)
-            fig = px.bar(
-                pic_dff,
-                x=data_x,
-                y='dealtotal',
-                color='dealtotal',
-                barmode='group',
-                template='plotly_white',
-            )
-            fig.update_traces(textposition='inside')
+            if data_x == "city_level":
+                print("pic_dff", pic_dff)
+                fig = px.bar(
+                    pic_dff,
+                    x=data_x,
+                    y='dealtotal',
+                    color='dealtotal',
+                    barmode='group',
+                    template='plotly_white',
+                )
+                fig.update_layout(
+                    xaxis=dict(
+                        tickmode='array',
+                        tickvals=[2, 3],  # 10表示的是第10个数据
+                        ticktext=['城市等级2', '城市等级3']
+                    )
+                )
+            else:
+                fig = px.bar(
+                    pic_dff,
+                    x=data_x,
+                    y='dealtotal',
+                    color='dealtotal',
+                    barmode='group',
+                    template='plotly_white',
+                )
+                fig.update_traces(textposition='inside')
             return fig
 
     # 销售额分析气泡图
@@ -407,17 +424,16 @@ def register_callbacks(dash_app):
 
         a1 = time.time()
         fig_list1 = []
-        thread_list = []
+        thread_list = []  # 多线程对象保存列表
         if len(updata_out_list) > 4:
-            updata_out_list = updata_out_list[:4]
+            updata_out_list = updata_out_list[:4]  # 多选不会多返回fig
         for i in updata_out_list:
             t = MyThread(build_allsale_graph, args=(updata_out_list, i, 'dealtotal', 'pic_dff.sum()'))
             thread_list.append(t)
             t.start()
         for j in thread_list:
-            j.join()
+            j.join()  # 开启等待全部线程运行完，否则某些线程未跑完返回None
             fig_list1.append(j.get_result())
-
         if len(fig_list1) < 4:
             for i in range(4 - len(fig_list1)):
                 fig_list1.append("")
