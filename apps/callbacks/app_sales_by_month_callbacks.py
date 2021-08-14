@@ -13,6 +13,8 @@ from services import srv_sales_bymonth
 ###############
 # 回调
 ###############
+from utils.thread_one_interface import MyThread
+
 
 def register_callbacks(dash_app):
     ###############
@@ -210,7 +212,6 @@ def register_callbacks(dash_app):
         )
         return fig
 
-
     @dash_app.callback(
         Output('signal', 'data'),
         [
@@ -384,31 +385,49 @@ def register_callbacks(dash_app):
 
         return build_city_graph(filter_values, val_x, val_cate, val_agg)
 
-
     @dash_app.callback(
-            [
+        [
             Output('graph_out_one', 'figure'),
             Output('graph_out_two', 'figure'),
             Output('graph_out_three', 'figure'),
             Output('graph_out_four', 'figure'),
         ],
-            Input('x_choice_3', 'value'),
+        Input('x_choice_3', 'value'),
     )
     def updata_out_four(updata_out_list):
-        fig_list = []
-        for j in updata_out_list:
-            fig_list.append(build_allsale_graph(updata_out_list, j, 'dealtotal', 'pic_dff.sum()'))
-            if len(fig_list) == 4:
-                break
-        if len(fig_list) < 4:
-            for a in range(4-len(fig_list)):
-                fig_list.append("")
-        return fig_list[0], fig_list[1], fig_list[2], fig_list[3]
+        # fig_list = []
+        # for j in updata_out_list:
+        #     fig_list.append(build_allsale_graph(updata_out_list, j, 'dealtotal', 'pic_dff.sum()'))
+        #     if len(fig_list) == 4:
+        #         break
+        # if len(fig_list) < 4:
+        #     for a in range(4 - len(fig_list)):
+        #         fig_list.append("")
+        # return fig_list[0], fig_list[1], fig_list[2], fig_list[3]
 
+        a1 = time.time()
+        fig_list1 = []
+        thread_list = []
+        if len(updata_out_list) > 4:
+            updata_out_list = updata_out_list[:4]
+        for i in updata_out_list:
+            t = MyThread(build_allsale_graph, args=(updata_out_list, i, 'dealtotal', 'pic_dff.sum()'))
+            thread_list.append(t)
+            t.start()
+        for j in thread_list:
+            j.join()
+            fig_list1.append(j.get_result())
+
+        if len(fig_list1) < 4:
+            for i in range(4 - len(fig_list1)):
+                fig_list1.append("")
+        b1 = time.time()
+        print("测试代码：", b1 - a1)
+        return fig_list1[0], fig_list1[1], fig_list1[2], fig_list1[3]
 
     @dash_app.callback(
-        Output('graph_billcount','figure'),
-        Input('option_x','value'),
+        Output('graph_billcount', 'figure'),
+        Input('option_x', 'value'),
     )
     def updata_graph_scatter(d_d):
         """
@@ -418,6 +437,5 @@ def register_callbacks(dash_app):
          """
         scatter_list = []
         for filter_values in d_d:
-            scatter_list =build_trademoney_scatter(filter_values,'billcount','dealtotal',d_d)
+            scatter_list = build_trademoney_scatter(filter_values, 'billcount', 'dealtotal', d_d)
         return scatter_list
-
