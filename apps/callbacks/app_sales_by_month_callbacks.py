@@ -405,7 +405,6 @@ def register_callbacks(dash_app):
                 fig_list.append("")
         return fig_list[0], fig_list[1], fig_list[2], fig_list[3]
 
-################################################
 
     @dash_app.callback(
         Output('graph_billcount','figure'),
@@ -422,68 +421,3 @@ def register_callbacks(dash_app):
             scatter_list =build_trademoney_scatter(filter_values,'billcount','dealtotal',d_d)
         return scatter_list
 
-
-####################################################################
-# 异步
-# async def demo(value_list):
-#     lenth_value_list = len(value_list)
-#     if len(value_list) > 4:
-#         value_list = value_list[:4]
-#     if lenth_value_list == 0:
-#         return []
-#     if lenth_value_list == 1:
-#         a, b = await asyncio.wait(
-#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()')])
-#     elif lenth_value_list == 2:
-#         a, b = await asyncio.wait(
-#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()'),
-#              build_allsale_graph(default_filter_values, value_list[1], 'dealtotal', 'pic_dff.sum()'), ])
-#     elif lenth_value_list == 3:
-#         a, b = await asyncio.wait(
-#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()'),
-#              build_allsale_graph(default_filter_values, value_list[1], 'dealtotal', 'pic_dff.sum()'),
-#              build_allsale_graph(default_filter_values, value_list[2], 'dealtotal', 'pic_dff.sum()'), ])
-#     else:
-#         a, b = await asyncio.wait(
-#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()'),
-#              build_allsale_graph(default_filter_values, value_list[1], 'dealtotal', 'pic_dff.sum()'),
-#              build_allsale_graph(default_filter_values, value_list[2], 'dealtotal', 'pic_dff.sum()'),
-#              build_allsale_graph(default_filter_values, value_list[3], 'dealtotal', 'pic_dff.sum()'), ])
-#     a_list = list()
-#     for j in a:
-#         a_list.append(j.result())
-#     return a_list
-#
-# @sales_app.callback(
-#     [
-#         Output('graph_out_allsale', 'figure'),
-#         Output('graph_out_pic', 'figure'),
-#         Output('graph_out_draw', 'figure'),
-#         Output('graph_out_photo', 'figure'),
-#     ],
-#     Input('x_choice_3', 'value'),
-# )
-# def updata_out_four(updata_out_list):
-#     # a1 = time.time()
-#     # print(updata_out_list)
-#     # fig_list1 = []
-#     # for j in updata_out_list:
-#     #     fig_list1.append(build_allsale_graph2(default_filter_values, j, 'dealtotal', 'pic_dff.sum()'))
-#     #     if len(fig_list1) == 4:
-#     #         break
-#     # if len(fig_list1) < 4:
-#     #     for i in range(4 - len(fig_list1)):
-#     #         fig_list1.append("")
-#     # b1 = time.time()
-#     # print("测试2：", b1 - a1)
-#
-#     a = time.time()
-#     print(updata_out_list)
-#     fig_list = asyncio.run(demo(updata_out_list))
-#     print(fig_list, 13243242424)
-#     if len(fig_list) < 4:
-#         for a in range(4 - len(fig_list)):
-#             fig_list.append("")
-#     b = time.time()
-#     print("测试异步1：", b - a)
-#     return fig_list[0], fig_list[1], fig_list[2], fig_list[3]
