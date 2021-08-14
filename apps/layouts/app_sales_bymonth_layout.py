@@ -12,7 +12,7 @@ from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
 from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
-    get_dim_graph_type, get_dim_order_type
+    get_dim_graph_type, get_dim_order_type,get_dim_graph_four,get_dim_graph_scatter
 from utils import date_util
 
 ###############
@@ -409,6 +409,169 @@ c_fig_03 = dbc.Card(
     style={"width": "100%"}
 )
 
+# 不同维度间销售额分析
+c_fig_04 = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            #用户选项
+            html.Div(
+                children=[
+                        html.H5(children='销售额分析',
+                                className='media-body',
+                                style={'min-width': '150px'}
+                            ),
+                        html.Div([
+                            dcc.Dropdown(
+                                id="x_choice_3",
+                                options=[{'label': x, 'value': y} for x, y in get_dim_graph_four().items()],
+                                value=['businessname', 'areaname4', 'areasize', 'star'],
+                                multi=True,
+                                searchable=False,
+                                clearable=False
+                            ),
+                            dcc.Dropdown(
+                                id='agg_choice_3',
+                                options=[{'label': x, 'value': y} for x, y in get_dim_graph_four().items()],
+                                value='dff.sum()',
+                                searchable=False,
+                                clearable=False
+                            ),
+                            ],
+                                className='media-right block-inline')
+                            ],
+                                className='media flex-wrap ',
+                                style={'alignItems': 'flex-end'}
+                            ),
+                    html.Hr(),
+
+                    # 画图 - 柱状图
+                    dbc.Row([
+                        dbc.Col(
+                            html.Div(
+                            dcc.Loading(
+                                id='loading_one',
+                                type='circle',
+                                children=[
+                                    dcc.Graph(
+                                        id='graph_out_one',
+                                        style={'height': '320px', 'width': '500px'}
+                                    )
+                                ], ), ), ),
+                        dbc.Col(html.Div(
+                            dcc.Loading(
+                                id='loading_two',
+                                type='circle',
+                                children=[
+                                    dcc.Graph(
+                                        id='graph_out_two',
+                                        style={'height': '320px', 'width': '500px'}
+                                    )
+                                ], ), ), ),
+                    ], ),
+                    dbc.Row([
+                        dbc.Col(html.Div(
+                            dcc.Loading(
+                                id='loading_three',
+                                type='circle',
+                                children=[
+                                    dcc.Graph(
+                                        id='graph_out_three',
+                                        style={'height': '320px', 'width': '500px'}
+                                    )
+                                ], ), ), ),
+                        dbc.Col(html.Div(
+                            dcc.Loading(
+                                id='loading_four',
+                                type='circle',
+                                children=[
+                                    dcc.Graph(
+                                        id='graph_out_four',
+                                        style={'height': '320px', 'width': '500px'}
+                                    )
+                                ], ), ), )
+                    ], ),
+                    html.Hr(),
+                    html.Div([
+                        html.Div(children='最近更新: 2021-07-23 12:30:00',
+                                 className='media-body'),
+                        html.Div(children=dbc.Button(
+                                                children='立即刷新',
+                                                color='secondary',
+                                                className='mr-1',
+                                                size='sm',
+                                                id='3',
+                                                n_clicks=0
+                        )
+                    ),
+                ],
+                        className='media flex-wrap align-items-center'
+            ),
+        ]
+    ),
+    style={"width": "100%"}
+)
+
+
+# 销售分析气泡图
+c_fig_05 = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            # 用户选项
+            html.Div(
+                children=[
+                    html.H5('销售额分析', className='media-body', style={'min-width': '150px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id="option_x",
+                            style={'width': 120},
+                            options=[{'label': x, 'value': y} for x, y in get_dim_graph_scatter().items()],
+                            value='areaname3',
+                            searchable=False,
+                            clearable=False
+                        ),
+                    ], className='media-right block-inline'
+                    ),
+                ],     className='media flex-wrap ',
+                       style={'alignItems': 'flex-end'}
+            ),
+            html.Hr(),
+
+            # 画图 - 气泡图
+            dcc.Loading(
+                id='loading_scatter',
+                type='circle',
+                children=[
+                    dcc.Graph(
+                        id="graph_billcount"
+                    )
+                ],
+                style={'width': '1022px', 'height': '450px'}
+            ),
+            html.Hr(),
+            html.Div(
+                children=[
+                    html.Div(
+                        children=[
+                            html.Span('最近更新:'),
+                            html.Span('2021-07-23 12:30:00',
+                                      id="billcount_update_time")
+                        ], className='media-body'
+                    ),
+                    html.Div(dbc.Button(
+                        children='立即刷新',
+                        id='billcount_update_button',
+                        color='secondary',
+                        className='mr-1',
+                        size='sm',
+                        n_clicks=0)),
+                ], className='media flex-wrap align-items-center'
+            ),
+        ]
+    ),style={"width": "100%"}
+)
+
+
+
 content = html.Div(
     className='content-style',
     children=[
@@ -419,6 +582,8 @@ content = html.Div(
                     children=[
                         dbc.Row(children=c_fig_01),
                         dbc.Row(children=c_fig_02, className='mt-3'),
+                        dbc.Row(children=c_fig_04, className='mt-3'),
+                        dbc.Row(children=c_fig_05, className='mt-3'),
                     ],
                     width=8
                 ),

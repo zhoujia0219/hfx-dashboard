@@ -35,6 +35,38 @@ def global_store(filter_values: dict) -> DataFrame:
     return df
 
 
+@cache.memoize()
+def global_cache(filter_values: dict) -> DataFrame:
+    """
+        全局缓存
+        @:param filter_values: 筛选值 json类型参数 { 'businessname': businessname, 'dealtotal': dealtotal,
+                                    'city_level':city_level, 'vctype':vctype,
+                                    'star':star, 'areaname4':areaname4}
+        @:return:
+        """
+    time_start = time.time()
+    allsale = find_allsale_list(filter_values)
+
+    time_end = time.time()
+    print('global_cache: Running time:{} seconds'.format(time_end - time_start))
+    return allsale
+
+@cache.memoize()
+def global_buffer(filter_values: dict) -> DataFrame:
+    """
+        全局缓存
+        @:param filter_values: 筛选值 json类型参数 { 'billcount': billcount, 'dealtotal': dealtotal,
+                                       'vctype':vctype,'star':star, 'areaname3':areaname3}
+        @:return:
+        """
+    time_start = time.time()
+    scatter_data = find_trademoney_list(filter_values)
+
+    time_end = time.time()
+    print('global_buffer: Running time:{} seconds'.format(time_end - time_start))
+    return scatter_data
+
+
 ###########################
 # 展示计算数据
 ###########################
@@ -238,6 +270,46 @@ def calculate_top_graph(filter_values: dict, month_value: str, order_value: int)
     return df
 
 
+@cache.memoize()
+def calculate_graph_allsale(filter_values: dict) -> DataFrame:
+    """
+
+    :param filter_values:
+    :return:
+    """
+    time_start = time.time()
+    allsale = find_allsale_list(filter_values)
+    if len(allsale) > 0:
+        allsale.replace(0, np.nan, inplace=True)
+        allsale['areasize'] = allsale['areasize'].astype('float')
+        allsale['areasize_bins'] = pd.cut(allsale['areasize'],
+                                         bins=[0, 10, 30, 50, 70, 100],
+                                         labels=['档口店', '外卖店', '小店', '标准店', '大店'],
+                                         right=True)
+        allsale['city_level_bins'] = pd.cut(allsale['city_level'],
+                                           bins=[0, 1, 3],
+                                           labels=['2', '3'],
+                                           right=True)
+        time_end = time.time()
+        print('calculate_graph_allsale: Running time:{} seconds'.format(time_end - time_start))
+        return allsale
+    return []
+
+@cache.memoize()
+def calculate_graph_scatter(filter_values: dict) -> DataFrame:
+    """
+
+    :param filter_values:
+    :return:
+    """
+    scatter_data = find_trademoney_list(filter_values)
+    if len(scatter_data) > 0:
+        # 转换0值
+        scatter_data.replace(0, np.nan, inplace=True)
+        return scatter_data
+    return []
+
+
 ###########################
 # 数据库取数
 ###########################
@@ -323,3 +395,27 @@ def add_sub_sql(filter_values: dict, query_sql: str) -> str:
         #     query_sql += """
         #     """
     return query_sql
+
+
+def find_allsale_list(filter_values: dict) ->DataFrame:
+    time_start = time.time()
+    query_sql="""
+        select businessname,star,areaname4,dealtotal,vctype,areasize,city_level
+        from chunbaiwei.fact_storesale_weather
+        """
+    allsale = db_util.read_by_pd(query_sql, default_dbname)
+    time_end = time.time()
+    print('find_allsale_list: Running time:{} seconds'.format(time_end - time_start))
+    return allsale
+
+
+def find_trademoney_list(filter_values: dict) ->DataFrame:
+    time_start = time.time()
+    query_sql = """
+        select star,billcount,dealtotal,areaname3,vctype
+        from chunbaiwei.fact_storesale_weather
+        """
+    trademoney = db_util.read_by_pd(query_sql,default_dbname)
+    time_end = time.time()
+    print('find_trademoney_list: Running time:{} seconds'.format(time_end - time_start))
+    return trademoney

@@ -153,6 +153,64 @@ def register_callbacks(dash_app):
             print('build_city_graph: Running time:{} seconds'.format(time_end - time_start))
             return fig
 
+    # 不同维度间销售额分析
+    def build_allsale_graph(filter_values, data_x, data_y, data_sum):
+        """
+        :param filter_values:
+        :param data_x:
+        :param data_y:
+        :param data_other:
+        :return:
+        """
+
+        pic = srv_sales_bymonth.calculate_graph_allsale(filter_values)
+        if len(pic) < 1:
+            return dash.no_update
+        if data_x == data_y:
+            return dash.no_update
+        else:
+            pic_dff = pic.groupby([data_x], as_index=False)['dealtotal']
+            pic_dff = eval(data_sum)
+            fig = px.bar(
+                pic_dff,
+                x=data_x,
+                y='dealtotal',
+                color='dealtotal',
+                barmode='group',
+                template='plotly_white',
+            )
+            fig.update_traces(textposition='inside')
+            return fig
+
+    # 销售额分析气泡图
+    def build_trademoney_scatter(filter_values, d_x, d_y, d_d):
+        """
+        :param filter_values:
+        :param d_x:
+        :param d_y:
+        :param d_i:
+        :return:
+        """
+        trade_data = srv_sales_bymonth.calculate_graph_scatter(filter_values)
+        if len(trade_data) < 1:
+            return dash.no_update
+        if d_x == d_y:
+            return dash.no_update
+        trade_data_group = trade_data.groupby([d_d], as_index=False)[['dealtotal', 'billcount']].sum()
+        fig = px.scatter(
+            trade_data_group,
+            x='billcount',
+            y='dealtotal',
+            color=d_d,
+            size='billcount',  # 点的大小
+            log_x=True,  # 对数变换
+            size_max=60,  # 点的最大值
+            # hover_name=,       #悬停信息
+            # animation_frame='',   #将**作为播放按钮
+        )
+        return fig
+
+
     @dash_app.callback(
         Output('signal', 'data'),
         [
@@ -325,3 +383,107 @@ def register_callbacks(dash_app):
         """
 
         return build_city_graph(filter_values, val_x, val_cate, val_agg)
+
+
+    @dash_app.callback(
+            [
+            Output('graph_out_one', 'figure'),
+            Output('graph_out_two', 'figure'),
+            Output('graph_out_three', 'figure'),
+            Output('graph_out_four', 'figure'),
+        ],
+            Input('x_choice_3', 'value'),
+    )
+    def updata_out_four(updata_out_list):
+        fig_list = []
+        for j in updata_out_list:
+            fig_list.append(build_allsale_graph(updata_out_list, j, 'dealtotal', 'pic_dff.sum()'))
+            if len(fig_list) == 4:
+                break
+        if len(fig_list) < 4:
+            for a in range(4-len(fig_list)):
+                fig_list.append("")
+        return fig_list[0], fig_list[1], fig_list[2], fig_list[3]
+
+################################################
+
+    @dash_app.callback(
+        Output('graph_billcount','figure'),
+        Input('option_x','value'),
+    )
+    def updata_graph_scatter(d_d):
+        """
+         :param filter_values
+         :param d_d:
+         :return:
+         """
+        scatter_list = []
+        for filter_values in d_d:
+            scatter_list =build_trademoney_scatter(filter_values,'billcount','dealtotal',d_d)
+        return scatter_list
+
+
+####################################################################
+# 异步
+# async def demo(value_list):
+#     lenth_value_list = len(value_list)
+#     if len(value_list) > 4:
+#         value_list = value_list[:4]
+#     if lenth_value_list == 0:
+#         return []
+#     if lenth_value_list == 1:
+#         a, b = await asyncio.wait(
+#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()')])
+#     elif lenth_value_list == 2:
+#         a, b = await asyncio.wait(
+#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()'),
+#              build_allsale_graph(default_filter_values, value_list[1], 'dealtotal', 'pic_dff.sum()'), ])
+#     elif lenth_value_list == 3:
+#         a, b = await asyncio.wait(
+#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()'),
+#              build_allsale_graph(default_filter_values, value_list[1], 'dealtotal', 'pic_dff.sum()'),
+#              build_allsale_graph(default_filter_values, value_list[2], 'dealtotal', 'pic_dff.sum()'), ])
+#     else:
+#         a, b = await asyncio.wait(
+#             [build_allsale_graph(default_filter_values, value_list[0], 'dealtotal', 'pic_dff.sum()'),
+#              build_allsale_graph(default_filter_values, value_list[1], 'dealtotal', 'pic_dff.sum()'),
+#              build_allsale_graph(default_filter_values, value_list[2], 'dealtotal', 'pic_dff.sum()'),
+#              build_allsale_graph(default_filter_values, value_list[3], 'dealtotal', 'pic_dff.sum()'), ])
+#     a_list = list()
+#     for j in a:
+#         a_list.append(j.result())
+#     return a_list
+#
+# @sales_app.callback(
+#     [
+#         Output('graph_out_allsale', 'figure'),
+#         Output('graph_out_pic', 'figure'),
+#         Output('graph_out_draw', 'figure'),
+#         Output('graph_out_photo', 'figure'),
+#     ],
+#     Input('x_choice_3', 'value'),
+# )
+# def updata_out_four(updata_out_list):
+#     # a1 = time.time()
+#     # print(updata_out_list)
+#     # fig_list1 = []
+#     # for j in updata_out_list:
+#     #     fig_list1.append(build_allsale_graph2(default_filter_values, j, 'dealtotal', 'pic_dff.sum()'))
+#     #     if len(fig_list1) == 4:
+#     #         break
+#     # if len(fig_list1) < 4:
+#     #     for i in range(4 - len(fig_list1)):
+#     #         fig_list1.append("")
+#     # b1 = time.time()
+#     # print("测试2：", b1 - a1)
+#
+#     a = time.time()
+#     print(updata_out_list)
+#     fig_list = asyncio.run(demo(updata_out_list))
+#     print(fig_list, 13243242424)
+#     if len(fig_list) < 4:
+#         for a in range(4 - len(fig_list)):
+#             fig_list.append("")
+#     b = time.time()
+#     print("测试异步1：", b - a)
+#     return fig_list[0], fig_list[1], fig_list[2], fig_list[3]

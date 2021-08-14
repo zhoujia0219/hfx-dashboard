@@ -112,3 +112,28 @@ def get_dim_graph_type() -> Dict:
     :return dict
     """
     return {'图形: 柱状图': 'px.bar', '图形: 线性图': 'px.line'}
+
+
+def get_dim_graph_four() -> Dict:
+    """
+    图形分类维度
+    :return dict
+    """
+    return {'维度: 渠道': 'businessname',
+            '维度: 战区': 'areaname4',
+            '维度: 店面积': 'areasize',
+            '维度: 门店星级': 'star',
+            '维度: 门店类型':'vctype',
+            '维度: 城市等级': 'city_level'
+            }
+
+
+def get_dim_graph_scatter() -> Dict:
+    """
+    图形分类维度
+    :return dict
+    """
+    return {'维度: 战区': 'areaname3',
+            '维度: 门店星级': 'star',
+            '维度: 门店类型':'vctype'
+            }
