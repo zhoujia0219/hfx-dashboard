@@ -133,7 +133,25 @@ def get_dim_graph_scatter() -> Dict:
     图形分类维度
     :return dict
     """
-    return {'维度: 战区': 'areaname3',
-            '维度: 门店星级': 'star',
-            '维度: 门店类型':'vctype'
+    return {'维度: 城区': 'county_name'}
+
+
+def get_dim_graph_scatter_x() -> Dict:
+    """
+    气泡图自定义x轴指标
+    :return dict
+    """
+    return {'X轴:  客单价': 'price',
+            'X轴:  客单量': 'billcount',
+            'X轴:  面积': 'areasize',
+            }
+
+def get_dim_graph_scatter_y() -> Dict:
+    """
+    气泡图自定义y轴指标
+    :return dict
+    """
+    return {'Y轴:  客单价': 'price',
+            'Y轴:  客单量': 'billcount',
+            'Y轴:  总销售额': 'dealtotal',
             }

@@ -55,8 +55,8 @@ def global_cache(filter_values: dict) -> DataFrame:
 def global_buffer(filter_values: dict) -> DataFrame:
     """
         全局缓存
-        @:param filter_values: 筛选值 json类型参数 { 'billcount': billcount, 'dealtotal': dealtotal,
-                                       'vctype':vctype,'star':star, 'areaname3':areaname3}
+        @:param filter_values: 筛选值 json类型参数 { 'price': price, 'amount': amount,
+                                       'trademoney':trademoney,'rdate':rdate, 'classname':classname,'province_name':province_name}
         @:return:
         """
     time_start = time.time()
@@ -64,6 +64,7 @@ def global_buffer(filter_values: dict) -> DataFrame:
 
     time_end = time.time()
     print('global_buffer: Running time:{} seconds'.format(time_end - time_start))
+    print(scatter_data,789797979797979)
     return scatter_data
 
 
@@ -282,14 +283,9 @@ def calculate_graph_allsale(filter_values: dict) -> DataFrame:
     if len(allsale) > 0:
         allsale.replace(0, np.nan, inplace=True)
         allsale['areasize'] = allsale['areasize'].astype('float')
-        allsale['areasize_bins'] = pd.cut(allsale['areasize'],
-                                         bins=[0, 10, 30, 50, 70, 100],
-                                         labels=['档口店', '外卖店', '小店', '标准店', '大店'],
-                                         right=True)
-        allsale['city_level_bins'] = pd.cut(allsale['city_level'],
-                                           bins=[0, 1, 3],
-                                           labels=['2', '3'],
-                                           right=True)
+        allsale['areasize_bins']=pd.cut(allsale['areasize'],
+                                        bins=[1, 20, 30, 50, 70, 100],
+                                        labels=['档口店', '外卖店', '小店', '标准店', '大店'])
         time_end = time.time()
         print('calculate_graph_allsale: Running time:{} seconds'.format(time_end - time_start))
         return allsale
@@ -306,6 +302,12 @@ def calculate_graph_scatter(filter_values: dict) -> DataFrame:
     if len(scatter_data) > 0:
         # 转换0值
         scatter_data.replace(0, np.nan, inplace=True)
+        scatter_data['rdate'] = pd.to_datetime(scatter_data['rdate'])
+        scatter_data = scatter_data[scatter_data['rdate'] == '2020/12/31']
+        scatter_data['price'] = scatter_data['dealtotal']/scatter_data['billcount']
+        scatter_data = scatter_data[scatter_data['city_name'] == '莆田市']
+        scatter_data = scatter_data[scatter_data['dealtotal'] > 0]
+        scatter_data = scatter_data[scatter_data['businessname'] == '到店销售']
         return scatter_data
     return []
 
@@ -412,10 +414,11 @@ def find_allsale_list(filter_values: dict) ->DataFrame:
 def find_trademoney_list(filter_values: dict) ->DataFrame:
     time_start = time.time()
     query_sql = """
-        select star,billcount,dealtotal,areaname3,vctype
+        select billcount,dealtotal,rdate,city_name,county_name,businessname,areasize
         from chunbaiwei.fact_storesale_weather
         """
     trademoney = db_util.read_by_pd(query_sql,default_dbname)
     time_end = time.time()
     print('find_trademoney_list: Running time:{} seconds'.format(time_end - time_start))
+    print(trademoney)
     return trademoney

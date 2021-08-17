@@ -12,7 +12,8 @@ from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
 from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
-    get_dim_graph_type, get_dim_order_type,get_dim_graph_four,get_dim_graph_scatter
+    get_dim_graph_type, get_dim_order_type,get_dim_graph_four,get_dim_graph_scatter, \
+    get_dim_graph_scatter_x,get_dim_graph_scatter_y
 from utils import date_util
 
 ###############
@@ -429,13 +430,6 @@ c_fig_04 = dbc.Card(
                                 searchable=False,
                                 clearable=False
                             ),
-                            dcc.Dropdown(
-                                id='agg_choice_3',
-                                options=[{'label': x, 'value': y} for x, y in get_dim_graph_four().items()],
-                                value='dff.sum()',
-                                searchable=False,
-                                clearable=False
-                            ),
                             ],
                                 className='media-right block-inline')
                             ],
@@ -519,13 +513,29 @@ c_fig_05 = dbc.Card(
             # 用户选项
             html.Div(
                 children=[
-                    html.H5('销售额分析', className='media-body', style={'min-width': '150px'}),
+                    html.H5('单月销售单价与数额之间的分析', className='media-body', style={'min-width': '150px'}),
                     html.Div([
                         dcc.Dropdown(
                             id="option_x",
                             style={'width': 120},
+                            options=[{'label': x, 'value': y} for x, y in get_dim_graph_scatter_x().items()],
+                            value='price',
+                            searchable=False,
+                            clearable=False
+                        ),
+                        dcc.Dropdown(
+                            id="option_y",
+                            style={'width': 120},
+                            options=[{'label': x, 'value': y} for x, y in get_dim_graph_scatter_y().items()],
+                            value='billcount',
+                            searchable=False,
+                            clearable=False
+                        ),
+                        dcc.Dropdown(
+                            id="option_other",
+                            style={'width': 120},
                             options=[{'label': x, 'value': y} for x, y in get_dim_graph_scatter().items()],
-                            value='areaname3',
+                            value='county_name',
                             searchable=False,
                             clearable=False
                         ),

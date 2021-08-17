@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
 from pandas import DataFrame
+import pandas as pd
 
 from services import srv_sales_bymonth
 
@@ -181,14 +182,42 @@ def register_callbacks(dash_app):
                     color='dealtotal',
                     barmode='group',
                     template='plotly_white',
+                    labels={'dealtotal': '总销售额','city_level':'城市等级'},
+                )
+                fig.update_layout(
+                    xaxis=dict(
+                    tickmode='array',
+                    tickvals=[2, 3],
+                    ticktext=['城市等级2', '城市等级3']
+
+                    )
+                )
+            elif data_x == "areasize":
+                pic_dff = pic.groupby(['areasize_bins'], as_index=False)['dealtotal'].sum()
+                fig = px.pie(
+                    pic_dff,
+                    names='areasize_bins',
+                    values='dealtotal',
+                    color_discrete_sequence=px.colors.sequential.Bluyl,
+                )
+            elif data_x == 'star':
+                fig = px.bar(
+                    pic_dff,
+                    x=data_x,
+                    y='dealtotal',
+                    color='dealtotal',
+                    barmode='group',
+                    template='plotly_white',
+                    labels={'dealtotal': '总销售额','star':'门店星级'},
                 )
                 fig.update_layout(
                     xaxis=dict(
                         tickmode='array',
-                        tickvals=[2, 3],  # 10表示的是第10个数据
-                        ticktext=['城市等级2', '城市等级3']
+                        tickvals=[1,2,3,4,5],
+                        ticktext=['门店星级1', '门店星级2','门店星级3','门店星级4','门店星级5',]
                     )
                 )
+
             else:
                 fig = px.bar(
                     pic_dff,
@@ -197,6 +226,7 @@ def register_callbacks(dash_app):
                     color='dealtotal',
                     barmode='group',
                     template='plotly_white',
+                    labels={'dealtotal':'总销售额','areaname4':'战区','businessname':'销售渠道','vctype':'门店类型'},
                 )
                 fig.update_traces(textposition='inside')
             return fig
@@ -207,7 +237,7 @@ def register_callbacks(dash_app):
         :param filter_values:
         :param d_x:
         :param d_y:
-        :param d_i:
+        :param d_d:
         :return:
         """
         trade_data = srv_sales_bymonth.calculate_graph_scatter(filter_values)
@@ -215,19 +245,21 @@ def register_callbacks(dash_app):
             return dash.no_update
         if d_x == d_y:
             return dash.no_update
-        trade_data_group = trade_data.groupby([d_d], as_index=False)[['dealtotal', 'billcount']].sum()
+        trade_data_group = trade_data.groupby([d_d,d_x], as_index=False)[['dealtotal', d_y]].sum()
         fig = px.scatter(
             trade_data_group,
-            x='billcount',
-            y='dealtotal',
-            color=d_d,
-            size='billcount',  # 点的大小
+            x=d_x,
+            y=d_y,
+            color='county_name',
+            size='dealtotal',  # 点的大小
             log_x=True,  # 对数变换
             size_max=60,  # 点的最大值
             # hover_name=,       #悬停信息
             # animation_frame='',   #将**作为播放按钮
+            labels={'price':'客单价','billcount':'客单量','county_name':'城区','dealtotal':'总销售额','areasize':'面积'}
         )
         return fig
+
 
     @dash_app.callback(
         Output('signal', 'data'),
@@ -402,6 +434,7 @@ def register_callbacks(dash_app):
 
         return build_city_graph(filter_values, val_x, val_cate, val_agg)
 
+
     @dash_app.callback(
         [
             Output('graph_out_one', 'figure'),
@@ -441,17 +474,22 @@ def register_callbacks(dash_app):
         print("测试代码：", b1 - a1)
         return fig_list1[0], fig_list1[1], fig_list1[2], fig_list1[3]
 
+
     @dash_app.callback(
         Output('graph_billcount', 'figure'),
-        Input('option_x', 'value'),
+        [
+            Input('option_x', 'value'),
+            Input('option_y', 'value'),
+            Input('option_other', 'value'),
+        ]
     )
-    def updata_graph_scatter(d_d):
+    def updata_graph_scatter(d_x,d_y,d_d):
         """
          :param filter_values
+         :param d_x:
+         :param d_y:
          :param d_d:
          :return:
          """
-        scatter_list = []
-        for filter_values in d_d:
-            scatter_list = build_trademoney_scatter(filter_values, 'billcount', 'dealtotal', d_d)
+        scatter_list = build_trademoney_scatter("", d_x, d_y, d_d)
         return scatter_list
