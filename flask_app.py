@@ -4,6 +4,7 @@ from os import path
 from flask import Flask, url_for
 from flask_caching import Cache
 
+# 引入dash应用实例
 from apps.app_sales_bymonth_index import register_sales_app
 from conf import hfx_dashboard
 
@@ -61,9 +62,12 @@ def apply_themes(app):
 
 def create_app():
     app = Flask(__name__, static_folder='base/static')
+    # 注册dash应用实例
     register_sales_app(app)
+    # 集成插件
     register_extensions(app)
+    # 注册 路由
     register_blueprints(app)
-
+    # 注册样式
     apply_themes(app)
     return app
