@@ -13,7 +13,7 @@ from apps.components import filter_store_area
 from apps.components import filter_store_star
 from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
     get_dim_graph_type, get_dim_order_type,get_dim_graph_four,get_dim_graph_scatter, \
-    get_dim_graph_scatter_x,get_dim_graph_scatter_y
+    get_dim_graph_scatter_x,get_dim_graph_scatter_y,get_dim_graph_map_limits,get_dim_graph_map_index
 from utils import date_util
 
 ###############
@@ -581,6 +581,73 @@ c_fig_05 = dbc.Card(
 )
 
 
+# 销售分布地理图
+c_fig_06 = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            # 用户选项
+            html.Div(
+                children=[
+                    html.H5('销售分布地理图', className='media-body', style={'min-width': '150px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id="map_limits",
+                            style={'width': 120},
+                            options=[{'label': x, 'value': y} for x, y in get_dim_graph_map_limits().items()],
+                            value='ad_name',
+                            searchable=False,
+                            clearable=False
+                        ),
+                        dcc.Dropdown(
+                            id="map_index",
+                            style={'width': 120},
+                            options=[{'label': x, 'value': y} for x, y in get_dim_graph_map_index().items()],
+                            value='sales',
+                            searchable=False,
+                            clearable=False
+                        ),
+                    ], className='media-right block-inline'
+                    ),
+                ],     className='media flex-wrap ',
+                       style={'alignItems': 'flex-end'}
+            ),
+            html.Hr(),
+            # 画图 - 地理图
+            dcc.Loading(
+                id='map_loading',
+                children=[
+                    dcc.Graph(
+                        id="map_graph"
+                    )
+                ],
+                style={'width': '1022px', 'height': '450px'}
+            ),
+            html.Hr(),
+            html.Div(
+                children=[
+                    html.Div(
+                        children=[
+                            html.Span('最近更新:'),
+                            html.Span('2021-08-20 17:00:00',
+                                      id="map_update_time")
+                        ], className='media-body'
+                    ),
+                    html.Div(dbc.Button(
+                        children='立即刷新',
+                        id='map_update_button',
+                        color='secondary',
+                        className='mr-1',
+                        size='sm',
+                        n_clicks=0)),
+                ], className='media flex-wrap align-items-center'
+            ),
+        ]
+    ),style={"width": "100%"}
+)
+
+
+
+
 
 content = html.Div(
     className='content-style',
@@ -594,7 +661,7 @@ content = html.Div(
                         dbc.Row(children=c_fig_02, className='mt-3'),
                         dbc.Row(children=c_fig_04, className='mt-3'),
                         dbc.Row(children=c_fig_05, className='mt-3'),
-                        # dbc.Row(children=c_fig_05, className='mt-3'),
+                        dbc.Row(children=c_fig_06, className='mt-3'),
                     ],
                     width=8
                 ),

@@ -218,16 +218,41 @@ pip install -r requirements.txt
 - base/routers.py
 
 - 示例
-
+> 注意：路由参数@blueprint.route('/')和 重定向 redirect(URL_SALES_BYMONTH) 不能一致
+> 
+> 例如，如果 @blueprint.route('/test') 配置的路由路径是/test ; 那么 redirect(URL_SALES_BYMONTH)中  URL_SALES_BYMONTH 的值不能为/test
 ```python
 
 @blueprint.route('/')
 def index():
     return redirect(URL_SALES_BYMONTH)
-
-
-
 ```
+
+### 第五步： 注册dash应用
+- flask_app.py
+- 示例（为省略后的代码，具体参看flask_app.py文件）:
+```python
+from importlib import import_module
+from os import path
+
+from flask import Flask, url_for
+from flask_caching import Cache
+# 引入新建的dash应用: 
+from apps.app_sales_bymonth_index import register_sales_app
+
+def register_blueprints(app):
+    module = import_module('apps.{}.routers'.format("base"))
+    app.register_blueprint(module.blueprint)
+
+
+def create_app():
+    app = Flask(__name__, static_folder='base/static')
+    # 注册dash应用
+    register_sales_app(app)
+    register_blueprints(app)
+    return app
+```
+
 
 ## 使用数据库取数
 
