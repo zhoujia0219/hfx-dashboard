@@ -594,6 +594,7 @@ content = html.Div(
                         dbc.Row(children=c_fig_02, className='mt-3'),
                         dbc.Row(children=c_fig_04, className='mt-3'),
                         dbc.Row(children=c_fig_05, className='mt-3'),
+                        # dbc.Row(children=c_fig_05, className='mt-3'),
                     ],
                     width=8
                 ),

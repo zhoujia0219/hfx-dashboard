@@ -1,6 +1,8 @@
 import dash
 from flask_login import login_required
 
+from apps.base_html_string2 import base_html_string2
+from apps.base_html_string5 import base_html_string5
 from conf.hfx_dashboard import BOOTSTRAP_THEME
 from conf.router_conts import URL_SALES_BYMONTH
 
@@ -11,19 +13,28 @@ def register_sales_app(app):
 
     # Meta tags for viewport responsiveness
     meta_viewport = {"name": "viewport", "content": "width=device-width, initial-scale=1, shrink-to-fit=no"}
+    import dash_html_components as html
 
     dash_app = dash.Dash(__name__,
                          server=app,
                          update_title="数据载入中...",
                          suppress_callback_exceptions=True,
+                         # assets_url_path="assets",
                          url_base_pathname=URL_SALES_BYMONTH,
                          meta_tags=[meta_viewport],
-                         external_stylesheets=[BOOTSTRAP_THEME]
+                         external_stylesheets=[BOOTSTRAP_THEME],
+                         index_string=base_html_string5  # todo
                          )
 
     with app.app_context():
         dash_app.title = '门店月度销售分析'
         dash_app.layout = layout
+        # dash_app.layout = html.Div(
+        #     children=[
+        #         html.H6(children="总销售额1", style={"color": "red", "whiteSpace": "pre"}),
+        #
+        #     ]
+        # )
         register_callbacks(dash_app)
 
 
