@@ -10,6 +10,7 @@ from pandas import DataFrame
 from flask_app import cache
 from utils import date_util
 from utils import db_util
+from utils.date_util import get_current_month_all_day
 
 default_dbname = "data_analysis"
 
@@ -51,6 +52,7 @@ def global_cache(filter_values: dict) -> DataFrame:
     print('global_cache: Running time:{} seconds'.format(time_end - time_start))
     return allsale
 
+
 @cache.memoize()
 def global_buffer(filter_values: dict) -> DataFrame:
     """
@@ -64,7 +66,7 @@ def global_buffer(filter_values: dict) -> DataFrame:
 
     time_end = time.time()
     print('global_buffer: Running time:{} seconds'.format(time_end - time_start))
-    print(scatter_data,789797979797979)
+    print(scatter_data, 789797979797979)
     return scatter_data
 
 
@@ -283,13 +285,14 @@ def calculate_graph_allsale(filter_values: dict) -> DataFrame:
     if len(allsale) > 0:
         allsale.replace(0, np.nan, inplace=True)
         allsale['areasize'] = allsale['areasize'].astype('float')
-        allsale['areasize_bins']=pd.cut(allsale['areasize'],
-                                        bins=[1, 20, 30, 50, 70, 100],
-                                        labels=['档口店', '外卖店', '小店', '标准店', '大店'])
+        allsale['areasize_bins'] = pd.cut(allsale['areasize'],
+                                          bins=[1, 20, 30, 50, 70, 100],
+                                          labels=['档口店', '外卖店', '小店', '标准店', '大店'])
         time_end = time.time()
         print('calculate_graph_allsale: Running time:{} seconds'.format(time_end - time_start))
         return allsale
     return []
+
 
 @cache.memoize()
 def calculate_graph_scatter(filter_values: dict) -> DataFrame:
@@ -304,7 +307,7 @@ def calculate_graph_scatter(filter_values: dict) -> DataFrame:
         scatter_data.replace(0, np.nan, inplace=True)
         scatter_data['rdate'] = pd.to_datetime(scatter_data['rdate'])
         scatter_data = scatter_data[scatter_data['rdate'] == '2020/12/31']
-        scatter_data['price'] = scatter_data['dealtotal']/scatter_data['billcount']
+        scatter_data['price'] = scatter_data['dealtotal'] / scatter_data['billcount']
         scatter_data = scatter_data[scatter_data['city_name'] == '莆田市']
         scatter_data = scatter_data[scatter_data['dealtotal'] > 0]
         scatter_data = scatter_data[scatter_data['businessname'] == '到店销售']
@@ -346,6 +349,7 @@ def find_channel_list() -> DataFrame:
     channels = db_util.read_by_pd(query_sql, default_dbname)
     time_end = time.time()
     print('find_channel_list: Running time:{} seconds'.format(time_end - time_start))
+    print(channels, 353535352262)
     return channels
 
 
@@ -399,9 +403,9 @@ def add_sub_sql(filter_values: dict, query_sql: str) -> str:
     return query_sql
 
 
-def find_allsale_list(filter_values: dict) ->DataFrame:
+def find_allsale_list(filter_values: dict) -> DataFrame:
     time_start = time.time()
-    query_sql="""
+    query_sql = """
         select businessname,star,areaname4,dealtotal,vctype,areasize,city_level
         from chunbaiwei.fact_storesale_weather
         """
@@ -411,20 +415,19 @@ def find_allsale_list(filter_values: dict) ->DataFrame:
     return allsale
 
 
-def find_trademoney_list(filter_values: dict) ->DataFrame:
+def find_trademoney_list(filter_values: dict) -> DataFrame:
     time_start = time.time()
     query_sql = """
         select billcount,dealtotal,rdate,city_name,county_name,businessname,areasize
         from chunbaiwei.fact_storesale_weather
         """
-    trademoney = db_util.read_by_pd(query_sql,default_dbname)
+    trademoney = db_util.read_by_pd(query_sql, default_dbname)
     time_end = time.time()
     print('find_trademoney_list: Running time:{} seconds'.format(time_end - time_start))
-    print(trademoney)
     return trademoney
 
 
-def find_mapdata_list(filter_values: dict) ->DataFrame:
+def find_mapdata_list(filter_values: dict) -> DataFrame:
     time_start = time.time()
     query_sql = """
         SELECT * FROM
@@ -436,6 +439,38 @@ def find_mapdata_list(filter_values: dict) ->DataFrame:
     mapdata = db_util.read_by_pd(query_sql, default_dbname)
     time_end = time.time()
     print('find_mapdata_list: Running time:{} seconds'.format(time_end - time_start))
-    print(mapdata)
     return mapdata
 
+
+def sales_day() -> DataFrame:
+    """
+    销售日数据
+    """
+    query_sql = """
+         select sale, substr(times,0,3) as times,rdate from chunbaiwei.fact_salebill where rdate='1900-01-20' OR rdate='1900-01-19'               
+             """
+    mapdata = db_util.read_by_pd(query_sql, default_dbname)
+    return mapdata
+
+
+def sales_month(range_choice:str) -> DataFrame:
+    """
+    销售月数据
+    """
+    current_montn_all_days = get_current_month_all_day(range_choice)
+    query_sql = """
+            select dealtotal,areaname3,to_char(rdate,'MM月dd日') as day  from chunbaiwei.fact_storesale_weather where rdate in {}
+             """.format(current_montn_all_days)
+    mapdata = db_util.read_by_pd(query_sql, default_dbname)
+    return mapdata
+
+
+def get_all_areaname():
+    """
+    获取所有战区名
+    """
+    sql = """
+    select areaname3  from chunbaiwei.fact_storesale_weather GROUP BY areaname3
+    """
+    data = db_util.query_list(sql, default_dbname)
+    return data

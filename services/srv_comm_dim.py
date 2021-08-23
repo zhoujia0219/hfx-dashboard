@@ -123,7 +123,7 @@ def get_dim_graph_four() -> Dict:
             '维度: 战区': 'areaname4',
             '维度: 店面积': 'areasize',
             '维度: 门店星级': 'star',
-            '维度: 门店类型':'vctype',
+            '维度: 门店类型': 'vctype',
             '维度: 城市等级': 'city_level'
             }
 
@@ -146,6 +146,7 @@ def get_dim_graph_scatter_x() -> Dict:
             'X轴:  面积': 'areasize',
             }
 
+
 def get_dim_graph_scatter_y() -> Dict:
     """
     气泡图自定义y轴指标
@@ -156,6 +157,7 @@ def get_dim_graph_scatter_y() -> Dict:
             'Y轴:  总销售额': 'dealtotal',
             }
 
+
 def get_dim_graph_map_limits() -> Dict:
     """
     地理图自定义地图范围
@@ -164,6 +166,7 @@ def get_dim_graph_map_limits() -> Dict:
     return {'地图范围:  全国': 'ad_name'
             }
 
+
 def get_dim_graph_map_index() -> Dict:
     """
     地理图自定义指标
@@ -171,3 +174,19 @@ def get_dim_graph_map_index() -> Dict:
     """
     return {'指标:  总销售额': 'sales'
             }
+
+
+def get_ZE_PJS_ZWS() -> Dict:
+    """
+    总额，平均数，中位数的映射关系
+    """
+    return {
+        "ZE": "pic_dff.sum()",
+        "PJS": "pic_dff.mean()",
+        "ZWS": "pic_dff.median()"  # 中位数
+    }
+
+
+def get_day_hour():
+    """一天24小时"""
+    return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
