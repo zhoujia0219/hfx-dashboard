@@ -12,8 +12,8 @@ from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
 from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
-    get_dim_graph_type, get_dim_order_type,get_dim_graph_four,get_dim_graph_scatter, \
-    get_dim_graph_scatter_x,get_dim_graph_scatter_y,get_dim_graph_map_limits,get_dim_graph_map_index
+    get_dim_graph_type, get_dim_order_type, get_dim_graph_four, get_dim_graph_scatter, \
+    get_dim_graph_scatter_x, get_dim_graph_scatter_y, get_dim_graph_map_limits, get_dim_graph_map_index
 from utils import date_util
 
 ###############
@@ -414,97 +414,96 @@ c_fig_03 = dbc.Card(
 c_fig_04 = dbc.Card(
     children=dbc.CardBody(
         children=[
-            #用户选项
+            # 用户选项
             html.Div(
                 children=[
-                        html.H5(children='销售额分析',
-                                className='media-body',
-                                style={'min-width': '150px'}
+                    html.H5(children='销售额分析',
+                            className='media-body',
+                            style={'min-width': '150px'}
                             ),
-                        html.Div([
-                            dcc.Dropdown(
-                                id="x_choice_3",
-                                options=[{'label': x, 'value': y} for x, y in get_dim_graph_four().items()],
-                                value=['businessname', 'areaname4', 'areasize', 'star'],
-                                multi=True,
-                                searchable=False,
-                                clearable=False
-                            ),
-                            ],
-                                className='media-right block-inline')
-                            ],
-                                className='media flex-wrap ',
-                                style={'alignItems': 'flex-end'}
-                            ),
-                    html.Hr(),
-
-                    # 画图 - 柱状图
-                    dbc.Row([
-                        dbc.Col(
-                            html.Div(
-                            dcc.Loading(
-                                id='loading_one',
-                                type='circle',
-                                children=[
-                                    dcc.Graph(
-                                        id='graph_out_one',
-                                        style={'height': '320px', 'width': '500px'}
-                                    )
-                                ], ), ), ),
-                        dbc.Col(html.Div(
-                            dcc.Loading(
-                                id='loading_two',
-                                type='circle',
-                                children=[
-                                    dcc.Graph(
-                                        id='graph_out_two',
-                                        style={'height': '320px', 'width': '500px'}
-                                    )
-                                ], ), ), ),
-                    ], ),
-                    dbc.Row([
-                        dbc.Col(html.Div(
-                            dcc.Loading(
-                                id='loading_three',
-                                type='circle',
-                                children=[
-                                    dcc.Graph(
-                                        id='graph_out_three',
-                                        style={'height': '320px', 'width': '500px'}
-                                    )
-                                ], ), ), ),
-                        dbc.Col(html.Div(
-                            dcc.Loading(
-                                id='loading_four',
-                                type='circle',
-                                children=[
-                                    dcc.Graph(
-                                        id='graph_out_four',
-                                        style={'height': '320px', 'width': '500px'}
-                                    )
-                                ], ), ), )
-                    ], ),
-                    html.Hr(),
                     html.Div([
-                        html.Div(children='最近更新: 2021-07-23 12:30:00',
-                                 className='media-body'),
-                        html.Div(children=dbc.Button(
-                                                children='立即刷新',
-                                                color='secondary',
-                                                className='mr-1',
-                                                size='sm',
-                                                id='3',
-                                                n_clicks=0
-                        )
-                    ),
+                        dcc.Dropdown(
+                            id="x_choice_3",
+                            options=[{'label': x, 'value': y} for x, y in get_dim_graph_four().items()],
+                            value=['businessname', 'areaname4', 'areasize', 'star'],
+                            multi=True,
+                            searchable=False,
+                            clearable=False
+                        ),
+                    ],
+                        className='media-right block-inline')
                 ],
-                        className='media flex-wrap align-items-center'
+                className='media flex-wrap ',
+                style={'alignItems': 'flex-end'}
+            ),
+            html.Hr(),
+
+            # 画图 - 柱状图
+            dbc.Row([
+                dbc.Col(
+                    html.Div(
+                        dcc.Loading(
+                            id='loading_one',
+                            type='circle',
+                            children=[
+                                dcc.Graph(
+                                    id='graph_out_one',
+                                    style={'height': '320px', 'width': '500px'}
+                                )
+                            ], ), ), ),
+                dbc.Col(html.Div(
+                    dcc.Loading(
+                        id='loading_two',
+                        type='circle',
+                        children=[
+                            dcc.Graph(
+                                id='graph_out_two',
+                                style={'height': '320px', 'width': '500px'}
+                            )
+                        ], ), ), ),
+            ], ),
+            dbc.Row([
+                dbc.Col(html.Div(
+                    dcc.Loading(
+                        id='loading_three',
+                        type='circle',
+                        children=[
+                            dcc.Graph(
+                                id='graph_out_three',
+                                style={'height': '320px', 'width': '500px'}
+                            )
+                        ], ), ), ),
+                dbc.Col(html.Div(
+                    dcc.Loading(
+                        id='loading_four',
+                        type='circle',
+                        children=[
+                            dcc.Graph(
+                                id='graph_out_four',
+                                style={'height': '320px', 'width': '500px'}
+                            )
+                        ], ), ), )
+            ], ),
+            html.Hr(),
+            html.Div([
+                html.Div(children='最近更新: 2021-07-23 12:30:00',
+                         className='media-body'),
+                html.Div(children=dbc.Button(
+                    children='立即刷新',
+                    color='secondary',
+                    className='mr-1',
+                    size='sm',
+                    id='3',
+                    n_clicks=0
+                )
+                ),
+            ],
+                className='media flex-wrap align-items-center'
             ),
         ]
     ),
     style={"width": "100%"}
 )
-
 
 # 销售分析气泡图
 c_fig_05 = dbc.Card(
@@ -541,8 +540,8 @@ c_fig_05 = dbc.Card(
                         ),
                     ], className='media-right block-inline'
                     ),
-                ],     className='media flex-wrap ',
-                       style={'alignItems': 'flex-end'}
+                ], className='media flex-wrap ',
+                style={'alignItems': 'flex-end'}
             ),
             html.Hr(),
 
@@ -577,12 +576,11 @@ c_fig_05 = dbc.Card(
                 ], className='media flex-wrap align-items-center'
             ),
         ]
-    ),style={"width": "100%"}
+    ), style={"width": "100%"}
 )
 
-
 # 销售分布地理图
-c_fig_06 = dbc.Card(
+c_fig_sales_day_month = dbc.Card(
     children=dbc.CardBody(
         children=[
             # 用户选项
@@ -608,8 +606,8 @@ c_fig_06 = dbc.Card(
                         ),
                     ], className='media-right block-inline'
                     ),
-                ],     className='media flex-wrap ',
-                       style={'alignItems': 'flex-end'}
+                ], className='media flex-wrap ',
+                style={'alignItems': 'flex-end'}
             ),
             html.Hr(),
             # 画图 - 地理图
@@ -642,13 +640,100 @@ c_fig_06 = dbc.Card(
                 ], className='media flex-wrap align-items-center'
             ),
         ]
-    ),style={"width": "100%"}
+    ), style={"width": "100%"}
 )
 
+# 本日本月销售分布
+c_fig_07 = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            # 用户选项
+            html.Div(
+                children=[
+                    # 标题和单选框
+                    html.H5('销售分布', className='media-body', style={'min-width': '150px'}),
+                    dcc.RadioItems(
+                        id="total_avg_mid",
+                        options=[{'label': '总额', 'value': 'ZE'},
+                                 {'label': '平均数', 'value': 'PJS'},
+                                 {'label': '中位数', 'value': 'ZWS'}],
+                        value='',
+                    ),
 
+                    # 下拉框
+                    html.Div([
+                        dcc.Dropdown(
+                            id="map_limits1",
+                            style={'width': 120},
+                            options=[{'label': "a", 'value': "a"}],
+                            value='a',
+                            searchable=False,
+                            clearable=False
+                        ),
+                        dcc.Dropdown(
+                            id="map_index2",
+                            style={'width': 120},
+                            options=[{'label': "b", 'value': "b"}],
+                            value='b',
+                            searchable=False,
+                            clearable=False
+                        ),
+                    ], className='media-right block-inline'
+                    ),
+                ], className='media flex-wrap ',
+                style={'alignItems': 'flex-end'}
+            ),
+            html.Hr(),
+            # 画图 - 销售分布
+            dbc.Row([
+                html.H6(children='本日销售分布', className='media-body', style={'min-width': '150px'}),
+                dbc.Col(
+                    html.Div(
+                        dcc.Loading(
+                            id='loading_sales_day',
+                            type='circle',
+                            children=[
+                                dcc.Graph(
+                                    id='sales_day',
+                                    style={'height': '400px', 'width': '1000px'}
+                                )
+                            ], ), ), ),
 
+                html.H6(children='本月销售分析', className='media-body', style={'min-width': '150px'}),
+                dbc.Col(html.Div(
+                    dcc.Loading(
+                        id='loading_sales_month',
+                        type='circle',
+                        children=[
+                            dcc.Graph(
+                                id='sales_month',
+                                style={'height': '400px', 'width': '1000px'}
+                            )
+                        ], ), ), ),
+            ], ),
 
-
+            html.Hr(),
+            html.Div(
+                children=[
+                    html.Div(
+                        children=[
+                            html.Span('最近更新:'),
+                            html.Span('{}'.format(str(datetime.now())[:19]),
+                                      id="map_update_time")
+                        ], className='media-body'
+                    ),
+                    html.Div(dbc.Button(
+                        children='立即刷新',
+                        id='map_update_button',
+                        color='secondary',
+                        className='mr-1',
+                        size='sm',
+                        n_clicks=0)),
+                ], className='media flex-wrap align-items-center'
+            ),
+        ]
+    ), style={"width": "100%"}
+)
 content = html.Div(
     className='content-style',
     children=[
@@ -661,7 +746,7 @@ content = html.Div(
                         dbc.Row(children=c_fig_02, className='mt-3'),
                         dbc.Row(children=c_fig_04, className='mt-3'),
                         dbc.Row(children=c_fig_05, className='mt-3'),
-                        dbc.Row(children=c_fig_06, className='mt-3'),
+                        dbc.Row(children=c_fig_sales_day_month, className='mt-3'),  # 本日本月的销售分布
                     ],
                     width=8
                 ),

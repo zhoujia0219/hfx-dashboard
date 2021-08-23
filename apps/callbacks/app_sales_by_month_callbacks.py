@@ -176,7 +176,6 @@ def register_callbacks(dash_app):
             pic_dff = pic.groupby([data_x], as_index=False)['dealtotal']
             pic_dff = eval(data_sum)
             if data_x == "city_level":
-                print("pic_dff", pic_dff)
                 fig = px.bar(
                     pic_dff,
                     x=data_x,
@@ -184,13 +183,13 @@ def register_callbacks(dash_app):
                     color='dealtotal',
                     barmode='group',
                     template='plotly_white',
-                    labels={'dealtotal': '总销售额','city_level':'城市等级'},
+                    labels={'dealtotal': '总销售额', 'city_level': '城市等级'},
                 )
                 fig.update_layout(
                     xaxis=dict(
-                    tickmode='array',
-                    tickvals=[2, 3],
-                    ticktext=['城市等级2', '城市等级3']
+                        tickmode='array',
+                        tickvals=[2, 3],
+                        ticktext=['城市等级2', '城市等级3']
 
                     )
                 )
@@ -211,13 +210,13 @@ def register_callbacks(dash_app):
                     color='dealtotal',
                     barmode='group',
                     template='plotly_white',
-                    labels={'dealtotal': '总销售额','star':'门店星级'},
+                    labels={'dealtotal': '总销售额', 'star': '门店星级'},
                 )
                 fig.update_layout(
                     xaxis=dict(
                         tickmode='array',
-                        tickvals=[1,2,3,4,5],
-                        ticktext=['门店星级1', '门店星级2','门店星级3','门店星级4','门店星级5',]
+                        tickvals=[1, 2, 3, 4, 5],
+                        ticktext=['门店星级1', '门店星级2', '门店星级3', '门店星级4', '门店星级5', ]
                     )
                 )
 
@@ -229,7 +228,7 @@ def register_callbacks(dash_app):
                     color='dealtotal',
                     barmode='group',
                     template='plotly_white',
-                    labels={'dealtotal':'总销售额','areaname4':'战区','businessname':'销售渠道','vctype':'门店类型'},
+                    labels={'dealtotal': '总销售额', 'areaname4': '战区', 'businessname': '销售渠道', 'vctype': '门店类型'},
                 )
                 fig.update_traces(textposition='inside')
             return fig
@@ -248,7 +247,7 @@ def register_callbacks(dash_app):
             return dash.no_update
         if d_x == d_y:
             return dash.no_update
-        trade_data_group = trade_data.groupby([d_d,d_x], as_index=False)[['dealtotal', d_y]].sum()
+        trade_data_group = trade_data.groupby([d_d, d_x], as_index=False)[['dealtotal', d_y]].sum()
         fig = px.scatter(
             trade_data_group,
             x=d_x,
@@ -259,7 +258,7 @@ def register_callbacks(dash_app):
             size_max=60,  # 点的最大值
             # hover_name=,       #悬停信息
             # animation_frame='',   #将**作为播放按钮
-            labels={'price':'客单价','billcount':'客单量','county_name':'城区','dealtotal':'总销售额','areasize':'面积'}
+            labels={'price': '客单价', 'billcount': '客单量', 'county_name': '城区', 'dealtotal': '总销售额', 'areasize': '面积'}
         )
         return fig
 
@@ -275,7 +274,7 @@ def register_callbacks(dash_app):
         map_data = srv_sales_bymonth.find_mapdata_list(filter_values)
         with urlopen('https://cdn.huanggefan.cn/geojson/china.json') as f:
             provinces_map = json.load(f)
-        map_datas =map_data .groupby('ad_name', as_index=False)['sales'].sum()
+        map_datas = map_data.groupby('ad_name', as_index=False)['sales'].sum()
         # print(map_datas)
         fig = px.choropleth_mapbox(
             map_datas,
@@ -304,8 +303,6 @@ def register_callbacks(dash_app):
             }
         )
         return fig
-
-
 
     @dash_app.callback(
         Output('signal', 'data'),
@@ -480,7 +477,6 @@ def register_callbacks(dash_app):
 
         return build_city_graph(filter_values, val_x, val_cate, val_agg)
 
-
     @dash_app.callback(
         [
             Output('graph_out_one', 'figure'),
@@ -520,7 +516,6 @@ def register_callbacks(dash_app):
         print("测试代码：", b1 - a1)
         return fig_list1[0], fig_list1[1], fig_list1[2], fig_list1[3]
 
-
     @dash_app.callback(
         Output('graph_billcount', 'figure'),
         [
@@ -529,7 +524,7 @@ def register_callbacks(dash_app):
             Input('option_other', 'value'),
         ]
     )
-    def updata_graph_scatter(d_x,d_y,d_d):
+    def updata_graph_scatter(d_x, d_y, d_d):
         """
          :param filter_values
          :param d_x:
@@ -540,7 +535,6 @@ def register_callbacks(dash_app):
         scatter_list = build_trademoney_scatter("", d_x, d_y, d_d)
         return scatter_list
 
-
     @dash_app.callback(
         Output('map_graph', 'figure'),
         [
@@ -548,9 +542,24 @@ def register_callbacks(dash_app):
             Input('map_index', 'value'),
         ]
     )
-    def updata_graph_map(map_name,map_value):
+    def updata_graph_map(map_name, map_value):
         """
-        :param map_one:
-        :return:
+        销售分布的本日、本月的回调函数
+        :param total_avg_mid: 单选框
+        :return:sales_day:本日销售分布图
+                sales_month:本月销售分布图
         """
-        return build_map_graph("",map_name,map_value)
+        return build_map_graph("", map_name, map_value)
+
+    @dash_app.callback(
+        [
+            Output('sales_day', 'figure'),
+            Output('sales_month', 'figure'),
+        ],
+        [
+            Input('total_avg_mid', 'value'),
+        ]
+    )
+    def sale_day_month(total_avg_mid):
+
+        pass
