@@ -1,7 +1,9 @@
 import math
 import time
+import json
 
 import dash
+from urllib.request import urlopen
 import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
@@ -199,6 +201,7 @@ def register_callbacks(dash_app):
                     names='areasize_bins',
                     values='dealtotal',
                     color_discrete_sequence=px.colors.sequential.Bluyl,
+                    labels={'dealtotal': '总销售额', 'areasize_bins': '门店面积类型'},
                 )
             elif data_x == 'star':
                 fig = px.bar(
@@ -231,7 +234,7 @@ def register_callbacks(dash_app):
                 fig.update_traces(textposition='inside')
             return fig
 
-    # 销售额分析气泡图
+    # 销售单价与销售数量分析气泡图
     def build_trademoney_scatter(filter_values, d_x, d_y, d_d):
         """
         :param filter_values:
@@ -259,6 +262,49 @@ def register_callbacks(dash_app):
             labels={'price':'客单价','billcount':'客单量','county_name':'城区','dealtotal':'总销售额','areasize':'面积'}
         )
         return fig
+
+    # 地理图
+    def build_map_graph(filter_values, map_name, map_value):
+        """
+        :param filter_values:
+        :param map_one:
+        :param map_two:
+        :param map_other:
+        :return:
+        """
+        map_data = srv_sales_bymonth.find_mapdata_list(filter_values)
+        with urlopen('https://cdn.huanggefan.cn/geojson/china.json') as f:
+            provinces_map = json.load(f)
+        map_datas =map_data .groupby('ad_name', as_index=False)['sales'].sum()
+        # print(map_datas)
+        fig = px.choropleth_mapbox(
+            map_datas,
+            geojson=provinces_map,
+            color=map_value,
+            locations=map_name,
+            # 地理数据json文件中的省份名称的键名
+            featureidkey="properties.name",
+            mapbox_style="white-bg",
+            # 不同程度的颜色参数
+            color_continuous_scale=[
+                [0, '#FFFAF0'],
+                [1. / 30000, '#FFE4B5'],
+                [1. / 300, '#F4A460'],
+                [1. / 30, '#F08080'],
+                [1 / 3, '#FA8072'],
+                [1., '#FF4500']],
+            # 中心经纬度
+            center={"lat": 37.110573, "lon": 106.493924},
+            zoom=3,
+            hover_name="ad_name",
+            hover_data=["sales"],
+            labels={
+                'ad_name': '省份名称',
+                'sales': '销售总额'
+            }
+        )
+        return fig
+
 
 
     @dash_app.callback(
@@ -493,3 +539,18 @@ def register_callbacks(dash_app):
          """
         scatter_list = build_trademoney_scatter("", d_x, d_y, d_d)
         return scatter_list
+
+
+    @dash_app.callback(
+        Output('map_graph', 'figure'),
+        [
+            Input('map_limits', 'value'),
+            Input('map_index', 'value'),
+        ]
+    )
+    def updata_graph_map(map_name,map_value):
+        """
+        :param map_one:
+        :return:
+        """
+        return build_map_graph("",map_name,map_value)

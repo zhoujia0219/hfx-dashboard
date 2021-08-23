@@ -422,3 +422,20 @@ def find_trademoney_list(filter_values: dict) ->DataFrame:
     print('find_trademoney_list: Running time:{} seconds'.format(time_end - time_start))
     print(trademoney)
     return trademoney
+
+
+def find_mapdata_list(filter_values: dict) ->DataFrame:
+    time_start = time.time()
+    query_sql = """
+        SELECT * FROM
+        (SELECT ad_name FROM chunbaiwei.dim_area WHERE city ='00'AND county ='00') c
+        LEFT JOIN 
+        (SELECT province_name,"sum"(dealtotal) as sales FROM chunbaiwei.fact_storesale_weather GROUP BY province_name) b
+        ON c.ad_name = b.province_name
+            """
+    mapdata = db_util.read_by_pd(query_sql, default_dbname)
+    time_end = time.time()
+    print('find_mapdata_list: Running time:{} seconds'.format(time_end - time_start))
+    print(mapdata)
+    return mapdata
+

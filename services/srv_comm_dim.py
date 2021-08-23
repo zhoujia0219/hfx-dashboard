@@ -155,3 +155,19 @@ def get_dim_graph_scatter_y() -> Dict:
             'Y轴:  客单量': 'billcount',
             'Y轴:  总销售额': 'dealtotal',
             }
+
+def get_dim_graph_map_limits() -> Dict:
+    """
+    地理图自定义地图范围
+    :return dict
+    """
+    return {'地图范围:  全国': 'ad_name'
+            }
+
+def get_dim_graph_map_index() -> Dict:
+    """
+    地理图自定义指标
+    :return dict
+    """
+    return {'指标:  总销售额': 'sales'
+            }
