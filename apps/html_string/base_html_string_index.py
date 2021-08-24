@@ -1,4 +1,4 @@
-base_html_string5 = """
+base_html_string_index = """
 <!DOCTYPE html>
 <html lang="zxx">
    <head>
@@ -61,9 +61,10 @@ base_html_string5 = """
                         <a href=""><i data-feather="home"></i>
                         <span>首页</span></a>
                      </li>
+                     
                       <li class="menu-divider mg-y-20-force"></li>
                      <li>
-                        <a href=""><i data-feather="mail"></i>
+                        <a href="http://127.0.0.1:8001/real_time/"><i data-feather="mail"></i>
                         <span>第二个页面</span></a>
                      </li>
                    <li class="menu-divider mg-y-20-force"></li>

@@ -12,3 +12,5 @@
 
 # 门店月度销售分析
 URL_SALES_BYMONTH = "/sales/bymonth/"
+# 实时销售页面
+URL_REAL_TIME_SALE = "/real_time/"
