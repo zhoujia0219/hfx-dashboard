@@ -4,6 +4,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import pandas
 from dateutil.relativedelta import relativedelta
 import plotly.express as px
 
@@ -16,7 +17,7 @@ from apps.components import filter_store_star
 from services import srv_sales_bymonth
 from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
     get_dim_graph_type, get_dim_order_type, get_dim_graph_four, get_dim_graph_scatter, \
-    get_dim_graph_scatter_x, get_dim_graph_scatter_y, get_dim_graph_map_limits, get_dim_graph_map_index
+    get_dim_graph_scatter_x, get_dim_graph_scatter_y, get_dim_graph_map_limits, get_dim_graph_map_index, get_day_hour
 from utils import date_util
 
 ###############
@@ -590,6 +591,7 @@ c_fig_06 = dbc.Card(
             html.Div(
                 children=[
                     html.H5('销售分布地理图', className='media-body', style={'min-width': '150px'}),
+                    html.Hr(),
                     html.Div([
                         dcc.Dropdown(
                             id="map_limits",
@@ -661,7 +663,8 @@ def sale_day_fig(data_x, data_y):
     if data_x == data_y:
         return dash.no_update
     pic_dff = pic.groupby([data_x], as_index=False)['sale'].sum()
-
+    empty_pic = pandas.DataFrame(get_day_hour(), columns=["times", "sale"])
+    pic_dff = pandas.concat([empty_pic, pic_dff])
     fig = px.bar(
         pic_dff,
         x=data_x,
@@ -679,10 +682,21 @@ def sale_day_fig(data_x, data_y):
 c_fig_sales_day_month = dbc.Card(
     children=dbc.CardBody(
         children=[
-            # 画图 - 销售分布
-            html.H5('销售分布', className='media-body', style={'min-width': '150px'}),
+            # 用户选项
+            html.Div(
+                children=[
+                    html.H5(children='销售分布',
+                            className='media-body',
+                            style={'min-width': '150px'}
+                            ),
+                ],
+                className='media flex-wrap ',
+                style={'alignItems': 'flex-end'}
+            ),
+            html.Hr(),
+            html.H6(children='本日销售分析', className='media-body', style={'min-width': '150px'}),
+            # 画图 - 日销售分布
             dbc.Row([
-                html.H6(children='本日销售分布', className='media-body', style={'min-width': '150px'}),
                 dbc.Col(
                     html.Div(
                         dcc.Loading(
@@ -692,49 +706,47 @@ c_fig_sales_day_month = dbc.Card(
                                 dcc.Graph(
                                     id='sales_day',
                                     figure=sale_day_fig("times", "sale"),  # 画图
-                                    style={'height': '400px', 'width': '1000px'}
+                                    style={'height': '400px', 'width': '1200px'}
                                 )
                             ], ), ), ),
-
-                html.H6(children='本月销售分析', className='media-body', style={'min-width': '150px'}),
-
-                # 用户选项
-                html.Div(
-                    children=[
-                        # 标题和单选框
-                        dcc.RadioItems(
-                            id="total_avg_mid",
-                            options=[{'label': '总额', 'value': 'ZE'},
-                                     {'label': '平均数', 'value': 'PJS'},
-                                     {'label': '中位数', 'value': 'ZWS'}],
-                            value='ZE',
+            ], ),
+            html.H6(children='本月销售分析', className='media-body', style={'min-width': '150px'}),
+            # 用户选项
+            html.Div(
+                children=[
+                    # 标题和单选框
+                    dcc.RadioItems(
+                        id="total_avg_mid",
+                        options=[{'label': '总额', 'value': 'ZE'},
+                                 {'label': '平均数', 'value': 'PJS'},
+                                 {'label': '中位数', 'value': 'ZWS'}],
+                        value='ZE',
+                    ),
+                    # 下拉框
+                    html.Div([
+                        dcc.Dropdown(
+                            id="range_choice",
+                            style={'width': 120},
+                            options=[{'label': '本月', 'value': 'by'},
+                                     {'label': '最近30天', 'value': 'zj'}],
+                            value='by',
+                            searchable=False,
+                            clearable=False
                         ),
-                        # 下拉框
-                        html.Div([
-                            dcc.Dropdown(
-                                id="range_choice",
-                                style={'width': 120},
-                                options=[{'label': '本月', 'value': 'by'},
-                                         {'label': '最近30天', 'value': 'zj'}],
-                                value='by',
-                                searchable=False,
-                                clearable=False
-                            ),
-                            dcc.Dropdown(
-                                id="map_index2",
-                                style={'width': 120},
-                                options=[{'label': "b", 'value': "b"}],
-                                value='b',
-                                searchable=False,
-                                clearable=False
-                            ),
-                        ], className='media-right block-inline'
+                        dcc.Dropdown(
+                            id="map_index2",
+                            style={'width': 120},
+                            options=[{'label': "b", 'value': "b"}],
+                            value='b',
+                            searchable=False,
+                            clearable=False
                         ),
-                    ], className='media flex-wrap ',
-                    style={'alignItems': 'flex-end'}
-                ),
-
-                html.Hr(),
+                    ], className='media-right block-inline'
+                    ),
+                ], className='media flex-wrap ',
+                style={'alignItems': 'flex-end'}
+            ),
+            dbc.Row([
                 dbc.Col(html.Div(
                     dcc.Loading(
                         id='loading_sales_month',
@@ -742,33 +754,32 @@ c_fig_sales_day_month = dbc.Card(
                         children=[
                             dcc.Graph(
                                 id='sales_month',
-                                style={'height': '400px', 'width': '1000px'}
+                                style={'height': '400px', 'width': '1200px'}
                             )
                         ], ), ), ),
             ], ),
 
             html.Hr(),
-            html.Div(
-                children=[
-                    html.Div(
-                        children=[
-                            html.Span('最近更新:'),
-                            html.Span('{}'.format(str(datetime.now())[:19]),
-                                      id="map_update_time2")
-                        ], className='media-body'
-                    ),
-                    html.Div(dbc.Button(
-                        children='立即刷新',
-                        id='map_update_button2',
-                        color='secondary',
-                        className='mr-1',
-                        size='sm',
-                        n_clicks=0)),
-                ], className='media flex-wrap align-items-center'
+            html.Div([
+                html.Div(children='最近更新: 2021-07-23 12:30:00',
+                         className='media-body'),
+                html.Div(children=dbc.Button(
+                    children='立即刷新',
+                    color='secondary',
+                    className='mr-1',
+                    size='sm',
+                    id='map_update_button3',
+                    n_clicks=0
+                )
+                ),
+            ],
+                className='media flex-wrap align-items-center'
             ),
         ]
-    ), style={"width": "100%"}
+    ),
+    style={"width": "100%"}
 )
+
 content = html.Div(
     className='content-style',
     children=[

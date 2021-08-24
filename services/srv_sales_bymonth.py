@@ -447,7 +447,7 @@ def sales_day() -> DataFrame:
     销售日数据
     """
     query_sql = """
-         select sale, substr(times,0,3) as times,rdate from chunbaiwei.fact_salebill where rdate='1900-01-20' OR rdate='1900-01-19'               
+         select sale, substr(times,0,3) as times,rdate from chunbaiwei.fact_salebill where rdate='2021-03-21' OR rdate='2021-03-22'               
              """
     mapdata = db_util.read_by_pd(query_sql, default_dbname)
     return mapdata
