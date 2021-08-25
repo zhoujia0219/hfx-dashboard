@@ -15,9 +15,7 @@ from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
 from services import srv_sales_real_time
-from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
-    get_dim_graph_type, get_dim_order_type, get_dim_graph_four, get_dim_graph_scatter, \
-    get_dim_graph_scatter_x, get_dim_graph_scatter_y, get_dim_graph_map_limits, get_dim_graph_map_index, get_day_hour
+from services.srv_comm_dim import get_day_hour, get_week_map
 from utils import date_util
 
 ###############
@@ -44,16 +42,16 @@ sidebar = html.Div(
     children=[
         html.H4(children="门店月度销售分析"),
         html.Hr(),
-        html.P(children="可通过条件筛选过滤数据，也可以改变维度和图形样式", className="small", style={'color': 'gray'}),
-        html.Div([
-            filter_date_range.filter_month_range(date_range, start_month, stop_month),
-            filter_city_level.filter_city_level(),
-            filter_channels.filter_channels(),
-            filter_store_age.filter_store_age(),
-            filter_store_area.filter_store_area(),
-            filter_store_star.filter_store_star(),
-            dbc.Button(children='重新计算', id='f_submit', color="primary", className="mt-3", block=True),
-        ]),
+        # html.P(children="可通过条件筛选过滤数据，也可以改变维度和图形样式", className="small", style={'color': 'gray'}),
+        # html.Div([
+        #     filter_date_range.filter_month_range(date_range, start_month, stop_month),
+        #     filter_city_level.filter_city_level(),
+        #     filter_channels.filter_channels(),
+        #     filter_store_age.filter_store_age(),
+        #     filter_store_area.filter_store_area(),
+        #     filter_store_star.filter_store_star(),
+        #     dbc.Button(children='重新计算', id='f_submit', color="primary", className="mt-3", block=True),
+        # ]),
     ],
 )
 
@@ -184,6 +182,7 @@ card_list = [
     ),
 ]
 
+
 def sale_day_fig(data_x, data_y):
     """
     销售日数据
@@ -220,6 +219,333 @@ def sale_day_fig(data_x, data_y):
     return fig
 
 
+left_table = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            # 用户选项
+            html.Div(
+                [
+                    dbc.Row(  # 顶上日期
+                        dbc.Col(
+                            html.Span(children="{}".format(
+                                datetime.now().strftime("%Y-%m-%d") + " " + get_week_map()[
+                                    datetime.now().isoweekday()])),
+                            style={"color": "#dcdcdc"},
+                            width=6
+                        )),
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="本日销售额"
+                            ),
+                            width=6
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="门店总数"
+                            ),
+                            width=3
+                        )]),
+                    dbc.Row([
+                        dbc.Col(
+                            html.H3(
+                                children="￥200000000",
+                                style={"color": "red"}
+                            ),
+                            width=6
+                        ),
+                        dbc.Col(
+                            html.H3(
+                                children="3500",
+                                style={"color": "red"}
+                            ),
+                            width=3
+                        )]),
+                    html.Hr(),  # todo 中间一点点的空白多了一根横线
+                    dbc.Row([  # 第一个带有图的
+                        dbc.Col(
+                            [dbc.Row(dbc.Col(html.H5(
+                                children="本周累计销售额/计划"
+                            ))),
+
+                                dbc.Row(dbc.Col(html.H5(
+                                    children="￥200000000/￥200000000",
+                                    style={"color": "red"}
+                                )))],
+                            width=6
+                        ),
+
+                        dbc.Col(
+                            html.H5(  # 图
+                                children="画图"
+                            ),
+                            width=6
+                        ),
+                    ], style={"backgroundColor": "#dcdcdc"}),
+                    html.Hr(),  # todo 中间一点点的空白多了一根横线
+                    dbc.Row([  # 第二个带有图的
+                        dbc.Col(
+                            [dbc.Row(dbc.Col(html.H5(
+                                children="本月累计销售额/计划"
+                            ))),
+
+                                dbc.Row(dbc.Col(html.H5(
+                                    children="￥200000000/￥200000000",
+                                    style={"color": "red"}
+                                )))],
+                            width=6
+                        ),
+
+                        dbc.Col(
+                            html.H5(  # 图
+                                children="画图"
+                            ),
+                            width=6
+                        ),
+                    ], style={"backgroundColor": "#dcdcdc"}),
+
+                    # 表格
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children=""
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="昨日同期"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="今日"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="上升/下降"
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="销售总数"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="90000"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="99999"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="+10%",
+                                style={"backgroundColor": "red"}
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="店均销售"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="3000"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="3300"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="+1%",
+                                style={"backgroundColor": "red"}
+
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="客单量"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="300"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="280"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="-10%",
+                                style={"backgroundColor": "green"}
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="客单价"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="34.5"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="34.5"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="0%"
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="销售毛利"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="450.0"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="460"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="5%",
+                                style={"backgroundColor": "red"}
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="毛利率"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="12%"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="11%"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="-5%",
+                                style={"backgroundColor": "green"}
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(
+                                children="门店数"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="3500",
+                                style={"color": "#dcdcdc"}
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="3500"
+                            ),
+                            width=3
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                children="+2%",
+                                style={"backgroundColor": "red"}
+                            ),
+                            width=3
+                        )
+                    ]),
+                    html.Hr(),
+                    # todo
+                ],
+                style={'alignItems': 'flex-end'}
+            ),
+            html.Hr(),
+        ]
+    ),
+    style={"width": "100%"}
+)
+
 # 本日本月销售分布
 c_fig_sales_day_month = dbc.Card(
     children=dbc.CardBody(
@@ -242,6 +568,19 @@ c_fig_sales_day_month = dbc.Card(
                 className='media-body',
                 style={'min-width': '150px'}
             ),
+            html.Div([
+                dcc.Dropdown(
+                    id="x_choice_3",
+                    style={'width': 120},
+                    options=[{'label': '5-12', 'value': 'time1'},
+                             {'label': '12-18', 'value': 'time1'},
+                             {'label': '18-5', 'value': 'time2'}],
+                    value='time1',
+                    searchable=False,
+                    clearable=False
+                ),
+            ],
+                className='media-left block-inline'),
             # 画图 - 日销售分布
             dbc.Row([
                 dbc.Col(
@@ -285,7 +624,7 @@ c_fig_sales_day_month = dbc.Card(
                         dcc.Dropdown(
                             id="map_index2",
                             style={'width': 120},
-                            options=[{'label': "b", 'value': "b"}],
+                            options=[{'label': "图形样式：柱状图", 'value': "b"}],
                             value='b',
                             searchable=False,
                             clearable=False
@@ -335,11 +674,13 @@ content = html.Div(
         # dbc.Row(id="card_data", children=card_list),
         dbc.Row(
             children=[
+                dbc.Col(left_table, width=4),
+
                 dbc.Col(
                     children=[
                         dbc.Row(children=c_fig_sales_day_month, className='mt-3'),  # 本日本月的销售分布
                     ],
-                    width=8
+                    width=8  # 控制整个块的区域
                 ),
             ],
             className='mt-3'),
@@ -356,5 +697,6 @@ layout = html.Div(
         content,
         # signal value to trigger callbacks
         dcc.Store(id='signal')
-    ]
+    ],
+    style={"width": "100%"}
 )

@@ -58,7 +58,7 @@ base_html_string_index = """
                <div class="page-sidebar-menu">
                   <ul class="accordion-menu">
                      <li class="open active">
-                        <a href=""><i data-feather="home"></i>
+                        <a href="http://127.0.0.1:8001/sales/bymonth/"><i data-feather="home"></i>
                         <span>首页</span></a>
                      </li>
                      

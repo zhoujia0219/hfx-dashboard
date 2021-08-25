@@ -1,12 +1,9 @@
 from datetime import datetime
 
-import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas
 from dateutil.relativedelta import relativedelta
-import plotly.express as px
 
 from apps.components import filter_channels
 from apps.components import filter_city_level
@@ -14,10 +11,9 @@ from apps.components import filter_date_range
 from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
-from services import srv_sales_bymonth
 from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
     get_dim_graph_type, get_dim_order_type, get_dim_graph_four, get_dim_graph_scatter, \
-    get_dim_graph_scatter_x, get_dim_graph_scatter_y, get_dim_graph_map_limits, get_dim_graph_map_index, get_day_hour
+    get_dim_graph_scatter_x, get_dim_graph_scatter_y, get_dim_graph_map_limits, get_dim_graph_map_index
 from utils import date_util
 
 ###############

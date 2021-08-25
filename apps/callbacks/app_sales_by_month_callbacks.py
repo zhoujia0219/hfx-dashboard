@@ -594,6 +594,5 @@ def register_callbacks(dash_app):
     #     """
     #     销售月分布
     #     """
-    #     print(total_avg_mid,range_choice,12131132)
     #     fig_sales_month = sale_month_fig("day", "dealtotal", get_ZE_PJS_ZWS()[total_avg_mid],range_choice)
     #     return fig_sales_month

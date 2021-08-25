@@ -34,3 +34,7 @@ body {
     background-color: #f5f6f7;
     font-size: small;
 }
+
+.card-body{
+    width：2000px!important
+}
