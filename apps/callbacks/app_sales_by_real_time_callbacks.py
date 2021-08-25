@@ -1,14 +1,8 @@
-import math
-import time
-import json
-
+import pandas as pd
 import dash
-from urllib.request import urlopen
 import plotly.express as px
 import plotly.graph_objects as go
-from dash.dependencies import Input, Output, State
-from pandas import DataFrame
-import pandas as pd
+from dash.dependencies import Input, Output
 
 from services import srv_sales_real_time
 
@@ -17,7 +11,7 @@ from services import srv_sales_real_time
 ###############
 from services.srv_comm_dim import get_ZE_PJS_ZWS
 from services.srv_sales_real_time import get_all_areaname
-from utils.thread_one_interface import MyThread
+from utils.date_util import get_day_hour
 
 
 def register_callbacks(dash_app):
@@ -55,16 +49,63 @@ def register_callbacks(dash_app):
             fig = go.Figure(data)
         return fig
 
+    def sale_day_fig(data_x, data_y, x_choice_time):
+        """
+        销售日数据
+        :param data_x:
+        :param data_y:
+        :param data_sum: pic_dff.sum()
+        :return:
+        """
+        day_hour_arang, all_time_list = get_day_hour(x_choice_time)
+        pic = srv_sales_real_time.sales_day(all_time_list)  # todo
+        if data_x == data_y:
+            return dash.no_update
+        pic_dff = pic.groupby([data_x], as_index=False)['sale'].sum()
+        empty_pic = pd.DataFrame(day_hour_arang, columns=["times", "sale"])
+        print(empty_pic,'empty_pic')
+        pic_dff = pd.concat([empty_pic, pic_dff])
+        fig = px.bar(
+            pic_dff,
+            x=data_x,
+            y='sale',
+            color='sale',
+            barmode='group',
+            template='plotly_white',
+            labels={'sale': '总销售额', 'times': '时间点'},
+        )
+        fig.update_traces(textposition='inside')
+        axis = [i for i in range(1, 24)]
+        fig.update_layout(
+            xaxis=dict(
+                tickmode='array',
+                tickvals=axis,
+                ticktext=axis
+            ))
+        return fig
+
     @dash_app.callback(
-        Output('sales_month', 'figure'),
+        Output('sales_real_time_day', 'figure'),
+        Input('x_choice_time', 'value'),
+    )
+    def sale_day_day(x_choice_time):
+        """
+        销售日分布
+        """
+        fig_sales_day = sale_day_fig("times", "sale", x_choice_time),  # 画图
+        return fig_sales_day[0]
+
+    @dash_app.callback(
+        Output('sales_real_time_month', 'figure'),
         [
             Input('total_avg_mid', 'value'),
-            Input('range_choice', 'value')
+            Input('range_choice', 'value'),
+
         ]
     )
     def sale_day_month(total_avg_mid, range_choice):
         """
         销售月分布
         """
-        fig_sales_month = sale_month_fig("day", "dealtotal", get_ZE_PJS_ZWS()[total_avg_mid],range_choice)
+        fig_sales_month = sale_month_fig("day", "dealtotal", get_ZE_PJS_ZWS()[total_avg_mid], range_choice)
         return fig_sales_month

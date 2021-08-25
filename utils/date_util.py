@@ -68,3 +68,36 @@ def get_current_month_all_day(range_choice: str):
         date_data.append(yesterday.strftime("%Y-%m-%d"))
         today = yesterday
     return tuple(date_data)
+
+
+def get_day_hour(x_choice_time):
+    """一天24小时
+        param x_choice_time:选择的时间范围
+        return: data_list:所有时间点的空数据，列表嵌元组形式
+                all_time_list:所有时间点，列表嵌列表，第一个列表是昨日时间点，第二个列表是今日时间点
+    """
+    data_list = list()  # 所有时间点的空数据，列表嵌元组形式
+    all_time_list = [[], []]
+    choice_str_list = x_choice_time.split("-")
+    try:
+        choice_str_list_0 = int(choice_str_list[0])
+        choice_str_list_1 = int(choice_str_list[1])
+    except:
+        choice_str_list_0 = 0
+        choice_str_list_1 = 23
+    # 当天的时间范围内
+    if len(choice_str_list) > 1 and choice_str_list_0 < choice_str_list_1:
+        for i in range(choice_str_list_0, choice_str_list_1 + 1):
+            data_list.append((i, 0))
+            all_time_list[0].append(str(i) if len(str(i)) == 2 else '0' + str(i))  # 拼接字符串时间点，数据库的是字符串
+    # 今天到第二天的某个时间点
+    if len(choice_str_list) > 1 and choice_str_list_0 > choice_str_list_1:
+        for i in range(choice_str_list_0, 24):
+            # 今日
+            all_time_list[0].append(str(i) if len(str(i)) == 2 else '0' + str(i))
+            data_list.append((i, 0))
+        for j in range(choice_str_list_1 + 1):
+            # 昨日
+            data_list.append((j, 0))
+            all_time_list[1].append(str(j) if len(str(j)) == 2 else '0' + str(j))
+    return data_list, all_time_list

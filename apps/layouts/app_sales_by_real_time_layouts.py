@@ -1,21 +1,11 @@
 from datetime import datetime
 
-import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas
 from dateutil.relativedelta import relativedelta
-import plotly.express as px
 
-from apps.components import filter_channels
-from apps.components import filter_city_level
-from apps.components import filter_date_range
-from apps.components import filter_store_age
-from apps.components import filter_store_area
-from apps.components import filter_store_star
-from services import srv_sales_real_time
-from services.srv_comm_dim import get_day_hour, get_week_map
+from services.srv_comm_dim import get_week_map
 from utils import date_util
 
 ###############
@@ -181,43 +171,6 @@ card_list = [
         style={'paddingRight': 15}
     ),
 ]
-
-
-def sale_day_fig(data_x, data_y):
-    """
-    销售日数据
-    :param data_x:
-    :param data_y:
-    :param data_sum: pic_dff.sum()
-    :return:
-    """
-    pic = srv_sales_real_time.sales_day()
-    if len(pic) < 1:
-        return dash.no_update
-    if data_x == data_y:
-        return dash.no_update
-    pic_dff = pic.groupby([data_x], as_index=False)['sale'].sum()
-    empty_pic = pandas.DataFrame(get_day_hour(), columns=["times", "sale"])
-    pic_dff = pandas.concat([empty_pic, pic_dff])
-    fig = px.bar(
-        pic_dff,
-        x=data_x,
-        y='sale',
-        color='sale',
-        barmode='group',
-        template='plotly_white',
-        labels={'sale': '总销售额', 'times': '时间点'},
-    )
-    fig.update_traces(textposition='inside')
-    axis = [i for i in range(1, 24)]
-    fig.update_layout(
-        xaxis=dict(
-            tickmode='array',
-            tickvals=axis,
-            ticktext=axis
-        ))
-    return fig
-
 
 left_table = dbc.Card(
     children=dbc.CardBody(
@@ -570,12 +523,12 @@ c_fig_sales_day_month = dbc.Card(
             ),
             html.Div([
                 dcc.Dropdown(
-                    id="x_choice_3",
+                    id="x_choice_time",
                     style={'width': 120},
-                    options=[{'label': '5-12', 'value': 'time1'},
-                             {'label': '12-18', 'value': 'time1'},
-                             {'label': '18-5', 'value': 'time2'}],
-                    value='time1',
+                    options=[{'label': '5-12', 'value': '5-12'},
+                             {'label': '12-18', 'value': '12-18'},
+                             {'label': '18-5', 'value': '18-5'}],
+                    value='5-12',
                     searchable=False,
                     clearable=False
                 ),
@@ -589,9 +542,8 @@ c_fig_sales_day_month = dbc.Card(
                             id='loading_sales_day',
                             type='circle',
                             children=[
-                                dcc.Graph(
-                                    id='sales_day',
-                                    figure=sale_day_fig("times", "sale"),  # 画图
+                                dcc.Graph(  # 日销售分布图
+                                    id='sales_real_time_day',
                                     style={'height': '400px', 'width': '1200px'}
                                 )
                             ], ), ), ),
@@ -635,16 +587,17 @@ c_fig_sales_day_month = dbc.Card(
                 style={'alignItems': 'flex-end'}
             ),
             dbc.Row([
-                dbc.Col(html.Div(
-                    dcc.Loading(
-                        id='loading_sales_month',
-                        type='circle',
-                        children=[
-                            dcc.Graph(  # 月销售分布图
-                                id='sales_month',
-                                style={'height': '400px', 'width': '1200px'}
-                            )
-                        ], ), ), ),
+                dbc.Col(
+                    html.Div(
+                        dcc.Loading(
+                            id='loading_sales_month',
+                            type='circle',
+                            children=[
+                                dcc.Graph(  # 月销售分布图
+                                    id='sales_real_time_month',
+                                    style={'height': '400px', 'width': '1200px'}
+                                )
+                            ], ), ), ),
             ], ),
 
             html.Hr(),
