@@ -1,4 +1,5 @@
 from datetime import datetime
+import plotly.graph_objs as go
 
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -6,6 +7,7 @@ import dash_html_components as html
 from dateutil.relativedelta import relativedelta
 
 from services.srv_comm_dim import get_week_map
+from services.srv_sales_real_time import sale_total, shop_count, guest_orders, cost_price, dealtotal_plan_sales
 from utils import date_util
 
 ###############
@@ -171,6 +173,41 @@ card_list = [
         style={'paddingRight': 15}
     ),
 ]
+sale_total_form = sale_total()  # 今日昨日销售额
+shop_form = shop_count()  # 今日昨日门店数
+guest_orders_form = guest_orders()  # 今日昨日客单量
+cost_form = cost_price()  # 今日昨日的成本
+sales_margin = [sale_total_form[0] - cost_form[0], sale_total_form[1] - cost_form[1]]  # 今日昨日的销售毛利
+sales_margin_rate = [(sale_total_form[0] - cost_form[0]) / sale_total_form[0],
+                     (sale_total_form[1] - cost_form[1]) / sale_total_form[1]]  # 今日昨日的毛利率
+
+customer_transaction_form = [sale_total_form[0] / guest_orders_form[0],
+                             sale_total_form[1] / guest_orders_form[1]]  # 今日昨日客单价
+
+dealtotal_plan_sales_form = dealtotal_plan_sales()  # 本周本月的累计销售额/计划销售额
+
+
+def pie_map_month_week(week_month):
+    """
+    本周本月的销售额/计划销售额饼图
+    param week_month:week表示本周，month表示本月
+    """
+    index = 1 if week_month == "month" else 0
+    fig = go.Figure(data=[go.Pie(
+        labels=['完成', '未完成'],
+        values=[round(dealtotal_plan_sales_form[index][0], 2), round(dealtotal_plan_sales_form[index][1], 2)],
+        hole=0.4,
+        showlegend=False,
+        textinfo='percent',
+        hoverinfo="percent", )])
+    fig.update_layout(
+        width=120, height=80,
+        paper_bgcolor="#dcdcdc",
+        showlegend=False,
+        margin=dict(t=5, l=5, b=5, r=5)
+    )
+    return fig
+
 
 left_table = dbc.Card(
     children=dbc.CardBody(
@@ -188,13 +225,13 @@ left_table = dbc.Card(
                         )),
                     dbc.Row([
                         dbc.Col(
-                            html.H4(
+                            html.H5(
                                 children="本日销售额"
                             ),
                             width=6
                         ),
                         dbc.Col(
-                            html.H4(
+                            html.H5(
                                 children="门店总数"
                             ),
                             width=3
@@ -202,14 +239,14 @@ left_table = dbc.Card(
                     dbc.Row([
                         dbc.Col(
                             html.H3(
-                                children="￥200000000",
+                                children="￥{}".format(sale_total_form[0]),
                                 style={"color": "red"}
                             ),
                             width=6
                         ),
                         dbc.Col(
                             html.H3(
-                                children="3500",
+                                children="{}".format(shop_form[0]),
                                 style={"color": "red"}
                             ),
                             width=3
@@ -222,16 +259,20 @@ left_table = dbc.Card(
                             ))),
 
                                 dbc.Row(dbc.Col(html.H5(
-                                    children="￥200000000/￥200000000",
+                                    children="￥{}/￥{}".format(round(dealtotal_plan_sales_form[0][0], 2),
+                                                              round(dealtotal_plan_sales_form[0][1], 2)),
                                     style={"color": "red"}
                                 )))],
                             width=6
                         ),
 
                         dbc.Col(
-                            html.H5(  # 图
-                                children="画图"
-                            ),
+                            dcc.Graph(  # 日销售分布图
+                                figure=pie_map_month_week("week"),
+                                style={"width": "100px", "height": "100px"}
+                            )
+                            ,
+                            style={"backgroundColor": "#dcdcdc"},
                             width=6
                         ),
                     ], style={"backgroundColor": "#dcdcdc"}),
@@ -243,19 +284,21 @@ left_table = dbc.Card(
                             ))),
 
                                 dbc.Row(dbc.Col(html.H5(
-                                    children="￥200000000/￥200000000",
+                                    children="￥{}/￥{}".format(round(dealtotal_plan_sales_form[1][0], 2),
+                                                              round(dealtotal_plan_sales_form[1][1], 2)),
                                     style={"color": "red"}
                                 )))],
                             width=6
                         ),
-
                         dbc.Col(
-                            html.H5(  # 图
-                                children="画图"
-                            ),
-                            width=6
-                        ),
-                    ], style={"backgroundColor": "#dcdcdc"}),
+                            dcc.Graph(  # 日销售分布图
+                                figure=pie_map_month_week("month"),
+                                style={"width": "100px", "height": "100px"}
+                            )
+                            ,
+                            style={"backgroundColor": "#dcdcdc"},
+                            width=1),
+                    ], style={"backgroundColor": "#dcdcdc", }),
 
                     # 表格
                     dbc.Row([
@@ -289,26 +332,30 @@ left_table = dbc.Card(
                     dbc.Row([
                         dbc.Col(
                             html.H4(
-                                children="销售总数"
+                                children="销售总额"
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="90000"
+                                children="{}".format(sale_total_form[1])
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="99999"
+                                children="{}".format(sale_total_form[0])
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="+10%",
-                                style={"backgroundColor": "red"}
+                                children="0%" if sale_total_form[0] == sale_total_form[1] else (
+                                        ("+" if sale_total_form[0] > sale_total_form[1] else "-") + "{}%".format(
+                                    round(sale_total_form[0] / sale_total_form[1] / 100, 2))),
+                                style={
+                                    "backgroundColor": "red" if sale_total_form[0] > sale_total_form[1] else "green"} if
+                                sale_total_form[0] != sale_total_form[1] else {}
                             ),
                             width=3
                         )
@@ -324,20 +371,29 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H4(
-                                children="3000"
+                                children="{}".format(round(sale_total_form[1] / shop_form[1], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="3300"
+                                children="{}".format(round(sale_total_form[0] / shop_form[0], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="+1%",
-                                style={"backgroundColor": "red"}
+                                children="0%" if round(sale_total_form[0] / shop_form[0], 2) == round(
+                                    sale_total_form[1] / shop_form[1], 2) else (("+" if round(
+                                    sale_total_form[0] / shop_form[0], 2) > round(sale_total_form[1] / shop_form[1],
+                                                                                  2) else "-") + "{}%".format(round(
+                                    round(sale_total_form[0] / shop_form[0], 2) / round(
+                                        sale_total_form[1] / shop_form[1], 2) / 100, 2))),
+                                style={
+                                    "backgroundColor": "red" if round(sale_total_form[0] / shop_form[0], 2) > round(
+                                        sale_total_form[1] / shop_form[1], 2) else "green"} if round(
+                                    sale_total_form[0] / shop_form[0], 2) != round(sale_total_form[1] / shop_form[1],
+                                                                                   2) else {}
 
                             ),
                             width=3
@@ -354,20 +410,25 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H4(
-                                children="300"
+                                children="{}".format(guest_orders_form[1])
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="280"
+                                children="{}".format(guest_orders_form[0])
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="-10%",
-                                style={"backgroundColor": "green"}
+                                children="0%" if guest_orders_form[0] == guest_orders_form[1] else (
+                                        ("+" if guest_orders_form[0] > guest_orders_form[1] else "-") + "{}%".format(
+                                    round(guest_orders_form[0] / guest_orders_form[1] / 100, 2))),
+                                style={
+                                    "backgroundColor": "red" if guest_orders_form[0] > guest_orders_form[
+                                        1] else "green"} if
+                                guest_orders_form[0] != guest_orders_form[1] else {}
                             ),
                             width=3
                         )
@@ -383,19 +444,26 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H4(
-                                children="34.5"
+                                children="{}".format(round(customer_transaction_form[1], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="34.5"
+                                children="{}".format(round(customer_transaction_form[0], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="0%"
+                                children="0%" if customer_transaction_form[0] == customer_transaction_form[1] else (
+                                        ("+" if customer_transaction_form[0] > customer_transaction_form[
+                                            1] else "-") + "{}%".format(
+                                    round(customer_transaction_form[0] / customer_transaction_form[1] / 100, 2))),
+                                style={
+                                    "backgroundColor": "red" if customer_transaction_form[0] >
+                                                                customer_transaction_form[1] else "green"} if
+                                customer_transaction_form[0] != customer_transaction_form[1] else {}
                             ),
                             width=3
                         )
@@ -411,20 +479,24 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H4(
-                                children="450.0"
+                                children="{}".format(sales_margin[1])
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="460"
+                                children="{}".format(sales_margin[0])
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="5%",
-                                style={"backgroundColor": "red"}
+                                children="0%" if sales_margin[0] == sales_margin[1] else (
+                                        ("+" if sales_margin[0] > sales_margin[1] else "-") + "{}%".format(
+                                    round(sales_margin[0] / sales_margin[1] / 100, 2))),
+                                style={
+                                    "backgroundColor": "red" if sales_margin[0] > sales_margin[1] else "green"} if
+                                sales_margin[0] != sales_margin[1] else {}
                             ),
                             width=3
                         )
@@ -440,20 +512,25 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H4(
-                                children="12%"
+                                children="{}%".format(round(sales_margin_rate[1], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="11%"
+                                children="{}%".format(round(sales_margin_rate[0], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="-5%",
-                                style={"backgroundColor": "green"}
+                                children="0%" if sales_margin_rate[0] == sales_margin_rate[1]
+                                else (
+                                        ("+" if sales_margin_rate[0] > sales_margin_rate[1] else "-")
+                                        + "{}%".format(round(sales_margin_rate[0] / sales_margin_rate[1] / 100, 2))),
+                                style={
+                                    "backgroundColor": "red" if sales_margin_rate[0] > sales_margin_rate[
+                                        1] else "green"} if sales_margin_rate[0] != sales_margin_rate[1] else {}
                             ),
                             width=3
                         )
@@ -469,21 +546,24 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H4(
-                                children="3500",
+                                children="{}".format(shop_form[1]),
                                 style={"color": "#dcdcdc"}
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="3500"
+                                children="{}".format(shop_form[0]),
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H4(
-                                children="+2%",
-                                style={"backgroundColor": "red"}
+                                children="0%" if shop_form[0] == shop_form[1] else (
+                                        ("+" if shop_form[0] > shop_form[1] else "-") + "{}%".format(
+                                    round(shop_form[0] / shop_form[1] / 100, 2))),
+                                style={"backgroundColor": "red" if shop_form[0] > shop_form[1] else "green"} if
+                                shop_form[0] != shop_form[1] else {}
                             ),
                             width=3
                         )

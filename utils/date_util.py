@@ -101,3 +101,37 @@ def get_day_hour(x_choice_time):
             data_list.append((j, 0))
             all_time_list[1].append(str(j) if len(str(j)) == 2 else '0' + str(j))
     return data_list, all_time_list
+
+
+def get_everyDay(begin_date, end_date):
+    """获取两个时间中间的所有时间"""
+    date_list = []
+    begin_date = datetime.strptime(begin_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    while begin_date <= end_date:
+        date_str = begin_date.strftime("%Y-%m-%d")
+        date_list.append(date_str)
+        begin_date += timedelta(days=1)
+    return date_list
+
+
+def current_week_month():
+    """
+    本周本月的日期
+    return:当前周的所有日期，当前月的所有日期
+    """
+    today = '2021-01-21'  # todo 测试的日期
+    monday, sunday = datetime.strptime(today, '%Y-%m-%d').date(), datetime.strptime(today, '%Y-%m-%d').date()
+    one_day = timedelta(days=1)
+    while monday.weekday() != 0:
+        monday -= one_day
+    while sunday.weekday() != 6:
+        sunday += one_day
+    week_list = get_everyDay(monday.strftime("%Y-%m-%d"), sunday.strftime("%Y-%m-%d"))  # 当前周的所有日期
+    first_day = today[:8] + "01"  # 当前月的第一天的日期
+    month_list = get_everyDay(first_day, today)
+    return tuple(week_list), tuple(month_list)
+
+
+if __name__ == '__main__':
+    current_week_month()

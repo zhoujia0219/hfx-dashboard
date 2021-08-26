@@ -63,13 +63,12 @@ def register_callbacks(dash_app):
             return dash.no_update
         pic_dff = pic.groupby([data_x], as_index=False)['sale'].sum()
         empty_pic = pd.DataFrame(day_hour_arang, columns=["times", "sale"])
-        print(empty_pic,'empty_pic')
         pic_dff = pd.concat([empty_pic, pic_dff])
         fig = px.bar(
             pic_dff,
             x=data_x,
             y='sale',
-            color='sale',
+            # color='sale',
             barmode='group',
             template='plotly_white',
             labels={'sale': '总销售额', 'times': '时间点'},
