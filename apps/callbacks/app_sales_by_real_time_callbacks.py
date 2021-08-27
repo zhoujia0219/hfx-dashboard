@@ -46,7 +46,13 @@ def register_callbacks(dash_app):
                 mode="lines",
             ),
             )
-            fig = go.Figure(data)
+        layout = go.Layout(
+            xaxis=dict(title="日期"),
+            yaxis=dict(title="销售额（元/1M=1百万）"),
+        )
+        fig = go.Figure(data,layout=layout)
+        fig.update_layout(barmode='group', template='plotly_white')
+
         return fig
 
     def sale_day_fig(data_x, data_y, x_choice_time):
@@ -58,29 +64,35 @@ def register_callbacks(dash_app):
         :return:
         """
         day_hour_arang, all_time_list = get_day_hour(x_choice_time)
-        pic = srv_sales_real_time.sales_day(all_time_list)  # todo
+        print(day_hour_arang, "day_hour_arang", all_time_list, 'all_time_list')
+        today_data, yesterday_data = srv_sales_real_time.sales_day(all_time_list)  #
         if data_x == data_y:
-            return dash.no_update
-        pic_dff = pic.groupby([data_x], as_index=False)['sale'].sum()
-        empty_pic = pd.DataFrame(day_hour_arang, columns=["times", "sale"])
-        pic_dff = pd.concat([empty_pic, pic_dff])
-        fig = px.bar(
-            pic_dff,
-            x=data_x,
-            y='sale',
-            # color='sale',
-            barmode='group',
-            template='plotly_white',
-            labels={'sale': '总销售额', 'times': '时间点'},
+            return ''
+        pic_dff_today = today_data.groupby([data_x], as_index=False)['sale'].sum()  # 今日数据的聚合
+        pic_dff_yesterday = yesterday_data.groupby([data_x], as_index=False)['sale'].sum()  # 昨日数据的聚合
+        empty_pic = pd.DataFrame(day_hour_arang, columns=["times", "sale"])  # 所有时间点的dataframe
+        # pic_dff_today = pd.concat([empty_pic, pic_dff_today])  # 今天的数据和空dataframe拼接
+        # pic_dff_yesterday = pd.concat([empty_pic, pic_dff_yesterday])  # 昨天的数据和空dataframe拼接
+        pic_dff = pd.concat([pic_dff_today, pic_dff_yesterday])  # 拼接两天数据
+        pic_dff = pd.concat([pic_dff, empty_pic])  # 拼接所有时间点
+        pic_dff.drop_duplicates(subset=['times'], keep='first', inplace=True)  # 去重
+        pic_dff = pic_dff.sort_values('times', ascending=True, inplace=False)  # 排序
+
+        # 对颜色处理
+        color_time_list = sorted(all_time_list[0] + all_time_list[1])
+        # 按照显示的效果将颜色设置好
+        color_list = ["darkgrey" if i in all_time_list[0] else 'blue' for i in color_time_list]
+        trace = go.Bar(
+            x=pic_dff[data_x],
+            y=pic_dff['sale'],
+            marker=dict(color=color_list)
         )
-        fig.update_traces(textposition='inside')
-        axis = [i for i in range(1, 24)]
-        fig.update_layout(
-            xaxis=dict(
-                tickmode='array',
-                tickvals=axis,
-                ticktext=axis
-            ))
+        layout = go.Layout(
+            xaxis=dict(title="时间（/小时）"),
+            yaxis=dict(title="销售额（元/1M=1百万）"),
+        )
+        fig = go.Figure(data=[trace, ], layout=layout)
+        fig.update_layout(barmode='group', template='plotly_white')
         return fig
 
     @dash_app.callback(

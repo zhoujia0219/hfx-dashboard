@@ -77,29 +77,40 @@ def get_day_hour(x_choice_time):
                 all_time_list:所有时间点，列表嵌列表，第一个列表是昨日时间点，第二个列表是今日时间点
     """
     data_list = list()  # 所有时间点的空数据，列表嵌元组形式
-    all_time_list = [[], []]
+    all_time_list = [[], []]  # 所有时间点，列表嵌列表，第一个列表是昨日时间点，第二个列表是今日时间点
+    today = datetime.today()  # 今天的时间
+    current_hour = today.hour  # 当前的小时
+    current_hour =11
     choice_str_list = x_choice_time.split("-")
     try:
-        choice_str_list_0 = int(choice_str_list[0])
-        choice_str_list_1 = int(choice_str_list[1])
+        choice_str_list_begin = int(choice_str_list[0])  # 开始时间
+        choice_str_list_end = int(choice_str_list[1])  # 结束时间
+        print(choice_str_list_begin,1,choice_str_list_end)
     except:
-        choice_str_list_0 = 0
-        choice_str_list_1 = 23
+        print(1)
+        choice_str_list_begin = 5
+        choice_str_list_end = 12  # 表示前端数据传错了，则依据采用默认的时间
     # 当天的时间范围内
-    if len(choice_str_list) > 1 and choice_str_list_0 < choice_str_list_1:
-        for i in range(choice_str_list_0, choice_str_list_1 + 1):
-            data_list.append((i, 0))
-            all_time_list[0].append(str(i) if len(str(i)) == 2 else '0' + str(i))  # 拼接字符串时间点，数据库的是字符串
-    # 今天到第二天的某个时间点
-    if len(choice_str_list) > 1 and choice_str_list_0 > choice_str_list_1:
-        for i in range(choice_str_list_0, 24):
-            # 今日
+    # 1.当前时间<开始时间
+    if current_hour < choice_str_list_begin:
+        for i in range(choice_str_list_begin, choice_str_list_end + 1):
             all_time_list[0].append(str(i) if len(str(i)) == 2 else '0' + str(i))
-            data_list.append((i, 0))
-        for j in range(choice_str_list_1 + 1):
-            # 昨日
-            data_list.append((j, 0))
-            all_time_list[1].append(str(j) if len(str(j)) == 2 else '0' + str(j))
+
+    # 2.当前时间处于时间范围中间
+    elif current_hour > choice_str_list_begin and current_hour < choice_str_list_end:
+        for i in range(choice_str_list_begin, current_hour + 1):
+            # 今天的范围时间
+            all_time_list[1].append(str(i) if len(str(i)) == 2 else '0' + str(i))
+        for j in range(current_hour + 1, choice_str_list_end + 1):
+            # 剩下的部分是属于昨天的时间点，暂时将当前时间点放到了今天，在取数据那部分验证今天是否有数据
+            all_time_list[0].append(str(j) if len(str(j)) == 2 else '0' + str(j))
+    # 3.当前时间>结束时间
+    else:
+        for i in range(choice_str_list_begin, choice_str_list_end + 1):
+            all_time_list[1].append(str(i) if len(str(i)) == 2 else '0' + str(i))
+    for i in range(choice_str_list_begin, choice_str_list_end + 1):
+        i = str(i) if len(str(i))==2 else '0' +str(i)
+        data_list.append((i, 0))  # 创建完整的时间点
     return data_list, all_time_list
 
 
