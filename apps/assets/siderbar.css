@@ -35,8 +35,8 @@ body {
     font-size: small;
 }
 
-.content-style{
-    display: flex;
 
+
+.center-font{
+    text-align: center;
 }
-

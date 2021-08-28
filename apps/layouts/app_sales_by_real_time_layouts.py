@@ -196,7 +196,7 @@ def pie_map_month_week(week_month):
     """
     index = 1 if week_month == "month" else 0
     fig = go.Figure(data=[go.Pie(
-        labels=['完成', '未完成'],
+        labels=['完成', '计划'],
         values=[round(dealtotal_plan_sales_form[index][0], 2), round(dealtotal_plan_sales_form[index][1], 2)],
         hole=0.4,
         showlegend=False,
@@ -211,7 +211,7 @@ def pie_map_month_week(week_month):
     return fig
 
 
-print(dealtotal_plan_sales_form[0][0],333)
+print(dealtotal_plan_sales_form[0][0], 333)
 left_table = dbc.Card(
     children=dbc.CardBody(
         children=[
@@ -228,13 +228,18 @@ left_table = dbc.Card(
                         )),
                     dbc.Row([
                         dbc.Col(
-                            html.H5(
+                            html.H4(
+                                className="center-font",
                                 children="本日销售额"
                             ),
                             width=6
                         ),
                         dbc.Col(
-                            html.H5(
+                            # width=6
+                        ),
+                        dbc.Col(
+                            html.H4(
+                                className="center-font",
                                 children="门店总数"
                             ),
                             width=3
@@ -242,26 +247,42 @@ left_table = dbc.Card(
                     dbc.Row([
                         dbc.Col(
                             html.H3(
+                                className="center-font",
                                 children="￥{}".format(big_number_conduct(sale_total_form[0], 2)),
                                 style={"color": "red"}
                             ),
                             width=6
                         ),
                         dbc.Col(
+                            # width=6
+                        ),
+                        dbc.Col(
                             html.H3(
-                                children="{}".format(format(shop_form[0],',')),
+                                className="center-font",
+                                children=" {}".format(format(shop_form[0], ',')),
                                 style={"color": "red"}
                             ),
                             width=3
-                        )]),
+                        )], style={'text_align': 'center'}),
                     html.Hr(),  # todo 中间一点点的空白多了一根横线
                     dbc.Row([  # 第一个带有图的
                         dbc.Col(
                             [dbc.Row(dbc.Col(html.H5(
-                                children="本周累计销售额/计划"
-                            ))),
-
-                                dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))),  # 这三个的目的是让文字不置顶
+                                dbc.Row(dbc.Col(html.H4(
+                                    className="center-font",
+                                    children="本周累计销售额/计划"
+                                ))),
+                                dbc.Row(dbc.Col(html.H4(
+                                    className="center-font",
                                     children="￥{}/￥{}".format(big_number_conduct(dealtotal_plan_sales_form[0][0], 2),
                                                               big_number_conduct(dealtotal_plan_sales_form[0][1], 2)
                                                               ),
@@ -269,25 +290,49 @@ left_table = dbc.Card(
                                 )))],
                             width=6
                         ),
+                        dbc.Col(),
+                        dbc.Col([
+                            dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))),  # 这三个的目的是让图不置顶
+                            dbc.Row(dbc.Col(
+                                dcc.Graph(  # 本周累计销售额/计划图
+                                    figure=pie_map_month_week("week"),
+                                    style={"width": "100px", "height": "100px"}
+                                )
+                                ,
+                                style={"backgroundColor": "#dcdcdc"},
 
-                        dbc.Col(
-                            dcc.Graph(  # 日销售分布图
-                                figure=pie_map_month_week("week"),
-                                style={"width": "100px", "height": "100px"}
-                            )
-                            ,
-                            style={"backgroundColor": "#dcdcdc"},
-                            width=6
-                        ),
+                            )), ], width=4),
                     ], style={"backgroundColor": "#dcdcdc"}),
                     html.Hr(),  # todo 中间一点点的空白多了一根横线
                     dbc.Row([  # 第二个带有图的
                         dbc.Col(
-                            [dbc.Row(dbc.Col(html.H5(
-                                children="本月累计销售额/计划"
-                            ))),
-
+                            [
                                 dbc.Row(dbc.Col(html.H5(
+                                    className="center-font",
+                                    children="  "
+                                ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))),  # 这三个的目的是让文字不置顶
+                                dbc.Row(dbc.Col(html.H4(
+                                    className="center-font",
+                                    children="本月累计销售额/计划"
+                                ))),
+
+                                dbc.Row(dbc.Col(html.H4(
+                                    className="center-font",
                                     children="￥{}/￥{}".format(big_number_conduct(dealtotal_plan_sales_form[1][0], 2),
                                                               big_number_conduct(dealtotal_plan_sales_form[1][1], 2)),
                                     style={"color": "red"}
@@ -295,37 +340,52 @@ left_table = dbc.Card(
                             width=6
                         ),
                         dbc.Col(
-                            dcc.Graph(  # 日销售分布图
-                                figure=pie_map_month_week("month"),
-                                style={"width": "100px", "height": "100px"}
-                            )
-                            ,
-                            style={"backgroundColor": "#dcdcdc"},
-                            width=1),
+                            # width=6
+                        ),
+                        dbc.Col([
+                            dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))), dbc.Row(dbc.Col(html.H5(
+                                className="center-font",
+                                children="  "
+                            ))),  # 这三个的目的是让图不置顶
+                            dbc.Row(dbc.Col(
+                                dcc.Graph(  # 本月累计销售额/计划的饼图
+                                    figure=pie_map_month_week("month"),
+                                    style={"width": "100px", "height": "100px"}
+                                )
+                                ,
+                                style={"backgroundColor": "#dcdcdc"},
+                                width=4), ), ], width=4),
+
                     ], style={"backgroundColor": "#dcdcdc", }),
 
                     # 表格
                     dbc.Row([
                         dbc.Col(
-                            html.H4(
+                            html.H5(
                                 children=""
                             ),
                             width=3
                         ),
                         dbc.Col(
-                            html.H4(
+                            html.H5(
                                 children="昨日同期"
                             ),
                             width=3
                         ),
                         dbc.Col(
-                            html.H4(
+                            html.H5(
                                 children="今日"
                             ),
                             width=3
                         ),
                         dbc.Col(
-                            html.H4(
+                            html.H5(
                                 children="上升/下降"
                             ),
                             width=3
@@ -375,13 +435,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(big_number_conduct(round(sale_total_form[1] / shop_form[1],2), 2))
+                                children="{}".format(big_number_conduct(round(sale_total_form[1] / shop_form[1], 2), 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(big_number_conduct(round(sale_total_form[0] / shop_form[0],2), 2))
+                                children="{}".format(big_number_conduct(round(sale_total_form[0] / shop_form[0], 2), 2))
                             ),
                             width=3
                         ),
@@ -448,13 +508,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(big_number_conduct(round(customer_transaction_form[1],2), 2))
+                                children="{}".format(big_number_conduct(round(customer_transaction_form[1], 2), 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(big_number_conduct(round(customer_transaction_form[0],2), 2))
+                                children="{}".format(big_number_conduct(round(customer_transaction_form[0], 2), 2))
                             ),
                             width=3
                         ),
