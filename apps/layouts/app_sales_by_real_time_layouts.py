@@ -288,7 +288,7 @@ left_table = dbc.Card(
                                                               ),
                                     style={"color": "red"}
                                 )))],
-                            width=6
+                            width=7
                         ),
                         dbc.Col(),
                         dbc.Col([
@@ -337,7 +337,7 @@ left_table = dbc.Card(
                                                               big_number_conduct(dealtotal_plan_sales_form[1][1], 2)),
                                     style={"color": "red"}
                                 )))],
-                            width=6
+                            width=7
                         ),
                         dbc.Col(
                             # width=6
@@ -360,8 +360,9 @@ left_table = dbc.Card(
                                 )
                                 ,
                                 style={"backgroundColor": "#dcdcdc"},
-                                width=4), ), ], width=4),
-
+                            ), ), ],
+                            width=4
+                        ),
                     ], style={"backgroundColor": "#dcdcdc", }),
 
                     # 表格
@@ -660,24 +661,34 @@ c_fig_sales_day_month = dbc.Card(
                 style={'alignItems': 'flex-end'}
             ),
             html.Hr(),
-            html.H5(
-                children='本日销售分析',
-                className='media-body',
-                style={'min-width': '150px'}
-            ),
-            html.Div([
-                dcc.Dropdown(
-                    id="x_choice_time",
-                    style={'width': 120},
-                    options=[{'label': '5-15', 'value': '5-15'},
-                             {'label': '12-18', 'value': '12-18'},
-                             {'label': '18-24', 'value': '18-24'}],
-                    value='5-15',
-                    searchable=False,
-                    clearable=False
+
+            html.Div(dbc.Row([
+                dbc.Col(html.H5(
+                    children='本日销售分析',
+                    className='media-body',
+                    style={'min-width': '150px'}
                 ),
-            ],
-                className='media-left block-inline'),
+                    width=3
+                ),
+                dbc.Col(),
+                dbc.Col(
+                    html.Div([
+                        dcc.Dropdown(
+                            id="x_choice_time",
+                            style={'width': 120},
+                            options=[{'label': '5-15', 'value': '5-15'},
+                                     {'label': '12-18', 'value': '12-18'},
+                                     {'label': '18-24', 'value': '18-24'}],
+                            value='5-15',
+                            searchable=False,
+                            clearable=False
+                        ),
+                    ],
+                        className='media-left block-inline'),
+                    width=3
+                )
+            ])),
+
             # 画图 - 日销售分布
             dbc.Row([
                 dbc.Col(
@@ -692,44 +703,137 @@ c_fig_sales_day_month = dbc.Card(
                                 )
                             ], ), ), ),
             ], ),
-            html.H5(children='本月销售分析', className='media-body', style={'min-width': '150px'}),
-            # 用户选项
-            html.Div(
-                children=[
-                    # 单选框
-                    dcc.RadioItems(
-                        id="total_avg_mid",
-                        options=[{'label': '总额', 'value': 'ZE'},
-                                 {'label': '平均数', 'value': 'PJS'},
-                                 {'label': '中位数', 'value': 'ZWS'}],
-                        value='ZE',
+
+            html.Div(dbc.Row([
+                dbc.Col(
+                    html.H5(
+                        children='本月销售分析',
+                        className='media-body',
+                        style={'min-width': '150px'}
                     ),
-                    # 下拉框
-                    html.Div([
-                        dcc.Dropdown(
-                            id="range_choice",
-                            style={'width': 120},
-                            options=[
-                                {'label': '本月', 'value': 'by'},
-                                {'label': '最近30天', 'value': 'zj'}
-                            ],
-                            value='by',
-                            searchable=False,
-                            clearable=False
-                        ),
-                        dcc.Dropdown(
-                            id="map_index2",
-                            style={'width': 120},
-                            options=[{'label': "图形样式：折线图", 'value': "b"}],
-                            value='b',
-                            searchable=False,
-                            clearable=False
-                        ),
-                    ], className='media-right block-inline'
+                    width=3
+                ),
+                dbc.Col(),
+
+                html.Div(dbc.Row([
+                    dbc.Col(
+                        dcc.RadioItems(
+                            id="total_avg_mid",
+                            options=[{'label': '总额  ', 'value': 'ZE'},
+                                     {'label': '平均数  ', 'value': 'PJS'},
+                                     {'label': '中位数  ', 'value': 'ZWS'}],
+                            value='ZE',
+                        )
+                        ,
+                        width=3
                     ),
-                ], className='media flex-wrap ',
-                style={'alignItems': 'flex-end'}
-            ),
+                    dbc.Col(
+                        html.Div([
+                            dcc.Dropdown(
+                                id="range_choice",
+                                style={'width': 120},
+                                options=[
+                                    {'label': '本月', 'value': 'by'},
+                                    {'label': '最近30天', 'value': 'zj'}
+                                ],
+                                value='by',
+                                searchable=False,
+                                clearable=False
+                            ),
+                        ],
+                            className='media-left block-inline'),
+                        width=3
+                    ),
+                    dbc.Col(dcc.Dropdown(
+                        id="map_index2",
+                        style={'width': 120},
+                        options=[{'label': "图形样式：折线图", 'value': "b"}],
+                        value='b',
+                        searchable=False,
+                        clearable=False
+                    ))
+                ])),
+
+                # dbc.Col(
+                #     html.Div(
+                #         children=[
+                #             # 单选框
+                #             dcc.RadioItems(
+                #                 id="total_avg_mid",
+                #                 options=[{'label': '总额  ', 'value': 'ZE'},
+                #                          {'label': '平均数  ', 'value': 'PJS'},
+                #                          {'label': '中位数  ', 'value': 'ZWS'}],
+                #                 value='ZE',
+                #             ),
+                #
+                #             # 下拉框
+                #             html.Div([
+                #                 dcc.Dropdown(
+                #                     id="range_choice",
+                #                     style={'width': 120},
+                #                     options=[
+                #                         {'label': '本月', 'value': 'by'},
+                #                         {'label': '最近30天', 'value': 'zj'}
+                #                     ],
+                #                     value='by',
+                #                     searchable=False,
+                #                     clearable=False
+                #                 ),
+                #                 dcc.Dropdown(
+                #                     id="map_index2",
+                #                     style={'width': 120},
+                #                     options=[{'label': "图形样式：折线图", 'value': "b"}],
+                #                     value='b',
+                #                     searchable=False,
+                #                     clearable=False
+                #                 ),
+                #             ], className='media-right block-inline'
+                #             ),
+                #         ], className='media flex-wrap ',
+                #         style={'alignItems': 'flex-end'}
+                #     ),
+                #     width=3
+                # )
+            ])),
+
+            # html.H5(children='本月销售分析', className='media-body', style={'min-width': '150px'}),
+            # # 用户选项
+            # html.Div(
+            #     children=[
+            #         # 单选框
+            #         dcc.RadioItems(
+            #             id="total_avg_mid",
+            #             options=[{'label': '总额', 'value': 'ZE'},
+            #                      {'label': '平均数', 'value': 'PJS'},
+            #                      {'label': '中位数', 'value': 'ZWS'}],
+            #             value='ZE',
+            #         ),
+            #         # 下拉框
+            #         html.Div([
+            #             dcc.Dropdown(
+            #                 id="range_choice",
+            #                 style={'width': 120},
+            #                 options=[
+            #                     {'label': '本月', 'value': 'by'},
+            #                     {'label': '最近30天', 'value': 'zj'}
+            #                 ],
+            #                 value='by',
+            #                 searchable=False,
+            #                 clearable=False
+            #             ),
+            #             dcc.Dropdown(
+            #                 id="map_index2",
+            #                 style={'width': 120},
+            #                 options=[{'label': "图形样式：折线图", 'value': "b"}],
+            #                 value='b',
+            #                 searchable=False,
+            #                 clearable=False
+            #             ),
+            #         ], className='media-right block-inline'
+            #         ),
+            #     ], className='media flex-wrap ',
+            #     style={'alignItems': 'flex-end'}
+            # ),
             dbc.Row([
                 dbc.Col(
                     html.Div(
