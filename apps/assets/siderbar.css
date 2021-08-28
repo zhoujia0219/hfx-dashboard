@@ -35,8 +35,8 @@ body {
     font-size: small;
 }
 
-.card-body{
-    width：2000px!important
-}
+.content-style{
+    display: flex;
 
+}
 

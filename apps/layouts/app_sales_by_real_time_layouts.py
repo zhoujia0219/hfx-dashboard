@@ -14,6 +14,8 @@ from utils import date_util
 # 页面筛选初始值
 ###############
 # 当前年月日
+from utils.tools import big_number_conduct
+
 today = datetime.now()
 # 格式化现在的月份
 now_month = today.strftime("%Y-%m")
@@ -209,6 +211,7 @@ def pie_map_month_week(week_month):
     return fig
 
 
+print(dealtotal_plan_sales_form[0][0],333)
 left_table = dbc.Card(
     children=dbc.CardBody(
         children=[
@@ -239,14 +242,14 @@ left_table = dbc.Card(
                     dbc.Row([
                         dbc.Col(
                             html.H3(
-                                children="￥{}".format(format(sale_total_form[0], ',')),
+                                children="￥{}".format(big_number_conduct(sale_total_form[0], 2)),
                                 style={"color": "red"}
                             ),
                             width=6
                         ),
                         dbc.Col(
                             html.H3(
-                                children="{}".format(format(shop_form[0], ',')),
+                                children="{}".format(format(shop_form[0],',')),
                                 style={"color": "red"}
                             ),
                             width=3
@@ -259,8 +262,9 @@ left_table = dbc.Card(
                             ))),
 
                                 dbc.Row(dbc.Col(html.H5(
-                                    children="￥{}/￥{}".format(format(round(dealtotal_plan_sales_form[0][0], 2), ','),
-                                                              format(round(dealtotal_plan_sales_form[0][1], 2), ',')),
+                                    children="￥{}/￥{}".format(big_number_conduct(dealtotal_plan_sales_form[0][0], 2),
+                                                              big_number_conduct(dealtotal_plan_sales_form[0][1], 2)
+                                                              ),
                                     style={"color": "red"}
                                 )))],
                             width=6
@@ -284,8 +288,8 @@ left_table = dbc.Card(
                             ))),
 
                                 dbc.Row(dbc.Col(html.H5(
-                                    children="￥{}/￥{}".format(format(round(dealtotal_plan_sales_form[1][0], 2), ','),
-                                                              format(round(dealtotal_plan_sales_form[1][1], 2), ',')),
+                                    children="￥{}/￥{}".format(big_number_conduct(dealtotal_plan_sales_form[1][0], 2),
+                                                              big_number_conduct(dealtotal_plan_sales_form[1][1], 2)),
                                     style={"color": "red"}
                                 )))],
                             width=6
@@ -338,13 +342,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(sale_total_form[1], ','))
+                                children="{}".format(big_number_conduct(sale_total_form[1], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(sale_total_form[0], ','))
+                                children="{}".format(big_number_conduct(sale_total_form[0], 2))
                             ),
                             width=3
                         ),
@@ -371,13 +375,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(round(sale_total_form[1] / shop_form[1], 2), ','))
+                                children="{}".format(big_number_conduct(round(sale_total_form[1] / shop_form[1],2), 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(round(sale_total_form[0] / shop_form[0], 2), ','))
+                                children="{}".format(big_number_conduct(round(sale_total_form[0] / shop_form[0],2), 2))
                             ),
                             width=3
                         ),
@@ -410,13 +414,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(guest_orders_form[1], ','))
+                                children="{}".format(big_number_conduct(guest_orders_form[1], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(guest_orders_form[0], ','))
+                                children="{}".format(big_number_conduct(guest_orders_form[0], 2))
                             ),
                             width=3
                         ),
@@ -444,13 +448,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(round(customer_transaction_form[1], 2), ','))
+                                children="{}".format(big_number_conduct(round(customer_transaction_form[1],2), 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(round(customer_transaction_form[0], 2), ','))
+                                children="{}".format(big_number_conduct(round(customer_transaction_form[0],2), 2))
                             ),
                             width=3
                         ),
@@ -479,13 +483,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(sales_margin[1], ','))
+                                children="{}".format(big_number_conduct(sales_margin[1], 2))
                             ),
                             width=3
                         ),
                         dbc.Col(
                             html.H5(
-                                children="{}".format(format(sales_margin[0], ','))
+                                children="{}".format(big_number_conduct(sales_margin[0], 2))
                             ),
                             width=3
                         ),
@@ -702,7 +706,7 @@ c_fig_sales_day_month = dbc.Card(
 )
 
 content = html.Div(
-    className='content-style',
+    className='content-style ',
     children=[
         # dbc.Row(id="card_data", children=card_list),
         dbc.Row(

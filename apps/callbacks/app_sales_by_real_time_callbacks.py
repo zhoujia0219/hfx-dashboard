@@ -50,8 +50,12 @@ def register_callbacks(dash_app):
             xaxis=dict(title="日期"),
             yaxis=dict(title="销售额（元/1M=1百万）"),
         )
-        fig = go.Figure(data,layout=layout)
-        fig.update_layout(barmode='group', template='plotly_white')
+        fig = go.Figure(data, layout=layout)
+        fig.update_layout(
+            barmode='group',
+            template='plotly_white',
+            width=1130
+        )
 
         return fig
 
@@ -64,7 +68,6 @@ def register_callbacks(dash_app):
         :return:
         """
         day_hour_arang, all_time_list = get_day_hour(x_choice_time)
-        print(day_hour_arang, "day_hour_arang", all_time_list, 'all_time_list')
         today_data, yesterday_data = srv_sales_real_time.sales_day(all_time_list)  #
         if data_x == data_y:
             return ''
@@ -83,6 +86,7 @@ def register_callbacks(dash_app):
         # 按照显示的效果将颜色设置好
         color_list = ["darkgrey" if i in all_time_list[0] else 'blue' for i in color_time_list]
         trace = go.Bar(
+            name="小时销售",
             x=pic_dff[data_x],
             y=pic_dff['sale'],
             marker=dict(color=color_list)
@@ -91,8 +95,19 @@ def register_callbacks(dash_app):
             xaxis=dict(title="时间（/小时）"),
             yaxis=dict(title="销售额（元/1M=1百万）"),
         )
-        fig = go.Figure(data=[trace, ], layout=layout)
-        fig.update_layout(barmode='group', template='plotly_white')
+        trace_avg = go.Scatter(  # 均值线
+            x=pic_dff[data_x],
+            y=[pic_dff['sale'].sum() / len(day_hour_arang) for i in day_hour_arang],
+            name="平均线",
+            mode='lines',
+            line=dict(color='darkgrey', dash='dash')
+        )
+        fig = go.Figure(data=[trace, trace_avg], layout=layout)
+        fig.update_layout(
+            barmode='group',
+            template='plotly_white',
+            width=1130
+        )
         return fig
 
     @dash_app.callback(
