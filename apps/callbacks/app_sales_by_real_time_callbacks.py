@@ -100,7 +100,7 @@ def register_callbacks(dash_app):
             y=[pic_dff['sale'].sum() / len(day_hour_arang) for i in day_hour_arang],
             name="平均线",
             mode='lines',
-            line=dict(color='darkgrey', dash='dash')
+            line=dict(color='blue', dash='dash')
         )
         fig = go.Figure(data=[trace, trace_avg], layout=layout)
         fig.update_layout(

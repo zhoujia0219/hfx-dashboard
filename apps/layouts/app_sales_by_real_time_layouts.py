@@ -229,7 +229,7 @@ left_table = dbc.Card(
                     dbc.Row([
                         dbc.Col(
                             html.H4(
-                                className="center-font",
+                                # className="center-font",
                                 children="本日销售额"
                             ),
                             width=6
@@ -239,7 +239,7 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H4(
-                                className="center-font",
+                                # className="center-font",
                                 children="门店总数"
                             ),
                             width=3
@@ -247,7 +247,7 @@ left_table = dbc.Card(
                     dbc.Row([
                         dbc.Col(
                             html.H3(
-                                className="center-font",
+                                # className="center-font",
                                 children="￥{}".format(big_number_conduct(sale_total_form[0], 2)),
                                 style={"color": "red"}
                             ),
@@ -258,7 +258,7 @@ left_table = dbc.Card(
                         ),
                         dbc.Col(
                             html.H3(
-                                className="center-font",
+                                # className="center-font",
                                 children=" {}".format(format(shop_form[0], ',')),
                                 style={"color": "red"}
                             ),
@@ -268,21 +268,21 @@ left_table = dbc.Card(
                     dbc.Row([  # 第一个带有图的
                         dbc.Col(
                             [dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))),  # 这三个的目的是让文字不置顶
-                                dbc.Row(dbc.Col(html.H4(
-                                    className="center-font",
+                                dbc.Row(dbc.Col(html.H5(
+                                    # className="center-font",
                                     children="本周累计销售额/计划"
                                 ))),
-                                dbc.Row(dbc.Col(html.H4(
-                                    className="center-font",
+                                dbc.Row(dbc.Col(html.H5(
+                                    # className="center-font",
                                     children="￥{}/￥{}".format(big_number_conduct(dealtotal_plan_sales_form[0][0], 2),
                                                               big_number_conduct(dealtotal_plan_sales_form[0][1], 2)
                                                               ),
@@ -293,13 +293,13 @@ left_table = dbc.Card(
                         dbc.Col(),
                         dbc.Col([
                             dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))),  # 这三个的目的是让图不置顶
                             dbc.Row(dbc.Col(
@@ -317,22 +317,22 @@ left_table = dbc.Card(
                         dbc.Col(
                             [
                                 dbc.Row(dbc.Col(html.H5(
-                                    className="center-font",
+                                    # className="center-font",
                                     children="  "
                                 ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))),  # 这三个的目的是让文字不置顶
-                                dbc.Row(dbc.Col(html.H4(
-                                    className="center-font",
+                                dbc.Row(dbc.Col(html.H5(
+                                    # className="center-font",
                                     children="本月累计销售额/计划"
                                 ))),
 
-                                dbc.Row(dbc.Col(html.H4(
-                                    className="center-font",
+                                dbc.Row(dbc.Col(html.H5(
+                                    # className="center-font",
                                     children="￥{}/￥{}".format(big_number_conduct(dealtotal_plan_sales_form[1][0], 2),
                                                               big_number_conduct(dealtotal_plan_sales_form[1][1], 2)),
                                     style={"color": "red"}
@@ -344,13 +344,13 @@ left_table = dbc.Card(
                         ),
                         dbc.Col([
                             dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))), dbc.Row(dbc.Col(html.H5(
-                                className="center-font",
+                                # className="center-font",
                                 children="  "
                             ))),  # 这三个的目的是让图不置顶
                             dbc.Row(dbc.Col(
