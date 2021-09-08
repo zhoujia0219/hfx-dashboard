@@ -1,4 +1,6 @@
 import pandas as pd
+import dask.dataframe as dd
+
 import dash
 import plotly.express as px
 import plotly.graph_objects as go
@@ -97,7 +99,7 @@ def register_callbacks(dash_app):
         )
         trace_avg = go.Scatter(  # 均值线
             x=pic_dff[data_x],
-            y=[pic_dff['sale'].sum() / len(day_hour_arang) for i in day_hour_arang],
+            y=[pic_dff['sale'].sum() / len(day_hour_arang) for _ in day_hour_arang],
             name="平均线",
             mode='lines',
             line=dict(color='blue', dash='dash')

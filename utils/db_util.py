@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+
 import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
@@ -68,6 +69,28 @@ def read_by_pd(sql: str, dbname: str):
     conn = gp_connect(dbname=dbname)
     try:
         df = pd.read_sql(sql, conn)
+        return df
+    except Exception as e:
+        logging.error("查询异常：{}, sql {}", str(e), sql)
+        raise e
+    finally:
+        conn.close()
+
+# 查询数据
+def read_by_pd1(sql: str, dbname: str):
+    """
+    查询列表
+    :param sql: 要执行的sql
+    :param dbname:  默认的schema
+    :return:
+    """
+    print(sql)
+
+    import dask.dataframe as pd
+    conn = gp_connect(dbname=dbname)
+    print(conn,23343)
+    try:
+        df = pd.read_sql_table(sql, index_col="businessname",uri=conn)
         return df
     except Exception as e:
         logging.error("查询异常：{}, sql {}", str(e), sql)
