@@ -65,12 +65,12 @@ base_html_string_real_time = """
                       <li class="menu-divider mg-y-20-force"></li>
                      <li>
                         <a href="http://127.0.0.1:8011/real_time/"><i data-feather="mail"></i>
-                        <span>第二个页面</span></a>
+                        <span>实时销售看板</span></a>
                      </li>
                    <li class="menu-divider mg-y-20-force"></li>
                      <li>
                         <a href="http://127.0.0.1:8011/store_inspection/"><i data-feather="layout"></i>
-                        <span>常规巡检页面</span></a>
+                        <span>常规巡检看板</span></a>
                      </li>
                      <li class="menu-divider mg-y-20-force"></li>
                      <li>
