@@ -4,7 +4,7 @@
 
 from typing import List, Dict
 
-from services import srv_sales_bymonth
+from services import srv_sales_bymonth, srv_store_inspection
 
 
 def get_dim_city_levels() -> List[Dict]:
@@ -192,3 +192,40 @@ def get_week_map():
     对应的星期
     """
     return {1: "星期一", 2: "星期二", 3: "星期三", 4: "星期四", 5: "星期五", 6: "星期六", 7: "星期日"}
+
+
+def get_store_area() -> List[Dict]:
+    """
+    每个门店所在的区域
+    :return List[dict]
+    """
+    area_channels = srv_store_inspection.find_store_inspect_finish_rate_col_name().values
+    return [{"label": a[0], "value": a[1]} for a in area_channels]
+
+
+def get_store_sort() -> List[Dict]:
+    """
+       门店巡检完成率排序——（正序、倒序）
+       :return List[dict]
+       """
+    return [{"label": "倒序", "value": "asc"},{"label": "正序", "value": "desc"}, ]
+
+
+def get_store_month() -> List[Dict]:
+    """
+       月份
+       :return List[dict]
+       """
+    return [{"label": "1月", "value": "01"},
+            {"label": "2月", "value": "02"},
+            {"label": "3月", "value": "03"},
+            {"label": "4月", "value": "04"},
+            {"label": "5月", "value": "05"},
+            {"label": "6月", "value": "06"},
+            {"label": "7月", "value": "07"},
+            {"label": "8月", "value": "08"},
+            {"label": "9月", "value": "09"},
+            {"label": "10月", "value": "10"},
+            {"label": "11月", "value": "11"},
+            {"label": "12月", "value": "12"}
+            ]

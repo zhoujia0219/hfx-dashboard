@@ -5,8 +5,9 @@ from flask import Flask, url_for
 from flask_caching import Cache
 
 # 引入dash应用实例
-from app_sales_by_real_time import register_real_time_sales_app
+from apps.app_sales_by_real_time import register_real_time_sales_app
 from apps.app_sales_bymonth_index import register_sales_app
+from apps.app_store_inspection import register_store_inspection_app
 from conf import hfx_dashboard
 
 # #########################
@@ -66,6 +67,7 @@ def create_app():
     # 注册dash应用实例
     register_sales_app(app)
     register_real_time_sales_app(app)  # 实时销售页面的dash对象的注册
+    register_store_inspection_app(app)
     # 集成插件
     register_extensions(app)
     # 注册 路由

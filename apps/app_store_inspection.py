@@ -1,38 +1,32 @@
 import dash
 from flask_login import login_required
 
+from apps.html_string.base_html_string_store_inspection import base_html_string_store_inspection
 from conf.hfx_dashboard import BOOTSTRAP_THEME
-from conf.router_conts import URL_SALES_BYMONTH
-from apps.html_string.base_html_string_index import base_html_string_index
+from conf.router_conts import URL_STORE_INSPECTION
 
 
-def register_sales_app(app):
-    from apps.layouts.app_sales_bymonth_layout import layout
-    from apps.callbacks.app_sales_by_month_callbacks import register_callbacks
+def register_store_inspection_app(app):
+    from apps.layouts.app_store_instpection_layouts import layout
+    from apps.callbacks.app_store_inspection_callbacks import register_callbacks
 
     # Meta tags for viewport responsiveness
     meta_viewport = {"name": "viewport", "content": "width=device-width, initial-scale=1, shrink-to-fit=no"}
+    import dash_html_components as html
 
     dash_app = dash.Dash(__name__,
                          server=app,
                          update_title="数据载入中...",
                          suppress_callback_exceptions=True,
-                         # assets_url_path="assets",
-                         url_base_pathname=URL_SALES_BYMONTH,
+                         url_base_pathname=URL_STORE_INSPECTION,
                          meta_tags=[meta_viewport],
                          external_stylesheets=[BOOTSTRAP_THEME],
-                         index_string=base_html_string_index  # todo
+                         index_string=base_html_string_store_inspection  # todo
                          )
 
     with app.app_context():
-        dash_app.title = '门店月度销售分析'
+        dash_app.title = '门店常规巡检'
         dash_app.layout = layout
-        # dash_app.layout = html.Div(
-        #     children=[
-        #         html.H6(children="总销售额1", style={"color": "red", "whiteSpace": "pre"}),
-        #
-        #     ]
-        # )
         register_callbacks(dash_app)
 
 

@@ -1,4 +1,4 @@
-base_html_string_real_time = """
+base_html_string_store_inspection = """
 <!DOCTYPE html>
 <html lang="zxx">
    <head>

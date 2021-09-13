@@ -14,3 +14,5 @@
 URL_SALES_BYMONTH = "/sales/bymonth/"
 # 实时销售页面
 URL_REAL_TIME_SALE = "/real_time/"
+# 巡检看板页面
+URL_STORE_INSPECTION = "/store_inspection/"

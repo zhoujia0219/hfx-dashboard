@@ -58,19 +58,19 @@ base_html_string_index = """
                <div class="page-sidebar-menu">
                   <ul class="accordion-menu">
                      <li class="open active">
-                        <a href="http://127.0.0.1:8001/sales/bymonth/"><i data-feather="home"></i>
+                        <a href="http://127.0.0.1:8011/sales/bymonth/"><i data-feather="home"></i>
                         <span>首页</span></a>
                      </li>
                      
                       <li class="menu-divider mg-y-20-force"></li>
                      <li>
-                        <a href="http://127.0.0.1:8001/real_time/"><i data-feather="mail"></i>
+                        <a href="http://127.0.0.1:8011/real_time/"><i data-feather="mail"></i>
                         <span>第二个页面</span></a>
                      </li>
                    <li class="menu-divider mg-y-20-force"></li>
                      <li>
-                        <a href="widgets.html"><i data-feather="layout"></i>
-                        <span>第三个页面</span></a>
+                        <a href="http://127.0.0.1:8011/store_inspection/"><i data-feather="layout"></i>
+                        <span>常规巡检页面</span></a>
                      </li>
                      <li class="menu-divider mg-y-20-force"></li>
                      <li>
