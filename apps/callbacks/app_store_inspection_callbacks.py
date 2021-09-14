@@ -67,8 +67,10 @@ def register_callbacks(dash_app):
     def update_graph_bar_01(val1, val2):
         # # 调用方法--巡检情况完成率
         inspection_current = srv_store_inspection.find_store_inspect_finish_rate_01(val2, val1).values
+        print(inspection_current,2332322)
         if len(inspection_current) < 1:
-            return dash.no_update
+            # return dash.no_update
+            return ""
         nameiLnk = []
         oneLink = []
         twoLink = []
@@ -76,6 +78,7 @@ def register_callbacks(dash_app):
             nameiLnk.append(i[1])
             oneLink.append(i[2])
             twoLink.append(i[3])
+
         trace0 = go.Bar(
             # 方向变了，所以 x 轴和 y 轴的数据也要调换位置
             y=nameiLnk,
@@ -85,6 +88,7 @@ def register_callbacks(dash_app):
             # 指定为水平方向即可
             orientation="h"
         )
+
         fig = go.Figure(data=[trace0])
         return fig
 
@@ -179,12 +183,11 @@ def register_callbacks(dash_app):
     def update_bar_title(value):
         return concat_str(value, "巡检完成率排名")
 
-    # 图二 合格率_直方图—实现标题回调（月份）
     @dash_app.callback(
         Output('month_choice_bar_regular_title', 'children'), Input('regular_fig_month_choice', 'value')
     )
     def update_bar_title(value):
-
+        """图二 合格率_直方图—实现标题回调（月份）"""
         return concat_str(value, '巡检合格率排名')
 
     # 图三 整改率_直方图—实现标题回调（月份）

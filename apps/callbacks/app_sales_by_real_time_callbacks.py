@@ -1,5 +1,6 @@
 import pandas as pd
-
+import dash_bootstrap_components as dbc
+import dash_html_components as html
 
 import dash
 import plotly.express as px
@@ -12,14 +13,17 @@ from services import srv_sales_real_time
 # 回调
 ###############
 from services.srv_comm_dim import get_ZE_PJS_ZWS
-from services.srv_sales_real_time import get_all_areaname
+from services.srv_sales_real_time import get_all_areaname, sale_total
 from utils.date_util import get_day_hour
+from utils.tools import big_number_conduct
 
 
 def register_callbacks(dash_app):
     ###############
     # 页面内容构建刷新函数
     ###############
+  # 今日昨日销售额
+
     def sale_month_fig(data_x, data_y, data_sum, range_choice):
         """
         销售月数据
@@ -114,9 +118,10 @@ def register_callbacks(dash_app):
 
     @dash_app.callback(
         Output('sales_real_time_day', 'figure'),
-        Input('x_choice_time', 'value'),
+        [Input('x_choice_time', 'value'),
+         Input("graph-update", "n_intervals")]
     )
-    def sale_day_day(x_choice_time):
+    def sale_day_day(x_choice_time, n):
         """
         销售日分布
         """
@@ -128,6 +133,7 @@ def register_callbacks(dash_app):
         [
             Input('total_avg_mid', 'value'),
             Input('range_choice', 'value'),
+            # Input("graph-update", "n_intervals")
 
         ]
     )
@@ -137,3 +143,41 @@ def register_callbacks(dash_app):
         """
         fig_sales_month = sale_month_fig("day", "dealtotal", get_ZE_PJS_ZWS()[total_avg_mid], range_choice)
         return fig_sales_month
+
+    @dash_app.callback(
+        Output("total_sale", "children"),
+        Input("table_update", "n_intervals")
+    )
+    def update_total_sale(n):
+        sale_total_form = sale_total()
+        return [
+            dbc.Col(
+                html.H5(
+                    children="销售总额"
+                ),
+                width=3
+            ),
+            dbc.Col(
+                html.H5(
+                    children="{}".format(big_number_conduct(sale_total_form[1], 2))
+                ),
+                width=3
+            ),
+            dbc.Col(
+                html.H5(
+                    children="{}".format(big_number_conduct(sale_total_form[0], 2))
+                ),
+                width=3
+            ),
+            dbc.Col(
+                html.H5(
+                    children="0%" if sale_total_form[0] == sale_total_form[1] else (
+                            ("+" if sale_total_form[0] > sale_total_form[1] else "-") + "{}%".format(
+                        round(sale_total_form[0] / sale_total_form[1] / 100, 2))),
+                    style={
+                        "backgroundColor": "red" if sale_total_form[0] > sale_total_form[1] else "green"} if
+                    sale_total_form[0] != sale_total_form[1] else {}
+                ),
+                width=3
+            )
+        ]

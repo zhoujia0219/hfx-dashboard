@@ -6,6 +6,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dateutil.relativedelta import relativedelta
 
+from conf.basic_const import REAL_TIME_SALA_ANALYZE_INTERVAL_TIME, REAL_TIME_TOTAL_SALE_INTERVAL_TIME
 from services.srv_comm_dim import get_week_map
 from services.srv_sales_real_time import sale_total, shop_count, guest_orders, cost_price, dealtotal_plan_sales
 from utils import date_util
@@ -211,7 +212,6 @@ def pie_map_month_week(week_month):
     return fig
 
 
-print(dealtotal_plan_sales_form[0][0], 333)
 left_table = dbc.Card(
     children=dbc.CardBody(
         children=[
@@ -312,7 +312,7 @@ left_table = dbc.Card(
 
                             )), ], width=4),
                     ], style={"backgroundColor": "#dcdcdc"}),
-                    html.Hr(),  # todo 中间一点点的空白多了一根横线
+                    html.Hr(),  #
                     dbc.Row([  # 第二个带有图的
                         dbc.Col(
                             [
@@ -394,37 +394,7 @@ left_table = dbc.Card(
                     ]),
                     html.Hr(),
 
-                    dbc.Row([
-                        dbc.Col(
-                            html.H5(
-                                children="销售总额"
-                            ),
-                            width=3
-                        ),
-                        dbc.Col(
-                            html.H5(
-                                children="{}".format(big_number_conduct(sale_total_form[1], 2))
-                            ),
-                            width=3
-                        ),
-                        dbc.Col(
-                            html.H5(
-                                children="{}".format(big_number_conduct(sale_total_form[0], 2))
-                            ),
-                            width=3
-                        ),
-                        dbc.Col(
-                            html.H5(
-                                children="0%" if sale_total_form[0] == sale_total_form[1] else (
-                                        ("+" if sale_total_form[0] > sale_total_form[1] else "-") + "{}%".format(
-                                    round(sale_total_form[0] / sale_total_form[1] / 100, 2))),
-                                style={
-                                    "backgroundColor": "red" if sale_total_form[0] > sale_total_form[1] else "green"} if
-                                sale_total_form[0] != sale_total_form[1] else {}
-                            ),
-                            width=3
-                        )
-                    ]),
+                    dbc.Row(id="total_sale"),  # 销售总额
                     html.Hr(),
 
                     dbc.Row([
@@ -635,6 +605,11 @@ left_table = dbc.Card(
                     ]),
                     html.Hr(),
                     # todo
+                    dcc.Interval(
+                        id='table_update',
+                        interval=REAL_TIME_TOTAL_SALE_INTERVAL_TIME,
+                        n_intervals=0
+                    ),
                 ],
                 style={'alignItems': 'flex-end'}
             ),
@@ -693,15 +668,14 @@ c_fig_sales_day_month = dbc.Card(
             dbc.Row([
                 dbc.Col(
                     html.Div(
-                        dcc.Loading(
-                            id='loading_sales_day',
-                            type='circle',
-                            children=[
-                                dcc.Graph(  # 日销售分布图
-                                    id='sales_real_time_day',
-                                    style={'height': '400px', 'width': '1200px'}
-                                )
-                            ], ), ), ),
+
+                        id='loading_sales_day',
+                        children=[
+                            dcc.Graph(  # 日销售分布图
+                                id='sales_real_time_day',
+                                style={'height': '400px', 'width': '1200px'}
+                            )
+                        ], ), ),
             ], ),
 
             html.Div(dbc.Row([
@@ -837,15 +811,16 @@ c_fig_sales_day_month = dbc.Card(
             dbc.Row([
                 dbc.Col(
                     html.Div(
-                        dcc.Loading(
-                            id='loading_sales_month',
-                            type='circle',
-                            children=[
-                                dcc.Graph(  # 月销售分布图
-                                    id='sales_real_time_month',
-                                    style={'height': '400px', 'width': '1200px'}
-                                )
-                            ], ), ), ),
+
+                        id='loading_sales_month',
+                        children=[
+                            dcc.Graph(  # 月销售分布图
+                                id='sales_real_time_month',
+                                style={'height': '400px', 'width': '1200px'}
+                            )
+                            , ], ),
+
+                ),
             ], ),
 
             html.Hr(),
@@ -864,6 +839,11 @@ c_fig_sales_day_month = dbc.Card(
             ],
                 className='media flex-wrap align-items-center'
             ),
+            dcc.Interval(
+                id='graph-update',
+                interval=REAL_TIME_SALA_ANALYZE_INTERVAL_TIME,
+                n_intervals=0
+            ),
         ]
     ),
     style={"width": "100%"}
@@ -872,15 +852,11 @@ c_fig_sales_day_month = dbc.Card(
 content = html.Div(
     className='content-style ',
     children=[
-        # dbc.Row(id="card_data", children=card_list),
         dbc.Row(
             children=[
                 dbc.Col(left_table, width=4),
-
                 dbc.Col(
-                    children=[
-                        dbc.Row(children=c_fig_sales_day_month, className='mt-3'),  # 本日本月的销售分布
-                    ],
+                    c_fig_sales_day_month,
                     width=8  # 控制整个块的区域
                 ),
             ],
