@@ -7,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 
+from analog_data import today_area_sale_, yesterday_area_sale_
 from services import srv_sales_real_time
 
 ###############
@@ -22,7 +23,7 @@ def register_callbacks(dash_app):
     ###############
     # 页面内容构建刷新函数
     ###############
-  # 今日昨日销售额
+    # 今日昨日销售额
     def sale_month_fig(data_x, data_y, data_sum, range_choice):
         """
         销售月数据
@@ -79,8 +80,6 @@ def register_callbacks(dash_app):
         pic_dff_today = today_data.groupby([data_x], as_index=False)['sale'].sum()  # 今日数据的聚合
         pic_dff_yesterday = yesterday_data.groupby([data_x], as_index=False)['sale'].sum()  # 昨日数据的聚合
         empty_pic = pd.DataFrame(day_hour_arang, columns=["times", "sale"])  # 所有时间点的dataframe
-        # pic_dff_today = pd.concat([empty_pic, pic_dff_today])  # 今天的数据和空dataframe拼接
-        # pic_dff_yesterday = pd.concat([empty_pic, pic_dff_yesterday])  # 昨天的数据和空dataframe拼接
         pic_dff = pd.concat([pic_dff_today, pic_dff_yesterday])  # 拼接两天数据
         pic_dff = pd.concat([pic_dff, empty_pic])  # 拼接所有时间点
         pic_dff.drop_duplicates(subset=['times'], keep='first', inplace=True)  # 去重
@@ -131,6 +130,70 @@ def register_callbacks(dash_app):
         fig_sales_day = sale_day_fig("times", "sale", x_choice_time),  # 画图
         return fig_sales_day[0]
 
+    def day_area_sale_list(level_area):
+        """
+        销售日数据
+        :param data_x:
+        :param data_y:
+        :return:
+        """
+        map_area = {"level_1": "area1", "level_2": "area2"}  # 根据选择确定对相应的列聚合
+        group_name = map_area[level_area]  # 得出要分组列的name
+
+        day_hour_arang, all_time_list = get_day_hour('1-24')
+        today_data, yesterday_data = pd.DataFrame(today_area_sale_), pd.DataFrame(yesterday_area_sale_)  #
+        # today_data, yesterday_data = srv_sales_real_time.sales_day(all_time_list)  #
+        # if data_x == data_y:
+        #     return ''
+
+        pic_dff = pd.concat([today_data, yesterday_data])  # 聚合两天数据
+        data = pic_dff.groupby([group_name])
+        fig_list = []
+        flag = 1  # 标记只能有9个
+        for i, j in data:
+            if flag < 9:
+                # 分组之后的每个战区名字，每组数据
+                area_name = i
+                times_list = []  # 时间列表，x轴
+                times_groupby = j.groupby("times")
+                for a, b in times_groupby:
+                    times_list.append(a)
+                y_dealtotal = times_groupby.sum()["dealtotal"]
+
+                # 对颜色处理
+                color_time_list = sorted(all_time_list[0] + all_time_list[1])
+                # 按照显示的效果将颜色设置好
+                color_list = ["darkgrey" if i in all_time_list[0] else 'blue' for i in color_time_list]
+                trace = go.Bar(
+                    name="{}".format(area_name),
+                    x=times_list,
+                    y=y_dealtotal,
+                    marker=dict(color=color_list)
+                )
+                layout = go.Layout(
+                    xaxis=dict(title="{}".format(area_name)),
+                )
+                fig = go.Figure(data=[trace, ], layout=layout)
+                fig.update_layout(
+                    showlegend=False,
+                    margin=dict(t=5, l=5, b=5, r=5)
+                )
+                fig_list.append(fig)
+            else:
+                break
+            flag += 1
+        if len(fig_list) < 9:  # 数据量不足
+            for i in range(9 - len(fig_list)):
+                fig_list.append("")
+        return fig_list
+
+    @dash_app.callback(
+        [Output("day_area_fig" + str(i), 'figure') for i in range(9)],
+        Input('area_level', 'value')
+    )
+    def day_area_sale(value):
+        """各区域本日销售分布"""
+        return day_area_sale_list(value)
     # @dash_app.callback(
     #     Output('sales_real_time_month', 'figure'),
     #     [

@@ -40,6 +40,35 @@ def sales_day(all_time_list):
     return today_data, yesterday_data
 
 
+# def day_area_all_data(all_time_list):
+#     """
+#     区域本日销售分布数据
+#     """
+#     to_day = '2021-03-21'  # todo 测试的date
+#     yes_day = '2021-03-20'  # todo 测试的date
+#     current_hour = datetime.today().hour  # 当前的小时
+#     current_hour = str(current_hour) if len(str(current_hour)) else '0' + str(current_hour)
+#     current_hour = 11
+#     has_data_sql = """
+#             select 1 from  (select sale, substr(times,0,3) as times,rdate from chunbaiwei.fact_salebill where rdate='{}' ) a
+#             where times='{}'""".format(to_day, current_hour)
+#     has_data = db_util.read_by_pd(has_data_sql, default_dbname)
+#     if not len(has_data):
+#         # 今天这个临界点没有数据则用昨天的数据
+#         all_time_list[0].append(current_hour)
+#     today_sql = """
+#     select dealtotal, times,rdate from  (select dealtotal, substr(times,0,3) as times,rdate from chunbaiwei.fact_storesale_weather where rdate='{}' ) a
+#         where times in {} """.format(to_day,
+#                                      str(set(all_time_list[1])).replace('{', "(").replace("}", ')') if all_time_list[
+#                                          1] else ('215', '261'))
+#     yesterday_sql = """
+#     select dealtotal, times,rdate from  (select dealtotal, substr(times,0,3) as times,rdate from chunbaiwei.fact_storesale_weather where rdate='{}' ) a
+#         where times in {} """.format(yes_day,
+#                                      str(set(all_time_list[0])).replace('{', "(").replace("}", ')') if all_time_list[
+#                                          0] else ('251', '261'))
+#     today_data = db_util.read_by_pd(today_sql, default_dbname)
+#     yesterday_data = db_util.read_by_pd(yesterday_sql, default_dbname)
+#     return today_data, yesterday_data
 def sales_month(range_choice: str) -> DataFrame:
     """
     销售月数据
