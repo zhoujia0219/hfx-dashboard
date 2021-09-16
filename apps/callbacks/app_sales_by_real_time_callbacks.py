@@ -23,7 +23,6 @@ def register_callbacks(dash_app):
     # 页面内容构建刷新函数
     ###############
   # 今日昨日销售额
-
     def sale_month_fig(data_x, data_y, data_sum, range_choice):
         """
         销售月数据
@@ -114,6 +113,10 @@ def register_callbacks(dash_app):
             template='plotly_white',
             width=1130
         )
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(t=5, l=5, b=5, r=5)
+        )
         return fig
 
     @dash_app.callback(
@@ -128,21 +131,21 @@ def register_callbacks(dash_app):
         fig_sales_day = sale_day_fig("times", "sale", x_choice_time),  # 画图
         return fig_sales_day[0]
 
-    @dash_app.callback(
-        Output('sales_real_time_month', 'figure'),
-        [
-            Input('total_avg_mid', 'value'),
-            Input('range_choice', 'value'),
-            # Input("graph-update", "n_intervals")
-
-        ]
-    )
-    def sale_day_month(total_avg_mid, range_choice):
-        """
-        销售月分布
-        """
-        fig_sales_month = sale_month_fig("day", "dealtotal", get_ZE_PJS_ZWS()[total_avg_mid], range_choice)
-        return fig_sales_month
+    # @dash_app.callback(
+    #     Output('sales_real_time_month', 'figure'),
+    #     [
+    #         Input('total_avg_mid', 'value'),
+    #         Input('range_choice', 'value'),
+    #         # Input("graph-update", "n_intervals")
+    #
+    #     ]
+    # )
+    # def sale_day_month(total_avg_mid, range_choice):
+    #     """
+    #     销售月分布
+    #     """
+    #     fig_sales_month = sale_month_fig("day", "dealtotal", get_ZE_PJS_ZWS()[total_avg_mid], range_choice)
+    #     return fig_sales_month
 
     @dash_app.callback(
         Output("total_sale", "children"),

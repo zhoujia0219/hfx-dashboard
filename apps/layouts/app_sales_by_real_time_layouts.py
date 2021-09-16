@@ -1,14 +1,19 @@
 from datetime import datetime
-import plotly.graph_objs as go
+
+import dash
+import plotly.graph_objects as go
 
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dateutil.relativedelta import relativedelta
 
+from apps.components.filter_all_table import table_key_category_sale
 from conf.basic_const import REAL_TIME_SALA_ANALYZE_INTERVAL_TIME, REAL_TIME_TOTAL_SALE_INTERVAL_TIME
+from services import srv_sales_real_time
 from services.srv_comm_dim import get_week_map
-from services.srv_sales_real_time import sale_total, shop_count, guest_orders, cost_price, dealtotal_plan_sales
+from services.srv_sales_real_time import sale_total, shop_count, guest_orders, cost_price, dealtotal_plan_sales, \
+    get_all_areaname
 from utils import date_util
 
 ###############
@@ -212,6 +217,51 @@ def pie_map_month_week(week_month):
     return fig
 
 
+def sale_month_fig(data_x, data_y, range_choice):
+    """
+    销售月数据
+    :param data_x:
+    :param data_y:
+    :param data_sum: pic_dff.sum()
+    :return:
+    """
+    current_month_days = date_util.get_current_month_all_day("")  # 本月的所有日期
+    pic_data = srv_sales_real_time.sales_month(range_choice)
+    print(pic_data, 1222222222)
+    if len(pic_data) < 1:
+        return dash.no_update
+    if data_x == data_y:
+        return dash.no_update
+    area_name = get_all_areaname()  # 所有战区名字
+    data = list()
+    for i in area_name:
+        pic = pic_data[pic_data["areaname3"] == i[0]]  # 对每个战区取数
+
+        pic_dff = pic.groupby([data_x], as_index=False)['dealtotal'].sum()
+        data.append(go.Scatter(
+            name=i[0],
+            x=pic_dff['day'],
+            y=pic_dff['dealtotal'],
+            mode="lines",
+
+        ),
+        )
+    layout = go.Layout(
+        xaxis=dict(title="日期"),
+        yaxis=dict(title="销售额（元/1M=1百万）"),
+    )
+    fig = go.Figure(data, layout=layout)
+    fig.update_layout(
+        barmode='group',
+        template='plotly_white',
+        width=1130
+    )
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(t=5, l=5, b=5, r=5)
+    )
+    return fig
+
 left_table = dbc.Card(
     children=dbc.CardBody(
         children=[
@@ -365,6 +415,11 @@ left_table = dbc.Card(
                         ),
                     ], style={"backgroundColor": "#dcdcdc", }),
 
+                    html.Br(),
+                    html.Br(),
+                    html.Br(),
+                    html.Br(),
+                    html.Br(),
                     # 表格
                     dbc.Row([
                         dbc.Col(
@@ -619,27 +674,27 @@ left_table = dbc.Card(
     style={"width": "100%"}
 )
 
-# 本日本月销售分布
+# 本日销售分布
 c_fig_sales_day_month = dbc.Card(
     children=dbc.CardBody(
         children=[
             # 用户选项
-            html.Div(
-                children=[
-                    html.H5(
-                        children='销售分布',
-                        className='media-body',
-                        style={'min-width': '150px'}
-                    ),
-                ],
-                className='media flex-wrap ',
-                style={'alignItems': 'flex-end'}
-            ),
-            html.Hr(),
+            # html.Div(
+            #     children=[
+            #         html.H5(
+            #             children='销售分布',
+            #             className='media-body',
+            #             style={'min-width': '150px'}
+            #         ),
+            #     ],
+            #     className='media flex-wrap ',
+            #     style={'alignItems': 'flex-end'}
+            # ),
+            # html.Hr(),
 
             html.Div(dbc.Row([
                 dbc.Col(html.H5(
-                    children='本日销售分析',
+                    children='日销售分布',
                     className='media-body',
                     style={'min-width': '150px'}
                 ),
@@ -678,10 +733,76 @@ c_fig_sales_day_month = dbc.Card(
                         ], ), ),
             ], ),
 
+            # html.Div(dbc.Row([
+            #     dbc.Col(
+            #         html.H5(
+            #             children='本月销售分析',
+            #             className='media-body',
+            #             style={'min-width': '150px'}
+            #         ),
+            #         width=3
+            #     ),
+            #     dbc.Col(),
+            #
+            #     html.Div(dbc.Row([
+            #         dbc.Col(
+            #             dcc.RadioItems(
+            #                 id="total_avg_mid",
+            #                 options=[{'label': '总额  ', 'value': 'ZE'},
+            #                          {'label': '平均数  ', 'value': 'PJS'},
+            #                          {'label': '中位数  ', 'value': 'ZWS'}],
+            #                 value='ZE',
+            #             )
+            #             ,
+            #             width=3
+            #         ),
+            #         dbc.Col(
+            #             html.Div([
+            #                 dcc.Dropdown(
+            #                     id="range_choice",
+            #                     style={'width': 120},
+            #                     options=[
+            #                         {'label': '本月', 'value': 'by'},
+            #                         {'label': '最近30天', 'value': 'zj'}
+            #                     ],
+            #                     value='by',
+            #                     searchable=False,
+            #                     clearable=False
+            #                 ),
+            #             ],
+            #                 className='media-left block-inline'),
+            #             width=3
+            #         ),
+            #         dbc.Col(dcc.Dropdown(
+            #             id="map_index2",
+            #             style={'width': 120},
+            #             options=[{'label': "图形样式：折线图", 'value': "b"}],
+            #             value='b',
+            #             searchable=False,
+            #             clearable=False
+            #         ))
+            #     ])),
+            #
+            #
+            # ])),
+            # dbc.Row([
+            #     dbc.Col(
+            #         html.Div(
+            #
+            #             id='loading_sales_month',
+            #             children=[
+            #                 dcc.Graph(  # 月销售分布图
+            #                     id='sales_real_time_month',
+            #                     style={'height': '400px', 'width': '1200px'}
+            #                 )
+            #                 , ], ),
+            #
+            #     ),
+            # ], ),
             html.Div(dbc.Row([
                 dbc.Col(
                     html.H5(
-                        children='本月销售分析',
+                        children='各区域本日销售分布',
                         className='media-body',
                         style={'min-width': '150px'}
                     ),
@@ -691,26 +812,16 @@ c_fig_sales_day_month = dbc.Card(
 
                 html.Div(dbc.Row([
                     dbc.Col(
-                        dcc.RadioItems(
-                            id="total_avg_mid",
-                            options=[{'label': '总额  ', 'value': 'ZE'},
-                                     {'label': '平均数  ', 'value': 'PJS'},
-                                     {'label': '中位数  ', 'value': 'ZWS'}],
-                            value='ZE',
-                        )
-                        ,
-                        width=3
-                    ),
-                    dbc.Col(
                         html.Div([
                             dcc.Dropdown(
-                                id="range_choice",
+                                id="area_level",
                                 style={'width': 120},
                                 options=[
-                                    {'label': '本月', 'value': 'by'},
-                                    {'label': '最近30天', 'value': 'zj'}
+                                    {'label': '区域层级：1级', 'value': 'level_1'},
+                                    {'label': '区域层级：2级', 'value': 'level_2'},
+                                    {'label': '区域层级：3级 ', 'value': 'level_3'}
                                 ],
-                                value='by',
+                                value='level_1',
                                 searchable=False,
                                 clearable=False
                             ),
@@ -718,111 +829,24 @@ c_fig_sales_day_month = dbc.Card(
                             className='media-left block-inline'),
                         width=3
                     ),
-                    dbc.Col(dcc.Dropdown(
-                        id="map_index2",
-                        style={'width': 120},
-                        options=[{'label': "图形样式：折线图", 'value': "b"}],
-                        value='b',
-                        searchable=False,
-                        clearable=False
-                    ))
                 ])),
 
-                # dbc.Col(
-                #     html.Div(
-                #         children=[
-                #             # 单选框
-                #             dcc.RadioItems(
-                #                 id="total_avg_mid",
-                #                 options=[{'label': '总额  ', 'value': 'ZE'},
-                #                          {'label': '平均数  ', 'value': 'PJS'},
-                #                          {'label': '中位数  ', 'value': 'ZWS'}],
-                #                 value='ZE',
-                #             ),
-                #
-                #             # 下拉框
-                #             html.Div([
-                #                 dcc.Dropdown(
-                #                     id="range_choice",
-                #                     style={'width': 120},
-                #                     options=[
-                #                         {'label': '本月', 'value': 'by'},
-                #                         {'label': '最近30天', 'value': 'zj'}
-                #                     ],
-                #                     value='by',
-                #                     searchable=False,
-                #                     clearable=False
-                #                 ),
-                #                 dcc.Dropdown(
-                #                     id="map_index2",
-                #                     style={'width': 120},
-                #                     options=[{'label': "图形样式：折线图", 'value': "b"}],
-                #                     value='b',
-                #                     searchable=False,
-                #                     clearable=False
-                #                 ),
-                #             ], className='media-right block-inline'
-                #             ),
-                #         ], className='media flex-wrap ',
-                #         style={'alignItems': 'flex-end'}
-                #     ),
-                #     width=3
-                # )
-            ])),
 
-            # html.H5(children='本月销售分析', className='media-body', style={'min-width': '150px'}),
-            # # 用户选项
-            # html.Div(
-            #     children=[
-            #         # 单选框
-            #         dcc.RadioItems(
-            #             id="total_avg_mid",
-            #             options=[{'label': '总额', 'value': 'ZE'},
-            #                      {'label': '平均数', 'value': 'PJS'},
-            #                      {'label': '中位数', 'value': 'ZWS'}],
-            #             value='ZE',
-            #         ),
-            #         # 下拉框
-            #         html.Div([
-            #             dcc.Dropdown(
-            #                 id="range_choice",
-            #                 style={'width': 120},
-            #                 options=[
-            #                     {'label': '本月', 'value': 'by'},
-            #                     {'label': '最近30天', 'value': 'zj'}
-            #                 ],
-            #                 value='by',
-            #                 searchable=False,
-            #                 clearable=False
-            #             ),
-            #             dcc.Dropdown(
-            #                 id="map_index2",
-            #                 style={'width': 120},
-            #                 options=[{'label': "图形样式：折线图", 'value': "b"}],
-            #                 value='b',
-            #                 searchable=False,
-            #                 clearable=False
-            #             ),
-            #         ], className='media-right block-inline'
-            #         ),
-            #     ], className='media flex-wrap ',
-            #     style={'alignItems': 'flex-end'}
-            # ),
+            ])),
             dbc.Row([
                 dbc.Col(
                     html.Div(
-
-                        id='loading_sales_month',
+                        # id='loading_sales_month',
                         children=[
                             dcc.Graph(  # 月销售分布图
-                                id='sales_real_time_month',
-                                style={'height': '400px', 'width': '1200px'}
+                                figure=sale_month_fig("day", "dealtotal", "zj"),
+                                # id='sales_real_time_month',
+                                style={'height': '400px'}
                             )
                             , ], ),
 
                 ),
             ], ),
-
             html.Hr(),
             html.Div([
                 html.Div(children='最近更新: 2021-07-23 12:30:00',
@@ -849,16 +873,333 @@ c_fig_sales_day_month = dbc.Card(
     style={"width": "100%"}
 )
 
+# 重点品类销售情况
+key_category_sale = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            dbc.Row([
+                dbc.Col(
+                    children=[
+                        dbc.Row([
+                            dbc.Col(
+                                html.H4(
+                                    children="重点品类销售情况"
+                                ),
+                                width=12
+                            ),
+                        ]),
+                        html.Br(),
+                        table_key_category_sale(5, ["品类", "客单量(昨日)", "客单量(今日)", "销售额(昨日)", "销售额(今日)", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["混沌", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["饺子", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["面食", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["水产品", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["冻肉", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["鲜奶", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["熟食", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["方便面", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["八宝粥", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["咖啡", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["茶", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["蜜饯果脯", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                    ],
+
+                    width=5
+                ),
+
+                dbc.Col(children=[
+                    html.Div(
+                        # id='loading_sales_month',
+                        children=[
+                            dcc.Graph(  # 月销售分布图
+                                figure=sale_month_fig("day", "dealtotal", "zj"),
+                                # id='sales_real_time_month',
+                                style={'height': '400px'}
+                            )
+                            , ], ),
+
+                ], width=3),
+                dbc.Col(children=[
+                    html.Div(
+                        # id='loading_sales_month',
+                        children=[
+                            # 画图
+                            dbc.Row([  # 筛选框
+                                dbc.Col(
+                                    dbc.Col(
+                                        html.Div([
+                                            dcc.Dropdown(  # 筛选框1
+                                                id="key_category_sale_pie1",
+                                                style={'width': 120},
+                                                options=[
+                                                    {'label': '分类级别：1级', 'value': 'level1'},
+                                                    {'label': '分类级别：2级', 'value': 'level2'}
+                                                ],
+                                                value='level1',
+                                                searchable=False,
+                                                clearable=False
+                                            ),
+                                            dcc.Dropdown(  # 筛选框2
+                                                id="key_category_sale_pie2",
+                                                style={'width': 120},
+                                                options=[{'label': "日期：今日", 'value': "today"},
+                                                         {'label': "日期：昨日", 'value': "yeterday"},
+                                                         {'label': "日期：前日", 'value': "qiantian"}
+                                                         ],
+                                                value='today',
+                                                searchable=False,
+                                                clearable=False
+                                            )
+                                        ],
+                                            className='media-left block-inline'),
+                                        width=6
+                                    ),
+                                ),
+                            ]),
+
+                            dbc.Row([
+                                dbc.Col(
+                                    html.Div(
+                                        # id='loading_sales_month',
+                                        children=[
+                                            dcc.Graph(  # 月销售分布图
+                                                figure=sale_month_fig("day", "dealtotal", "zj"),
+                                                # id='sales_real_time_month',
+                                                style={'height': '400px'}
+                                            )
+                                            , ], ),
+
+                                ),
+                            ], ),
+
+                        ], ),
+                ], width=4)
+
+            ])
+        ]
+    ),
+    style={"width": "100%"}
+)
+
+# 区域销售分布
+area_sale_distribute = html.Div()
+
+# 区域销售排名
+area_sale_rank = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            dbc.Row([
+                dbc.Col(
+                    children=[
+                        dbc.Row([
+                            dbc.Col(
+                                html.H4(
+                                    children="区域销售排名"
+                                ),
+                                width=12
+                            ),
+                        ]),
+                        html.Br(),
+                        table_key_category_sale(5, ["", "客单量(昨日)", "客单量(今日)", "销售额(昨日)", "销售额(今日)", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["一战区一片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["一战区二片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["一战区三片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["二战区一片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["二战区二片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["二战区三片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                        table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
+                        html.Hr(),
+                    ],
+                    width=8
+                ),
+
+                dbc.Col(children=[  # 画图
+                    dbc.Row([ # 筛选框
+                        dbc.Col(
+                            dbc.Col(
+                                html.Div([
+                                    dcc.Dropdown(  # 筛选框1
+                                        id="area_sale_1",
+                                        style={'width': 120},
+                                        options=[
+                                            {'label': '销售额', 'value': 'xse'},
+                                            {'label': '客单量', 'value': 'kdl'}
+                                        ],
+                                        value='xse',
+                                        searchable=False,
+                                        clearable=False
+                                    ),
+                                    dcc.Dropdown(  # 筛选框2
+                                        id="area_sale_2",
+                                        style={'width': 120},
+                                        options=[{'label': "一级", 'value': "one"},
+                                                 {'label': "二级", 'value': "two"},
+                                                 {'label': "三级", 'value': "three"}
+                                                 ],
+                                        value='one',
+                                        searchable=False,
+                                        clearable=False
+                                    )
+                                ],
+                                    className='media-left block-inline'),
+                                width=6
+                            ),
+                        ),
+                    ]),
+
+                    dbc.Row([
+                        dbc.Col(
+                            html.Div(
+                                # id='loading_sales_month',
+                                children=[
+                                    dcc.Graph(  # 月销售分布图
+                                        figure=sale_month_fig("day", "dealtotal", "zj"),
+                                        # id='sales_real_time_month',
+                                        style={'height': '400px'}
+                                    )
+                                    , ], ),
+
+                        ),
+                    ], ),
+
+                ], width=4),
+
+            ])
+        ]
+    ),
+    style={"width": "100%"}
+)
+
+
+# 本月销售分布
+current_month_sale = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            html.Div(dbc.Row([
+                dbc.Col(
+                    html.H5(
+                        children='本月销售分析',
+                        className='media-body',
+                        style={'min-width': '150px'}
+                    ),
+                    width=3
+                ),
+                # dbc.Col(),
+
+                # html.Div(dbc.Row([
+                #     dbc.Col(
+                #         dcc.RadioItems(
+                #             id="total_avg_mid",
+                #             options=[{'label': '总额  ', 'value': 'ZE'},
+                #                      {'label': '平均数  ', 'value': 'PJS'},
+                #                      {'label': '中位数  ', 'value': 'ZWS'}],
+                #             value='ZE',
+                #         )
+                #         ,
+                #         width=3
+                #     ),
+                #     dbc.Col(
+                #         html.Div([
+                #             dcc.Dropdown(
+                #                 id="range_choice",
+                #                 style={'width': 120},
+                #                 options=[
+                #                     {'label': '本月', 'value': 'by'},
+                #                     {'label': '最近30天', 'value': 'zj'}
+                #                 ],
+                #                 value='by',
+                #                 searchable=False,
+                #                 clearable=False
+                #             ),
+                #         ],
+                #             className='media-left block-inline'),
+                #         width=3
+                #     ),
+                #     dbc.Col(dcc.Dropdown(
+                #         id="map_index2",
+                #         style={'width': 120},
+                #         options=[{'label': "图形样式：折线图", 'value': "b"}],
+                #         value='b',
+                #         searchable=False,
+                #         clearable=False
+                #     ))
+                # ])),
+            ])),
+            dbc.Row([
+                dbc.Col(
+                    html.Div(
+                        # id='loading_sales_month',
+                        children=[
+                            dcc.Graph(  # 月销售分布图
+                                figure=sale_month_fig("day", "dealtotal", "zj"),
+                                # id='sales_real_time_month',
+                                style={'height': '400px'}
+                            )
+                            , ], ),
+
+                ),
+            ], ),
+        ]
+    ),
+    style={"width": "100%"}
+)
+
+# 整体布局
 content = html.Div(
     className='content-style ',
     children=[
-        dbc.Row(
+        dbc.Row(  # 本日销售以及图形
             children=[
                 dbc.Col(left_table, width=4),
                 dbc.Col(
                     c_fig_sales_day_month,
                     width=8  # 控制整个块的区域
                 ),
+            ],
+            className='mt-3'),
+        dbc.Row(  # 重点品类销售情况
+            children=[
+                dbc.Col(key_category_sale),
+            ],
+            className='mt-3'),
+        dbc.Row(  # 本日销售以及图形
+            children=[
+                dbc.Col(area_sale_distribute, width=4),
+                dbc.Col(
+                    area_sale_rank,
+                    width=8  # 控制整个块的区域
+                ),
+            ],
+            className='mt-3'),
+        dbc.Row(  # 本月销售分布
+            children=[
+                dbc.Col(current_month_sale, width=12),
             ],
             className='mt-3'),
     ],
