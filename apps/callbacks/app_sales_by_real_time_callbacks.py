@@ -1,3 +1,6 @@
+import json
+from urllib.request import urlopen
+
 import pandas as pd
 import dash_bootstrap_components as dbc
 import dash_html_components as html
@@ -8,7 +11,7 @@ import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 
 from analog_data import today_area_sale_, yesterday_area_sale_, pie_key_category_sale_pie_today, \
-    pie_key_category_sale_pie_yesterday, area_sale_rank_bar_today, area_sale_rank_bar_yesterday
+    pie_key_category_sale_pie_yesterday, area_sale_rank_bar_today, area_sale_rank_bar_yesterday, china_data
 from services import srv_sales_real_time
 
 ###############
@@ -25,7 +28,7 @@ def register_callbacks(dash_app):
     # 页面内容构建刷新函数
     ###############
     # 今日昨日销售额
-    def sale_month_fig(data_x, data_y, data_sum, range_choice):
+    def sale_month_callback(data_x, data_y, data_sum, range_choice):
         """
         销售月数据
         :param data_x:
@@ -124,7 +127,7 @@ def register_callbacks(dash_app):
         [Input('x_choice_time', 'value'),
          Input("graph-update", "n_intervals")]
     )
-    def sale_day_day(x_choice_time, n):
+    def sale_day_day_callback(x_choice_time, n):
         """
         销售日分布
         """
@@ -192,8 +195,10 @@ def register_callbacks(dash_app):
         [Output("day_area_fig" + str(i), 'figure') for i in range(9)],
         Input('area_level', 'value')
     )
-    def day_area_sale(value):
-        """各区域本日销售分布"""
+    def day_area_sale_callback(value):
+        """
+        各区域本日销售分布
+        """
         return day_area_sale_list(value)
 
     # @dash_app.callback(
@@ -216,8 +221,10 @@ def register_callbacks(dash_app):
         Output("total_sale", "children"),
         Input("table_update", "n_intervals")
     )
-    def update_total_sale(n):
-        """对销售总额的定时刷新"""
+    def update_total_sale_callback(n):
+        """
+        对销售总额的定时刷新
+        """
         sale_total_form = sale_total()
         return [
             dbc.Col(
@@ -258,8 +265,10 @@ def register_callbacks(dash_app):
             Input("key_category_sale_pie2", "value")
         ]
     )
-    def pie_key_category_sale(value1, value2):
-        """重点商品品类的销售情况饼图"""
+    def pie_key_category_sale_callback(value1, value2):
+        """
+        重点商品品类的销售情况饼图
+        """
         if value2 == 'today':
             data = pd.DataFrame(pie_key_category_sale_pie_today)
         else:
@@ -292,8 +301,10 @@ def register_callbacks(dash_app):
         Output("key_category_sale_bar_fig", "figure"),
         Input("graph-update_3", "n_intervals")
     )
-    def key_category_sale_bar(n):
-        """重点品类商品的横向条形图"""
+    def key_category_sale_bar_callback(n):
+        """
+        重点品类商品的横向条形图
+        """
         today_data = pd.DataFrame(pie_key_category_sale_pie_today)
         yesterday_data = pd.DataFrame(pie_key_category_sale_pie_yesterday)
         data = today_data["dealtotal"] - yesterday_data["dealtotal"]
@@ -308,7 +319,7 @@ def register_callbacks(dash_app):
             ),
         ]
         layout = go.Layout(
-            title='今日昨日销售数据比对', height=850, width=510, )
+            title='今日昨日销售数据比对', height=620, width=510, )
 
         fig = go.Figure(data=fig_list, layout=layout)
         fig.update_layout(
@@ -325,8 +336,10 @@ def register_callbacks(dash_app):
             Input("area_sale_2", "value")
         ]
     )
-    def area_sale_rank_bar(value1,value2):
-        """区域销售排名横向对比条形图"""
+    def area_sale_rank_bar_callback(value1, value2):
+        """
+        区域销售排名横向对比条形图
+        """
         # if value2 == "one":
         #     area = 'area1'
         # else:
@@ -366,14 +379,13 @@ def register_callbacks(dash_app):
         today_data = pd.DataFrame(area_sale_rank_bar_today).groupby(area)
         yesterday_data = pd.DataFrame(area_sale_rank_bar_yesterday).groupby(area)
         y_axis = []
-        for i,j in today_data:
+        for i, j in today_data:
             y_axis.append(i)
         today_sum_data = today_data.sum()
         yesterday_sum_data = yesterday_data.sum()
         data = today_sum_data["dealtotal"] - yesterday_sum_data["dealtotal"]
 
         color_list = ["red" if i < 0 else "#00bc12" for i in data]
-        print(data)
         fig_list = [
             go.Bar(
                 x=data,
@@ -384,12 +396,63 @@ def register_callbacks(dash_app):
             ),
         ]
         layout = go.Layout(
-            title='', height=850, width=510, )
+            title='', height=480, width=380, )
 
         fig = go.Figure(data=fig_list, layout=layout)
         fig.update_layout(
             barmode='group',
             template='plotly_white',
+            # showlegend=False,
+            margin=dict(t=5, l=5, b=5, r=5)
         )
         fig.update_traces(textposition='outside')  # 条形显示数据
+        return fig
+
+    @dash_app.callback(
+        Output("area_sale_distribute_fig", "figure"),
+        Input("area_sale_distribute_option", "value")
+    )
+    def area_sale_distribute_callback(value):
+        """
+        区域销售分布，地理图
+        """
+        with urlopen('https://cdn.huanggefan.cn/geojson/china.json') as f:
+            provinces_map = json.load(f)
+        map_datas = pd.DataFrame(china_data)
+
+        # map_datas = map_data.groupby('ad_name', as_index=False)['sales'].sum()
+        # # print(map_datas,9090909)
+        fig = px.choropleth_mapbox(
+            map_datas,
+            geojson=provinces_map,
+            color='sales',
+            locations='ad_name',
+            # 地理数据json文件中的省份名称的键名
+            featureidkey="properties.name",
+            mapbox_style="white-bg",
+            # height=620,
+            # 不同程度的颜色参数
+            color_continuous_scale=[
+                [0, 'lightcoral'],  # 这个必须要写，否则会出错
+                [1. / 3000, 'indianred'],
+                [1. / 300, 'brown'],
+                [1. / 30, 'firebrick'],
+                [1 / 3, 'maroon'],
+                [1., 'darkred']],
+
+            # 中心经纬度
+            center={"lat": 37.110573, "lon": 106.493924},
+            width=350,
+            zoom=2,  # 地图缩小值（0-12）
+            hover_name="ad_name",
+            hover_data=["sales"],
+            labels={
+                'ad_name': '省份名称',
+                'sales': '销售总额'
+            }
+        )
+        layout = go.Layout(
+            title='', height=620, width=380, )
+        fig = go.Figure(data=fig, layout=layout)
+
         return fig

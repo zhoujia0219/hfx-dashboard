@@ -837,36 +837,34 @@ key_category_sale = dbc.Card(
                         ]),
                         html.Br(),
                         table_key_category_sale(5, ["品类", "客单量(昨日)", "客单量(今日)", "销售额(昨日)", "销售额(今日)", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["混沌", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["饺子", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["面食", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["水产品", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["冻肉", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["鲜奶", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["熟食", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["方便面", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["八宝粥", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["咖啡", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["茶", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["蜜饯果脯", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                     ],
-
                     width=5
                 ),
-
                 dbc.Col(children=[
                     html.Div(
                         # id='key_category_sale_bar_graph',
@@ -940,7 +938,7 @@ key_category_sale = dbc.Card(
                     interval=REAL_TIME_SALA_ANALYZE_INTERVAL_TIME,
                     n_intervals=0
                 ),
-            ])
+            ], style={"height": "600px"})
         ],
 
     ),
@@ -948,9 +946,52 @@ key_category_sale = dbc.Card(
 )
 
 # 区域销售分布
-area_sale_distribute = html.Div()
+area_sale_distribute = dbc.Card(
+    children=dbc.CardBody(
+        children=[
+            html.Div(dbc.Row([
+                dbc.Col(
+                    html.H5(
+                        children='区域销售分布',
+                        className='media-body',
+                        style={'min-width': '150px'}
+                    ),
+                    width=3
+                ),
+            ])),
+            dbc.Row([  # 筛选框
+                dbc.Col(
+                    html.Div([
+                        dcc.Dropdown(  # 全国或某个大区、某个省
+                            id="area_sale_distribute_option",
+                            style={'width': 120},
+                            options=[{'label': "全国", 'value': "china"},
+                                     ],
+                            value='china',
+                            searchable=False,
+                            clearable=False
+                        )
+                    ],
+                        className='media-left block-inline'),
+                    width=12
+                ),
+            ], className='media-left block-inline'),
+            dbc.Row([  # TODO
+                dbc.Col(
+                    html.Div(
+                        id='area_sale_distribute_graph',
+                        children=[
+                            dcc.Graph(  # # 画图,地理图：区域销售分布
+                                id='area_sale_distribute_fig',
+                            )
+                            , ], ),
+                ),
+            ], ),
+        ]
+    ),
+    style={"width": "100%"}
+)
 
-# 区域销售排名
 area_sale_rank = dbc.Card(
     children=dbc.CardBody(
         children=[
@@ -967,29 +1008,29 @@ area_sale_rank = dbc.Card(
                         ]),
                         html.Br(),
                         table_key_category_sale(5, ["", "客单量(昨日)", "客单量(今日)", "销售额(昨日)", "销售额(今日)", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["一战区一片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["一战区二片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["一战区三片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["二战区一片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["二战区二片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["二战区三片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                         table_key_category_sale(5, ["三战区一片区", "1000", "1100", "1000", "1100", ], 2),
-                        html.Hr(),
+                        html.Hr(style={"margin": 8}),
                     ],
-                    width=8
+                    width=8, style={"height": "300px"}
                 ),
 
                 dbc.Col(children=[  # 画图
@@ -1040,7 +1081,7 @@ area_sale_rank = dbc.Card(
 
                 ], width=4),
 
-            ])
+            ], style={"height": "520px"})
         ]
     ),
     style={"width": "100%"}
@@ -1139,7 +1180,7 @@ content = html.Div(
             className='mt-3'),
         dbc.Row(  # 本日销售以及图形
             children=[
-                dbc.Col(area_sale_distribute, width=4),  #区域销售分布
+                dbc.Col(area_sale_distribute, width=4),  # 区域销售分布
                 dbc.Col(
                     area_sale_rank,
                     width=8  # 控制整个块的区域
