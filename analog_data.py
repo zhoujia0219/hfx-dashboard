@@ -34,17 +34,32 @@ today_area_sale_ = {
               "2021-03-21", "2021-03-21", "2021-03-21", "2021-03-21", "2021-03-21", "2021-03-21", "2021-03-21",
               "2021-03-21", "2021-03-21", "2021-03-21", "2021-03-21", "2021-03-21", "2021-03-21"]
 }
-# if __name__ == '__main__':
-#     a = pd.DataFrame(today_area_sale_)
-#     b =a.groupby(["area1"])
-#     # for i,j in a:
-#     #     print(i,88888888888888,j)
-#     # print(a.groupby(["area1"]).get_group("一战区"),33)
-#     for i,j in b:
-#         # print(i,12333333333333333333332,j)
-#         for a,d in j.groupby("times"):
-#             print(a,9999999999999,d,23223)
-#     # print(b)
-#     # print(b.values,type(b),b,2)
-#
-#     啊= [i for i in range(222)]
+
+# 饼图的模拟数据
+pie_key_category_sale_pie_today = {
+    "category_name": [
+        "饼干", "混沌", "饺子", "面食", "水产品", "冻肉", "鲜奶", "酸奶", "熟食", "方便面", "八宝粥", "咖啡", "茶", "蜜饯果脯", "干海产品"
+    ],
+    "dealtotal": [12, 23, 34, 45, 56, 67, 78, 89, 90, 122, 111, 131, 32, 63, 72]
+}
+pie_key_category_sale_pie_yesterday = {
+    "category_name": [
+        "饼干", "混沌", "饺子", "面食", "水产品", "冻肉", "鲜奶", "酸奶", "熟食", "方便面", "八宝粥", "咖啡", "茶", "蜜饯果脯", "干海产品"
+    ],
+    "dealtotal": [18, 15, 34, 36, 55, 72, 70, 80, 90, 110, 122, 98, 69, 36, 27]
+}
+
+if __name__ == '__main__':
+    a = pd.DataFrame(pie_key_category_sale_pie_today)
+    print(a,5315451515)
+    a = pd.DataFrame(today_area_sale_)
+    b = a.groupby(["area1"])
+    # for i,j in a:
+    #     print(i,88888888888888,j)
+    # print(a.groupby(["area1"]).get_group("一战区"),33)
+    for i, j in b:
+        # print(i,12333333333333333333332,j)
+        for a, d in j.groupby("times"):
+            print(a, 9999999999999, d, 23223)
+    # print(b)
+    # print(b.values,type(b),b,2)

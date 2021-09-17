@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 
-from analog_data import today_area_sale_, yesterday_area_sale_
+from analog_data import today_area_sale_, yesterday_area_sale_, pie_key_category_sale_pie_today,pie_key_category_sale_pie_yesterday
 from services import srv_sales_real_time
 
 ###############
@@ -88,7 +88,7 @@ def register_callbacks(dash_app):
         # 对颜色处理
         color_time_list = sorted(all_time_list[0] + all_time_list[1])
         # 按照显示的效果将颜色设置好
-        color_list = ["darkgrey" if i in all_time_list[0] else 'blue' for i in color_time_list]
+        color_list = ["darkgrey" if i in all_time_list[0] else '#44cef6' for i in color_time_list]
         trace = go.Bar(
             name="小时销售",
             x=pic_dff[data_x],
@@ -163,7 +163,7 @@ def register_callbacks(dash_app):
                 # 对颜色处理
                 color_time_list = sorted(all_time_list[0] + all_time_list[1])
                 # 按照显示的效果将颜色设置好
-                color_list = ["darkgrey" if i in all_time_list[0] else 'blue' for i in color_time_list]
+                color_list = ["darkgrey" if i in all_time_list[0] else '#44cef6' for i in color_time_list]
                 trace = go.Bar(
                     name="{}".format(area_name),
                     x=times_list,
@@ -194,6 +194,7 @@ def register_callbacks(dash_app):
     def day_area_sale(value):
         """各区域本日销售分布"""
         return day_area_sale_list(value)
+
     # @dash_app.callback(
     #     Output('sales_real_time_month', 'figure'),
     #     [
@@ -215,6 +216,7 @@ def register_callbacks(dash_app):
         Input("table_update", "n_intervals")
     )
     def update_total_sale(n):
+        """对销售总额的定时刷新"""
         sale_total_form = sale_total()
         return [
             dbc.Col(
@@ -247,3 +249,41 @@ def register_callbacks(dash_app):
                 width=3
             )
         ]
+
+    @dash_app.callback(
+        Output("pie_key_category_sale_fig", "figure"),
+        [
+            Input("key_category_sale_pie1", "value"),
+            Input("key_category_sale_pie2", "value")
+        ]
+    )
+    def pie_key_category_sale(value1, value2):
+        """重点商品品类的销售情况饼图"""
+        print(value1, value2)
+        if value2 == 'today':
+            data = pd.DataFrame(pie_key_category_sale_pie_today)
+        else:
+            data = pd.DataFrame(pie_key_category_sale_pie_yesterday)
+
+        # trace = go.Pie(labels=data['category_name'], values=data['dealtotal'], textfont=dict(size=15), )
+        # layout = go.Layout(
+        #     xaxis=dict(title="{}".format(1)),
+        # )
+        # fig = go.Figure(data=[trace, ], layout=layout)
+        # fig.update_layout(
+        #     showlegend=False,
+        #     margin=dict(t=2, l=5, b=5, r=5)
+        # )
+        # fig.update_traces(hoverinfo='label+percent', textinfo='label+percent', textfont_size=20,
+        #                   # marker=dict(line=dict(color='#000000', width=2))
+        #                   )
+        # return fig
+        fig = px.pie(data, values='dealtotal', names='category_name',
+                     # title='',
+                     )
+        fig.update_traces(textposition='outside', textinfo='percent+label',)
+        fig.update_layout(
+            showlegend=True,
+            margin=dict(t=5, l=5, b=5, r=5)
+        )
+        return fig

@@ -420,7 +420,6 @@ left_table = dbc.Card(
                     html.Br(),
                     html.Br(),
                     html.Br(),
-                    html.Br(),
                     # 表格
                     dbc.Row([
                         dbc.Col(
@@ -756,12 +755,12 @@ c_fig_sales_day_month = dbc.Card(
             dbc.Row([  # todo
                 dbc.Col(
                     html.Div(
-                        id='day_area_graph_'+str(i),
+                        id='day_area_graph_' + str(i),
                         children=[
                             dcc.Graph(  # 各区域本日销售分布
                                 # figure=sale_month_fig("day", "dealtotal", "zj"),
-                                id='day_area_fig'+str(i),
-                                style={'height': '150px', "width": "400px"}
+                                id='day_area_fig' + str(i),
+                                style={'height': '150px', "width": "390px"}
                             )
                         ], ),
                     width=4
@@ -770,44 +769,44 @@ c_fig_sales_day_month = dbc.Card(
             dbc.Row([  # todo
                 dbc.Col(
                     html.Div(
-                        id='day_area_graph_'+str(i),
+                        id='day_area_graph_' + str(i),
                         children=[
                             dcc.Graph(  # 各区域本日销售分布
                                 # figure=sale_month_fig("day", "dealtotal", "zj"),
-                                id='day_area_fig'+str(i),
-                                style={'height': '150px', "width": "400px"}
+                                id='day_area_fig' + str(i),
+                                style={'height': '150px', "width": "390px"}
                             )
                         ], ),
                     width=4
-                ) for i in range(3,6)
+                ) for i in range(3, 6)
             ], ),
             dbc.Row([  # todo
                 dbc.Col(
                     html.Div(
-                        id='day_area_graph_'+str(i),
+                        id='day_area_graph_' + str(i),
                         children=[
                             dcc.Graph(  # 各区域本日销售分布
                                 # figure=sale_month_fig("day", "dealtotal", "zj"),
-                                id='day_area_fig'+str(i),
-                                style={'height': '150px', "width": "400px"}
+                                id='day_area_fig' + str(i),
+                                style={'height': '150px', "width": "390px"}
                             )
                         ], ),
                     width=4
-                ) for i in range(6,9)
+                ) for i in range(6, 9)
             ], ),
             html.Hr(),
             html.Div([
                 html.Div(children='最近更新: 2021-07-23 12:30:00',
                          className='media-body'),
-                html.Div(children=dbc.Button(
-                    children='立即刷新',
-                    color='secondary',
-                    className='mr-1',
-                    size='sm',
-                    id='map_update_button3',
-                    n_clicks=0
-                )
-                ),
+                # html.Div(children=dbc.Button(
+                #     children='立即刷新',
+                #     color='secondary',
+                #     className='mr-1',
+                #     size='sm',
+                #     id='map_update_button3',
+                #     n_clicks=0
+                # )
+                # ),
             ],
                 className='media flex-wrap align-items-center'
             ),
@@ -870,62 +869,64 @@ key_category_sale = dbc.Card(
 
                 dbc.Col(children=[
                     html.Div(
-                        # id='loading_sales_month',
+                        # id='key_category_sale_bar_graph',
                         children=[
-                            dcc.Graph(  # 月销售分布图
-                                figure=sale_month_fig("day", "dealtotal", "zj"),
-                                # id='sales_real_time_month',
+                            dcc.Graph(  # 横向图
+                                # figure=sale_month_fig("day", "dealtotal", "zj"),
+                                id='key_category_sale_bar_fig',
                                 style={'height': '400px'}
                             )
                             , ], ),
 
                 ], width=3),
+
                 dbc.Col(children=[
                     html.Div(
                         # id='loading_sales_month',
                         children=[
                             # 画图
                             dbc.Row([  # 筛选框
+                                dbc.Col(width=6),
                                 dbc.Col(
-                                    dbc.Col(
-                                        html.Div([
-                                            dcc.Dropdown(  # 筛选框1
-                                                id="key_category_sale_pie1",
-                                                style={'width': 120},
-                                                options=[
-                                                    {'label': '分类级别：1级', 'value': 'level1'},
-                                                    {'label': '分类级别：2级', 'value': 'level2'}
-                                                ],
-                                                value='level1',
-                                                searchable=False,
-                                                clearable=False
-                                            ),
-                                            dcc.Dropdown(  # 筛选框2
-                                                id="key_category_sale_pie2",
-                                                style={'width': 120},
-                                                options=[{'label': "日期：今日", 'value': "today"},
-                                                         {'label': "日期：昨日", 'value': "yeterday"},
-                                                         {'label': "日期：前日", 'value': "qiantian"}
-                                                         ],
-                                                value='today',
-                                                searchable=False,
-                                                clearable=False
-                                            )
-                                        ],
-                                            className='media-left block-inline'),
-                                        width=6
-                                    ),
+                                    html.Div([
+                                        dcc.Dropdown(  # 筛选框1
+                                            id="key_category_sale_pie1",
+                                            style={'width': 120},
+                                            options=[
+                                                {'label': '分类级别：1级', 'value': 'level1'},
+                                                # {'label': '分类级别：2级', 'value': 'level2'}
+                                            ],
+                                            value='level1',
+                                            searchable=False,
+                                            clearable=False
+                                        ),
+                                        dcc.Dropdown(  # 筛选框2
+                                            id="key_category_sale_pie2",
+                                            style={'width': 120},
+                                            options=[{'label': "日期：今日", 'value': "today"},
+                                                     {'label': "日期：昨日", 'value': "yeterday"},
+                                                     # {'label': "日期：前日", 'value': "qiantian"}
+                                                     ],
+                                            value='today',
+                                            searchable=False,
+                                            clearable=False
+                                        )
+                                    ],
+                                        className='media-left block-inline'),
+                                    width=6
                                 ),
                             ]),
-
+                            html.Br(),
+                            html.Br(),
+                            html.Br(),
                             dbc.Row([
                                 dbc.Col(
                                     html.Div(
-                                        # id='loading_sales_month',
+                                        id='pie_key_category_sale_graph',
                                         children=[
-                                            dcc.Graph(  # 月销售分布图
-                                                figure=sale_month_fig("day", "dealtotal", "zj"),
-                                                # id='sales_real_time_month',
+                                            dcc.Graph(  # 饼图
+                                                # figure=sale_month_fig("day", "dealtotal", "zj"),
+                                                id='pie_key_category_sale_fig',
                                                 style={'height': '400px'}
                                             )
                                             , ], ),
@@ -989,35 +990,34 @@ area_sale_rank = dbc.Card(
 
                 dbc.Col(children=[  # 画图
                     dbc.Row([  # 筛选框
+                        dbc.Col(width=6),
                         dbc.Col(
-                            dbc.Col(
-                                html.Div([
-                                    dcc.Dropdown(  # 筛选框1
-                                        id="area_sale_1",
-                                        style={'width': 120},
-                                        options=[
-                                            {'label': '销售额', 'value': 'xse'},
-                                            {'label': '客单量', 'value': 'kdl'}
-                                        ],
-                                        value='xse',
-                                        searchable=False,
-                                        clearable=False
-                                    ),
-                                    dcc.Dropdown(  # 筛选框2
-                                        id="area_sale_2",
-                                        style={'width': 120},
-                                        options=[{'label': "一级", 'value': "one"},
-                                                 {'label': "二级", 'value': "two"},
-                                                 {'label': "三级", 'value': "three"}
-                                                 ],
-                                        value='one',
-                                        searchable=False,
-                                        clearable=False
-                                    )
-                                ],
-                                    className='media-left block-inline'),
-                                width=6
-                            ),
+                            html.Div([
+                                dcc.Dropdown(  # 筛选框1
+                                    id="area_sale_1",
+                                    style={'width': 120},
+                                    options=[
+                                        {'label': '销售额', 'value': 'xse'},
+                                        {'label': '客单量', 'value': 'kdl'}
+                                    ],
+                                    value='xse',
+                                    searchable=False,
+                                    clearable=False
+                                ),
+                                dcc.Dropdown(  # 筛选框2
+                                    id="area_sale_2",
+                                    style={'width': 120},
+                                    options=[{'label': "一级", 'value': "one"},
+                                             {'label': "二级", 'value': "two"},
+                                             {'label': "三级", 'value': "three"}
+                                             ],
+                                    value='one',
+                                    searchable=False,
+                                    clearable=False
+                                )
+                            ],
+                                className='media-left block-inline'),
+                            width=8
                         ),
                     ]),
 
