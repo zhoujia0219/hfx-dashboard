@@ -7,7 +7,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 
-from analog_data import today_area_sale_, yesterday_area_sale_, pie_key_category_sale_pie_today,pie_key_category_sale_pie_yesterday
+from analog_data import today_area_sale_, yesterday_area_sale_, pie_key_category_sale_pie_today, \
+    pie_key_category_sale_pie_yesterday, area_sale_rank_bar_today, area_sale_rank_bar_yesterday
 from services import srv_sales_real_time
 
 ###############
@@ -259,7 +260,6 @@ def register_callbacks(dash_app):
     )
     def pie_key_category_sale(value1, value2):
         """重点商品品类的销售情况饼图"""
-        print(value1, value2)
         if value2 == 'today':
             data = pd.DataFrame(pie_key_category_sale_pie_today)
         else:
@@ -281,9 +281,115 @@ def register_callbacks(dash_app):
         fig = px.pie(data, values='dealtotal', names='category_name',
                      # title='',
                      )
-        fig.update_traces(textposition='outside', textinfo='percent+label',)
+        fig.update_traces(textposition='outside', textinfo='percent+label', )
         fig.update_layout(
             showlegend=True,
             margin=dict(t=5, l=5, b=5, r=5)
         )
+        return fig
+
+    @dash_app.callback(
+        Output("key_category_sale_bar_fig", "figure"),
+        Input("graph-update_3", "n_intervals")
+    )
+    def key_category_sale_bar(n):
+        """重点品类商品的横向条形图"""
+        today_data = pd.DataFrame(pie_key_category_sale_pie_today)
+        yesterday_data = pd.DataFrame(pie_key_category_sale_pie_yesterday)
+        data = today_data["dealtotal"] - yesterday_data["dealtotal"]
+        color_list = ["red" if i < 0 else "#00bc12" for i in data]
+        fig_list = [
+            go.Bar(
+                x=data,
+                y=today_data['category_name'],
+                text=[i if i < 0 else "+" + str(i) for i in data],
+                orientation='h',
+                marker=dict(color=color_list),
+            ),
+        ]
+        layout = go.Layout(
+            title='今日昨日销售数据比对', height=850, width=510, )
+
+        fig = go.Figure(data=fig_list, layout=layout)
+        fig.update_layout(
+            barmode='group',
+            template='plotly_white',
+        )
+        fig.update_traces(textposition='outside')  # 条形显示数据
+        return fig
+
+    @dash_app.callback(
+        Output("area_sale_rank_fig", "figure"),
+        [
+            Input("area_sale_1", "value"),
+            Input("area_sale_2", "value")
+        ]
+    )
+    def area_sale_rank_bar(value1,value2):
+        """区域销售排名横向对比条形图"""
+        # if value2 == "one":
+        #     area = 'area1'
+        # else:
+        #     area = 'area2'
+        # today_data = pd.DataFrame(today_area_sale_).groupby(area)
+        # yesterday_data = pd.DataFrame(yesterday_area_sale_).groupby(area)
+        # y_axis = []
+        # for i,j in today_data:
+        #     y_axis.append(i)
+        # today_sum_data = today_data.sum()
+        # yesterday_sum_data = yesterday_data.sum()
+        # data = today_sum_data["dealtotal"] - yesterday_sum_data["dealtotal"]
+        # color_list = ["red" if i < 0 else "#00bc12" for i in data]
+        # fig_list = [
+        #     go.Bar(
+        #         x=data,
+        #         y=y_axis,
+        #         text=[i if i < 0 else "+" + str(i) for i in data],
+        #         orientation='h',
+        #         marker=dict(color=color_list),
+        #     ),
+        # ]
+        # layout = go.Layout(
+        #     title='', height=850, width=510, )
+        #
+        # fig = go.Figure(data=fig_list, layout=layout)
+        # fig.update_layout(
+        #     barmode='group',
+        #     template='plotly_white',
+        # )
+        # fig.update_traces(textposition='outside',texttemplate='%{text:.2s}')  # 条形显示数据
+        # return fig
+        # if value2 == "one":
+        area = 'area1'
+        # else:
+        #     area = 'area2'
+        today_data = pd.DataFrame(area_sale_rank_bar_today).groupby(area)
+        yesterday_data = pd.DataFrame(area_sale_rank_bar_yesterday).groupby(area)
+        y_axis = []
+        for i,j in today_data:
+            y_axis.append(i)
+        today_sum_data = today_data.sum()
+        yesterday_sum_data = yesterday_data.sum()
+        data = today_sum_data["dealtotal"] - yesterday_sum_data["dealtotal"]
+
+        color_list = ["red" if i < 0 else "#00bc12" for i in data]
+        print(data)
+        fig_list = [
+            go.Bar(
+                x=data,
+                y=y_axis,
+                text=[i if i < 0 else "+" + str(i) for i in data],
+                orientation='h',
+                marker=dict(color=color_list),
+            ),
+        ]
+        layout = go.Layout(
+            title='', height=850, width=510, )
+
+        fig = go.Figure(data=fig_list, layout=layout)
+        fig.update_layout(
+            barmode='group',
+            template='plotly_white',
+        )
+        fig.update_traces(textposition='outside')  # 条形显示数据
         return fig

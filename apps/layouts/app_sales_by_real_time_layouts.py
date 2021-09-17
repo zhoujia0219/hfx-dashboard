@@ -874,7 +874,6 @@ key_category_sale = dbc.Card(
                             dcc.Graph(  # 横向图
                                 # figure=sale_month_fig("day", "dealtotal", "zj"),
                                 id='key_category_sale_bar_fig',
-                                style={'height': '400px'}
                             )
                             , ], ),
 
@@ -936,9 +935,14 @@ key_category_sale = dbc.Card(
 
                         ], ),
                 ], width=4)
-
+                , dcc.Interval(
+                    id='graph-update_3',
+                    interval=REAL_TIME_SALA_ANALYZE_INTERVAL_TIME,
+                    n_intervals=0
+                ),
             ])
-        ]
+        ],
+
     ),
     style={"width": "100%"}
 )
@@ -1009,7 +1013,6 @@ area_sale_rank = dbc.Card(
                                     style={'width': 120},
                                     options=[{'label': "一级", 'value': "one"},
                                              {'label': "二级", 'value': "two"},
-                                             {'label': "三级", 'value': "three"}
                                              ],
                                     value='one',
                                     searchable=False,
@@ -1026,10 +1029,9 @@ area_sale_rank = dbc.Card(
                             html.Div(
                                 id='area_sale_rank_graph',
                                 children=[
-                                    dcc.Graph(  # 月销售分布图
-                                        figure=sale_month_fig("day", "dealtotal", "zj"),
+                                    dcc.Graph(  # 区域销售排名横向对比条形图
+                                        # figure=sale_month_fig("day", "dealtotal", "zj"),
                                         id='area_sale_rank_fig',
-                                        style={'height': '400px'}
                                     )
                                     , ], ),
 
@@ -1137,7 +1139,7 @@ content = html.Div(
             className='mt-3'),
         dbc.Row(  # 本日销售以及图形
             children=[
-                dbc.Col(area_sale_distribute, width=4),
+                dbc.Col(area_sale_distribute, width=4),  #区域销售分布
                 dbc.Col(
                     area_sale_rank,
                     width=8  # 控制整个块的区域

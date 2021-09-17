@@ -272,9 +272,11 @@ def register_callbacks(dash_app):
         :return:
         """
         map_data = srv_sales_bymonth.find_mapdata_list(filter_values)
+        print(map_data,22222333333333411)
         with urlopen('https://cdn.huanggefan.cn/geojson/china.json') as f:
             provinces_map = json.load(f)
         map_datas = map_data.groupby('ad_name', as_index=False)['sales'].sum()
+        print(map_datas,9090909)
         # print(map_datas)
         fig = px.choropleth_mapbox(
             map_datas,
