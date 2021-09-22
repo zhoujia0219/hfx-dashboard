@@ -20,6 +20,7 @@ from utils import date_util
 # 页面筛选初始值
 ###############
 # 当前年月日
+from utils.date_util import year_month_count
 from utils.tools import big_number_conduct
 
 today = datetime.now()
@@ -225,9 +226,9 @@ def sale_month_fig(data_x, data_y, range_choice):
     :param data_sum: pic_dff.sum()
     :return:
     """
-    current_month_days = date_util.get_current_month_all_day("")  # 本月的所有日期
+    current_day = 12  # todo
+    # current_day = datetime.now().day  # todo
     pic_data = srv_sales_real_time.sales_month(range_choice)
-
     if len(pic_data) < 1:
         return dash.no_update
     if data_x == data_y:
@@ -236,14 +237,23 @@ def sale_month_fig(data_x, data_y, range_choice):
     data = list()
     for i in area_name:
         pic = pic_data[pic_data["areaname3"] == i[0]]  # 对每个战区取数
-
         pic_dff = pic.groupby([data_x], as_index=False)['dealtotal'].sum()
         data.append(go.Scatter(
             name=i[0],
-            x=pic_dff['day'],
-            y=pic_dff['dealtotal'],
+            x=[i for i in range(1, year_month_count(datetime.now().year, datetime.now().month) + 1)][:current_day+1],
+            # x=pic_dff['day'],
+            y=pic_dff['dealtotal'][:current_day+1],
             mode="lines",
-
+        ),
+        )
+        data.append(go.Scatter(
+            showlegend=False,
+            name=i[0],
+            x=[i for i in range(1, year_month_count(datetime.now().year, datetime.now().month) + 1)][current_day:],
+            # x=pic_dff['day'],
+            y=pic_dff['dealtotal'][current_day:],
+            mode="lines",
+            line=dict(color='darkgrey')
         ),
         )
     layout = go.Layout(
@@ -257,8 +267,10 @@ def sale_month_fig(data_x, data_y, range_choice):
         width=1130
     )
     fig.update_layout(
-        showlegend=False,
-        margin=dict(t=5, l=5, b=5, r=5)
+        margin=dict(t=5, l=5, b=5, r=5),
+        xaxis=dict(  # 设置x轴刻度线间隔
+            dtick=1
+        )
     )
     return fig
 

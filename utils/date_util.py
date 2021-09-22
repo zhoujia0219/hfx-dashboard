@@ -80,12 +80,12 @@ def get_day_hour(x_choice_time):
     all_time_list = [[], []]  # 所有时间点，列表嵌列表，第一个列表是昨日时间点，第二个列表是今日时间点
     today = datetime.today()  # 今天的时间
     current_hour = today.hour  # 当前的小时
-    current_hour =11
+    current_hour = 11
     choice_str_list = x_choice_time.split("-")
     try:
         choice_str_list_begin = int(choice_str_list[0])  # 开始时间
         choice_str_list_end = int(choice_str_list[1])  # 结束时间
-        print(choice_str_list_begin,1,choice_str_list_end)
+        print(choice_str_list_begin, 1, choice_str_list_end)
     except:
         print(1)
         choice_str_list_begin = 5
@@ -109,7 +109,7 @@ def get_day_hour(x_choice_time):
         for i in range(choice_str_list_begin, choice_str_list_end + 1):
             all_time_list[1].append(str(i) if len(str(i)) == 2 else '0' + str(i))
     for i in range(choice_str_list_begin, choice_str_list_end + 1):
-        i = str(i) if len(str(i))==2 else '0' +str(i)
+        i = str(i) if len(str(i)) == 2 else '0' + str(i)
         data_list.append((i, 0))  # 创建完整的时间点
     return data_list, all_time_list
 
@@ -142,6 +142,18 @@ def current_week_month():
     first_day = today[:8] + "01"  # 当前月的第一天的日期
     month_list = get_everyDay(first_day, today)
     return tuple(week_list), tuple(month_list)
+
+
+def year_month_count(year, month):
+    """某年某月有多少天"""
+    if (month == 1 or month == 3 or month == 5 or month == 7 or month == 8 or month == 10 or month == 12):
+        return 31
+    elif (month == 4 or month == 6 or month == 9 or month == 11):
+        return 30
+    elif month == 2 and ((year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)):
+        return 29
+    else:
+        return 28
 
 
 if __name__ == '__main__':
