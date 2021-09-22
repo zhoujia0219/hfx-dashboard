@@ -755,45 +755,44 @@ c_fig_sales_day_month = dbc.Card(
             dbc.Row([  # todo
                 dbc.Col(
                     html.Div(
-                        id='day_area_graph_' + str(i),
+                        id='day_area_graph_bar',
                         children=[
                             dcc.Graph(  # 各区域本日销售分布
-                                # figure=sale_month_fig("day", "dealtotal", "zj"),
-                                id='day_area_fig' + str(i),
-                                style={'height': '150px', "width": "390px"}
+                                id='day_area_fig_bar',
+                                style={'height': '450px', "width": "1080px"}
                             )
                         ], ),
                     width=4
-                ) for i in range(3)
+                )
             ], ),
-            dbc.Row([  # todo
-                dbc.Col(
-                    html.Div(
-                        id='day_area_graph_' + str(i),
-                        children=[
-                            dcc.Graph(  # 各区域本日销售分布
-                                # figure=sale_month_fig("day", "dealtotal", "zj"),
-                                id='day_area_fig' + str(i),
-                                style={'height': '150px', "width": "390px"}
-                            )
-                        ], ),
-                    width=4
-                ) for i in range(3, 6)
-            ], ),
-            dbc.Row([  # todo
-                dbc.Col(
-                    html.Div(
-                        id='day_area_graph_' + str(i),
-                        children=[
-                            dcc.Graph(  # 各区域本日销售分布
-                                # figure=sale_month_fig("day", "dealtotal", "zj"),
-                                id='day_area_fig' + str(i),
-                                style={'height': '150px', "width": "390px"}
-                            )
-                        ], ),
-                    width=4
-                ) for i in range(6, 9)
-            ], ),
+            # dbc.Row([  # todo
+            #     dbc.Col(
+            #         html.Div(
+            #             id='day_area_graph_' + str(i),
+            #             children=[
+            #                 dcc.Graph(  # 各区域本日销售分布
+            #                     # figure=sale_month_fig("day", "dealtotal", "zj"),
+            #                     id='day_area_fig' + str(i),
+            #                     style={'height': '150px', "width": "390px"}
+            #                 )
+            #             ], ),
+            #         width=4
+            #     ) for i in range(3, 6)
+            # ], ),
+            # dbc.Row([  # todo
+            #     dbc.Col(
+            #         html.Div(
+            #             id='day_area_graph_' + str(i),
+            #             children=[
+            #                 dcc.Graph(  # 各区域本日销售分布
+            #                     # figure=sale_month_fig("day", "dealtotal", "zj"),
+            #                     id='day_area_fig' + str(i),
+            #                     style={'height': '150px', "width": "390px"}
+            #                 )
+            #             ], ),
+            #         width=4
+            #     ) for i in range(6, 9)
+            # ], ),
             html.Hr(),
             html.Div([
                 html.Div(children='最近更新: 2021-07-23 12:30:00',
