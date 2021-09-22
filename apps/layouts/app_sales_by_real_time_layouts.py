@@ -226,7 +226,7 @@ def sale_month_fig(data_x, data_y, range_choice):
     :param data_sum: pic_dff.sum()
     :return:
     """
-    current_day = 12  # todo
+    current_day = 12  # todo 暂时的测试day
     # current_day = datetime.now().day  # todo
     pic_data = srv_sales_real_time.sales_month(range_choice)
     if len(pic_data) < 1:
@@ -238,15 +238,15 @@ def sale_month_fig(data_x, data_y, range_choice):
     for i in area_name:
         pic = pic_data[pic_data["areaname3"] == i[0]]  # 对每个战区取数
         pic_dff = pic.groupby([data_x], as_index=False)['dealtotal'].sum()
-        data.append(go.Scatter(
+        data.append(go.Scatter(  # 画有的天数的线条
             name=i[0],
-            x=[i for i in range(1, year_month_count(datetime.now().year, datetime.now().month) + 1)][:current_day+1],
+            x=[i for i in range(1, year_month_count(datetime.now().year, datetime.now().month) + 1)][:current_day + 1],
             # x=pic_dff['day'],
-            y=pic_dff['dealtotal'][:current_day+1],
+            y=pic_dff['dealtotal'][:current_day + 1],
             mode="lines",
         ),
         )
-        data.append(go.Scatter(
+        data.append(go.Scatter(  # 画尚未有的日期的线条，用灰色表示
             showlegend=False,
             name=i[0],
             x=[i for i in range(1, year_month_count(datetime.now().year, datetime.now().month) + 1)][current_day:],
