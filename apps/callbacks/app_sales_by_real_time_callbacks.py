@@ -315,12 +315,14 @@ def register_callbacks(dash_app):
         #                   )
         # return fig
         fig = px.pie(data, values='dealtotal', names='category_name',
-                     # title='',
+                     width=600
                      )
         fig.update_traces(textposition='outside', textinfo='percent+label', )
         fig.update_layout(
             showlegend=True,
-            margin=dict(t=5, l=5, b=5, r=5)
+            margin=dict(t=5, l=5, b=5, r=5),
+            legend_orientation="h",  # 将颜色条放下面
+            width=600
         )
         return fig
 
@@ -448,7 +450,7 @@ def register_callbacks(dash_app):
         map_datas = pd.DataFrame(china_data)
 
         # map_datas = map_data.groupby('ad_name', as_index=False)['sales'].sum()
-        # # print(map_datas,9090909)
+        print(provinces_map, 9090909)
         fig = px.choropleth_mapbox(
             map_datas,
             geojson=provinces_map,
@@ -457,7 +459,6 @@ def register_callbacks(dash_app):
             # 地理数据json文件中的省份名称的键名
             featureidkey="properties.name",
             mapbox_style="white-bg",
-            # height=620,
             # 不同程度的颜色参数
             # color_continuous_scale=[
             #     [0, 'lightcoral'],  # 这个必须要写，否则会出错
@@ -470,7 +471,7 @@ def register_callbacks(dash_app):
             range_color=(0, 10000000),
             # 中心经纬度
             center={"lat": 37.110573, "lon": 106.493924},
-            width=350,
+            width=550,
             zoom=2,  # 地图缩小值（0-12）
             hover_name="ad_name",
             hover_data=["sales"],
@@ -479,8 +480,10 @@ def register_callbacks(dash_app):
                 'sales': '销售总额'
             }
         )
-        layout = go.Layout(
-            title='', height=620, width=380, )
-        fig = go.Figure(data=fig, layout=layout)
+        fig.update_layout(coloraxis_showscale=False)  # 去掉颜色条
 
+        layout = go.Layout(
+            title='', height=620, width=550, )
+        fig = go.Figure(data=fig, layout=layout)
+        # fig.update_traces(text="fwfwfwgwgegwgw",visible=True)
         return fig

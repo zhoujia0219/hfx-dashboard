@@ -270,7 +270,9 @@ def sale_month_fig(data_x, data_y, range_choice):
         margin=dict(t=5, l=5, b=5, r=5),
         xaxis=dict(  # 设置x轴刻度线间隔
             dtick=1
-        )
+        ),
+        legend_orientation="h",
+        legend=dict(y=-0.2, x=0.35),
     )
     return fig
 
@@ -935,7 +937,7 @@ key_category_sale = dbc.Card(
                                             dcc.Graph(  # 饼图
                                                 # figure=sale_month_fig("day", "dealtotal", "zj"),
                                                 id='pie_key_category_sale_fig',
-                                                style={'height': '400px'}
+                                                style={'height': '400px', 'width': '600px'}
                                             )
                                             , ], ),
 
