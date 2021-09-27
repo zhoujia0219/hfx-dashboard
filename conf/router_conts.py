@@ -16,3 +16,5 @@ URL_SALES_BYMONTH = "/sales/bymonth/"
 URL_REAL_TIME_SALE = "/real_time/"
 # 巡检看板页面
 URL_STORE_INSPECTION = "/store_inspection/"
+# 自检
+URL_SELF_CHECKING = "/self/checking/"
