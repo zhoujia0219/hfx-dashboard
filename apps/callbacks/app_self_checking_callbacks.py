@@ -6,13 +6,15 @@ import json
 import dash
 from urllib.request import urlopen
 
+import numpy as np
 import pandas as pd
+from pandas import DataFrame
+
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.figure_factory as ff
 from dash.dependencies import Input, Output, State
-from pandas import DataFrame
 
 from services import srv_sales_bymonth
 
@@ -70,10 +72,11 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_not_yet_rate(signal_data):
+
         fig = go.Figure(go.Funnelarea(
             text=["应完成", "已完成", "点评数", "合格数"],
-            values=[60000, 45000, 35000, 30000]
-
+            values=[60000, 45000, 35000, 30000],
+            showlegend=False
         ))
         # fig.update_layout(textposition="outside", showlegend=False)
         return fig
@@ -666,113 +669,6 @@ def register_callbacks(dash_app):
         return fig
 
     @dash_app.callback(
-        Output('question_diff_graph', 'figure'),
-        [
-            Input('signal', 'data'),
-        ])
-    def update_question_diff_graph(signal_data):
-        table_data = [['类别', '上月检查次数', '不合格次数', '本月检查次数', '本月不合格次数'],
-                      ['Q-物料来源', 9000, 100, 1000, 120],
-                      ['备料管控', 8500, 90, 1000, 110],
-                      ['水果管控', 8000, 80, 1000, 100],
-                      ['开封原料', 7000, 70, 1000, 90],
-                      ['效期管理', 6000, 60, 1000, 80],
-                      ['储藏管理', 6000, 50, 1000, 70],
-                      ['交叉感染', 6000, 40, 1000, 60],
-                      ['否决项/重点项', 6000, 30, 1000, 50],
-                      ['OP操作', 6000, 20, 1000, 40]
-                      ]
-
-        # fig = ff.create_table(table_data, height_constant=40)
-
-        fig = make_subplots(
-            rows=2, cols=1,
-            shared_xaxes=True,
-            vertical_spacing=0.03,
-            specs=[[{"type": "table"}],
-                   [{"type": "bar"}]
-                   ]
-        )
-
-        rank_df = pd.DataFrame([
-            {"name": "Q-物料来源", "month": "2021年9月", "rate": 10},
-            {"name": "备料管控", "month": "2021年9月", "rate": 20},
-            {"name": "水果管控", "month": "2021年9月", "rate": 11},
-            {"name": "开封原料", "month": "2021年9月", "rate": 6},
-            {"name": "效期管理", "month": "2021年9月", "rate": 4},
-            {"name": "储藏管理", "month": "2021年9月", "rate": 13},
-            {"name": "交叉感染", "month": "2021年9月", "rate": 15},
-            {"name": "否决项/重点项", "month": "2021年9月", "rate": 10},
-            {"name": "OP操作", "month": "2021年9月", "rate": 10},
-
-            {"name": "Q-物料来源", "month": "2021年8月", "rate": -20},
-            {"name": "备料管控", "month": "2021年8月", "rate": -4},
-            {"name": "水果管控", "month": "2021年8月", "rate": -13},
-            {"name": "开封原料", "month": "2021年8月", "rate": -14},
-            {"name": "效期管理", "month": "2021年8月", "rate": -12},
-            {"name": "储藏管理", "month": "2021年8月", "rate": -5},
-            {"name": "交叉感染", "month": "2021年8月", "rate": -1},
-            {"name": "否决项/重点项", "month": "2021年8月", "rate": -15},
-            {"name": "OP操作", "month": "2021年8月", "rate": -8},
-
-        ])
-
-        fig = px.bar(rank_df, x="rate", y="name", color='month', orientation='h',
-                     category_orders={'name': [c for c in rank_df['name']]},
-                     hover_name='month',
-                     labels={'month': '月份', 'rate': '数量', 'name': '问题项'},
-                     text=[str(math.fabs(c)) for c in rank_df["rate"]],
-                     template="plotly_white")
-
-
-        # fig.add_table(cells=['类别', '上月检查次数', '不合格次数', '本月检查次数', '本月不合格次数'])
-
-        # current_month_data = pd.DataFrame([
-        #     {"name": "Q-物料来源", "month": "2021年9月", "rate": 10},
-        #     {"name": "备料管控", "month": "2021年9月", "rate": 20},
-        #     {"name": "水果管控", "month": "2021年9月", "rate": 110},
-        #     {"name": "开封原料", "month": "2021年9月", "rate": 60},
-        #     {"name": "效期管理", "month": "2021年9月", "rate": 40},
-        #     {"name": "储藏管理", "month": "2021年9月", "rate": 130},
-        #     {"name": "交叉感染", "month": "2021年9月", "rate": 150},
-        #     {"name": "否决项/重点项", "month": "2021年9月", "rate": 10},
-        #     {"name": "OP操作", "month": "2021年9月", "rate": 100}])
-        # last_month_data = pd.DataFrame([
-        #     {"name": "Q-物料来源", "month": "2021年8月", "rate": -20},
-        #     {"name": "备料管控", "month": "2021年8月", "rate": -40},
-        #     {"name": "水果管控", "month": "2021年8月", "rate": -130},
-        #     {"name": "开封原料", "month": "2021年8月", "rate": -140},
-        #     {"name": "效期管理", "month": "2021年8月", "rate": -120},
-        #     {"name": "储藏管理", "month": "2021年8月", "rate": -50},
-        #     {"name": "交叉感染", "month": "2021年8月", "rate": -10},
-        #     {"name": "否决项/重点项", "month": "2021年8月", "rate": -150},
-        #     {"name": "OP操作", "month": "2021年8月", "rate": -80},
-        # ])
-        # data = current_month_data["rate"] - last_month_data["rate"]
-        # color_list = ["red" if i < 0 else "#00bc12" for i in data]
-        # fig_list = [
-        #     ff.create_table(table_data, height_constant=40),
-        #     go.Bar(
-        #         x=data,
-        #         y=current_month_data['name'],
-        #         text=[i if i < 0 else "+" + str(i) for i in data],
-        #         orientation='h',
-        #         marker=dict(color=color_list),
-        #     ),
-        # ]
-        # layout = go.Layout(
-        #     title='问题项对比', height=620, width=510, )
-        #
-        # fig = go.Figure(data=fig_list, layout=layout)
-        # fig.update_layout(
-        #     barmode='group',
-        #     template='plotly_white',
-        # )
-        # fig.update_traces(textposition='outside')
-
-        return fig
-
-    @dash_app.callback(
         Output('graph_indicator_relevance', 'figure'),
         [
             Input('signal', 'data'),
@@ -1001,42 +897,151 @@ def register_callbacks(dash_app):
     @dash_app.callback(
         Output('question_distribution_graph', 'figure'),
         [
+            Input('choices_item_category', 'value'),
+            Input('choices_item_date', 'value'),
             Input('signal', 'data'),
         ])
-    def update_question_distribution_graph(signal_data):
+    def update_question_distribution_graph(category_value, date_value, signal_data):
         df = pd.DataFrame([
-            {"area": "武汉运营中心", "category": "Q-物料来源", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "备料管控", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "水果管控", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "开封原料", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "效期管理", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "储藏管理", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "交叉感染", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "否决项/重点项", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "武汉运营中心", "category": "OP操作", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
+            {"category": "Q-物料来源", "item": "物料来源巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "Q-物料来源", "item": "物料来源巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "Q-物料来源", "item": "物料来源巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "Q-物料来源", "item": "物料来源巡检项4",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "Q-物料来源", "item": "物料来源巡检项5",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "Q-物料来源", "item": "物料来源巡检项6",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "备料管控", "item": "备料管控巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "备料管控", "item": "备料管控巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "备料管控", "item": "备料管控巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "备料管控", "item": "备料管控巡检项4",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "备料管控", "item": "备料管控巡检项5",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "备料管控", "item": "备料管控巡检项6",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "水果管控", "item": "水果管控巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "水果管控", "item": "水果管控巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "水果管控", "item": "水果管控巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "水果管控", "item": "水果管控巡检项4",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "水果管控", "item": "水果管控巡检项5",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "开封原料", "item": "开封原料巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "开封原料", "item": "开封原料巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "开封原料", "item": "开封原料巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "效期管理", "item": "效期管理巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "效期管理", "item": "效期管理巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "效期管理", "item": "效期管理巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "效期管理", "item": "效期管理巡检项4",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "储藏管理", "item": "储藏管理巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "储藏管理", "item": "储藏管理巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "储藏管理", "item": "储藏管理巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "储藏管理", "item": "储藏管理巡检项4",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "交叉感染", "item": "交叉感染巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "交叉感染", "item": "交叉感染巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "交叉感染", "item": "交叉感染巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "否决项/重点项", "item": "否决项/重点项巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "否决项/重点项", "item": "否决项/重点项巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "OP操作", "item": "OP操作巡检项1",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "OP操作", "item": "OP操作巡检项2",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "OP操作", "item": "OP操作巡检项3",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "OP操作", "item": "OP操作巡检项4",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+            {"category": "OP操作", "item": "OP操作巡检项5",
+             "noPassCount": random.randint(0, 500), "checkCount": random.randint(100, 1000)},
+        ])
 
-            {"area": "杭州运营中心", "category": "Q-物料来源", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "备料管控", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "水果管控", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "开封原料", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "效期管理", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "储藏管理", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "交叉感染", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "否决项/重点项", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "杭州运营中心", "category": "OP操作", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
+        fig = px.sunburst(df,
+                          path=['category', 'item'], values='noPassCount',
+                          color='checkCount', hover_data=['category', 'noPassCount'],
+                          color_continuous_scale='RdBu',
+                          color_continuous_midpoint=np.average(df['checkCount'], weights=df['noPassCount'])
+                          )
+        return fig
 
-            {"area": "南京运营中心", "category": "Q-物料来源", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "备料管控", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "水果管控", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "开封原料", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "效期管理", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "储藏管理", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "交叉感染", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "否决项/重点项", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
-            {"area": "南京运营中心", "category": "OP操作", "month": "2021年9月", "noPassCount": random.randint(0, 500)},
+    @dash_app.callback(
+        [
+            Output('question_diff_tab_graph', 'figure'),
+            Output('question_diff_bar_graph', 'figure'), ],
+        [
+            Input('choices_diff_category', 'value'),
+            Input('choices_diff_month', 'value'),
+            Input('signal', 'data'),
+        ])
+    def update_question_diff_graph(category_value, month_value, signal_data):
+
+        table_data = [['类别', '上月检查次数', '不合格次数', '本月检查次数', '本月不合格次数'],
+                      ['Q-物料来源', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['备料管控',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['水果管控',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['开封原料',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['效期管理',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['储藏管理',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['交叉感染',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['否决项/重点项',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
+                      ['OP操作', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)]
+                      ]
+
+        df = pd.DataFrame(table_data, columns=['类别', '上月检查次数', '不合格次数', '本月检查次数', '本月不合格次数'])
+        tab_fig = ff.create_table(table_data, height_constant=40)
+
+        rank_df = pd.DataFrame([
+            {"name": "Q-物料来源", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "备料管控", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "水果管控", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "开封原料", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "效期管理", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "储藏管理", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "交叉感染", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "否决项/重点项", "month": "2021年9月", "rate": random.randint(1, 100)},
+            {"name": "OP操作", "month": "2021年9月", "rate": random.randint(1, 100)},
+
+            {"name": "Q-物料来源", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "备料管控", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "水果管控", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "开封原料", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "效期管理", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "储藏管理", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "交叉感染", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "否决项/重点项", "month": "2021年8月", "rate": -(random.randint(1, 100))},
+            {"name": "OP操作", "month": "2021年8月", "rate": -(random.randint(1, 100))},
 
         ])
-        fig = px.sunburst(df,
-                          path=['category', 'area'], values='noPassCount',
-                          color='area', hover_data=['category', 'noPassCount'])
-        return fig
+        bar_fig = px.bar(rank_df, x="rate", y="name", color='month', orientation='h',
+                         category_orders={'name': [c for c in rank_df['name']]},
+                         hover_name='month',
+                         labels={'month': '月份', 'rate': '数量', 'name': '问题项'},
+                         text=[str(math.fabs(c)) for c in rank_df["rate"]],
+                         template="plotly_white")
+
+        return [tab_fig, bar_fig]

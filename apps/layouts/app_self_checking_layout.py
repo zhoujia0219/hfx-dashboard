@@ -198,11 +198,11 @@ month_finish_detail_graph = [
             dbc.Card(
                 children=dbc.CardBody(
                     children=[
-                     dbc.Col(
-                         children=[
-                             dcc.Graph(id="graph_month_finish")
-                         ]
-                     )
+                        dbc.Col(
+                            children=[
+                                dcc.Graph(id="graph_month_finish")
+                            ]
+                        )
                     ]
                 )
             )
@@ -216,53 +216,57 @@ month_finish_detail_graph = [
                     children=[
                         html.Br(),
                         html.Br(),
-                        dbc.Col(
-                            children=[
-                                html.H6(children=[
-                                    html.Span(children="点评报告数:"),
-                                    html.Span(children="10000"),
-                                ]),
-                                html.H6(children=[
-                                    html.Span(children="点评率:"),
-                                    html.Span(children="10000"),
-                                ]),
-                                dbc.Progress("25%", value=25)
-                            ]
-                        ),
-                        html.Br(),
-                        html.Br(),
-                        html.Br(),
-                        dbc.Col(
-                            children=[
-                                html.H6(children=[
-                                    html.Span(children="点评报告数:"),
-                                    html.Span(children="10000"),
-                                ]),
-                                html.H6(children=[
-                                    html.Span(children="合格数:"),
-                                    html.Span(children="10000"),
-                                ]),
-                                html.H6(children=[
-                                    html.Span(children="不合格数:"),
-                                    html.Span(children="10000"),
-                                ]),
-                                dbc.Progress("25%", value=25)
-                            ]
-                        ),
-                        html.Br(),
-                        html.Br(),
-                        html.Br(),
+
                         dbc.Col(
                             children=[
                                 html.H6(children=[
                                     html.Span(children="应完成报告数:"),
-                                    html.Span(children="10000"),
+                                    html.Span(id="month_finish_report_count", children="10000"),
                                 ]),
                                 html.H6(children=[
                                     html.Span(children="已完成:"),
-                                    html.Span(children="10000"),
+                                    html.Span(id="month_finished", children="10000"),
                                 ]),
-                                dbc.Progress("35%", value=35)
+                                dbc.Progress(id="month_finished_process", children="35%", value=35)
+                            ]
+                        ),
+                        html.Br(),
+                        html.Br(),
+                        html.Br(),
+
+                        dbc.Col(
+                            children=[
+                                html.H6(children=[
+                                    html.Span(children="点评报告数:"),
+                                    html.Span(id="month_remarks_report_count", children="10000"),
+                                ]),
+                                html.H6(children=[
+                                    html.Span(children="点评率:"),
+                                    html.Span(id="month_remarks_rate", children="88.8%"),
+                                ]),
+                                dbc.Progress(id="month_remarks_rate_process", children="88.8%", value=88.8)
+                            ]
+                        ),
+
+                        html.Br(),
+                        html.Br(),
+                        html.Br(),
+
+                        dbc.Col(
+                            children=[
+                                html.H6(children=[
+                                    html.Span(children="点评报告数:"),
+                                    html.Span(id="month_remarks_report_count_2", children="10000"),
+                                ]),
+                                html.H6(children=[
+                                    html.Span(children="合格数:"),
+                                    html.Span(id="month_remarks_report_pass_count", children="10000"),
+                                ]),
+                                html.H6(children=[
+                                    html.Span(children="不合格数:"),
+                                    html.Span(id="month_remarks_report_no_pass_count", children="10000"),
+                                ]),
+                                dbc.Progress(id="month_remarks_report_pass_process", children="25%", value=25)
                             ]
                         ),
 
@@ -547,7 +551,6 @@ question_item_graph = [
         )
     ),
 
-
     # 问题项环比
     dbc.Col(
         children=dbc.Card(
@@ -592,7 +595,13 @@ question_item_graph = [
                         children=[
                             dbc.Col(
                                 children=[
-                                    dcc.Graph(id="question_diff_graph")
+                                    dcc.Graph(id="question_diff_tab_graph"),
+                                ]
+                            ),
+
+                            dbc.Col(
+                                children=[
+                                    dcc.Graph(id="question_diff_bar_graph")
                                 ]
                             )
                         ]
@@ -606,11 +615,13 @@ question_item_graph = [
 content = html.Div(
     className='content-style',
     children=[
-        dbc.Row(id="top_cards", children=top_cards, style={"height": "280px","margin": "5px"}),
-        dbc.Row(id="month_finish_detail_graph", children=month_finish_detail_graph, style={"margin": "5px 0px 5px 0px"}),
+        dbc.Row(id="top_cards", children=top_cards, style={"height": "280px", "margin": "5px"}),
+        dbc.Row(id="month_finish_detail_graph", children=month_finish_detail_graph,
+                style={"margin": "5px 0px 5px 0px"}),
         dbc.Row(id="task_finish_detail_graph", children=task_finish_detail_graph, style={"margin": "5px 0px 5px 0px"}),
         dbc.Row(id="indicator_trend_graph", children=indicator_trend_graph, style={"margin": "5px 0px 5px 0px"}),
-        dbc.Row(id="indicator_relevance_graph", children=indicator_relevance_graph, style={"margin": "5px 0px 5px 0px"}),
+        dbc.Row(id="indicator_relevance_graph", children=indicator_relevance_graph,
+                style={"margin": "5px 0px 5px 0px"}),
         dbc.Row(id="question_item_graph", children=question_item_graph, style={"margin": "5px 0px 5px 0px"}),
 
     ],
