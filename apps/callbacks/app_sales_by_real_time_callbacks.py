@@ -220,14 +220,16 @@ def register_callbacks(dash_app):
                     y=y_dealtotal,
                     marker=dict(color=color_list),
                 )
-                # 对位置的添加
+                # 对每个图形位置的添加
                 fig.append_trace(trace, math.ceil(flag / 3), flag % 3 if flag % 3 != 0 else 3)
             else:
                 break
             flag += 1
         fig.update_layout(
             showlegend=False,
-            margin=dict(t=22, l=5, b=5, r=5)
+            margin=dict(t=30, l=5, b=5, r=5),
+            template='simple_white',
+            # template='plotly_white',
         )
         return fig
         # fig_list = []
