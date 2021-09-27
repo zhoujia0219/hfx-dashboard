@@ -734,18 +734,18 @@ c_fig_sales_day_month = dbc.Card(
             ], ),
             html.Br(),
             html.Br(),
-            html.Div(dbc.Row([
-                dbc.Col(
-                    html.H5(
-                        children='各区域本日销售分布',
-                        className='media-body',
-                        style={'min-width': '150px'}
+            html.Div(
+                dbc.Row([
+                    dbc.Col(
+                        html.H5(
+                            children='各区域本日销售分布',
+                            className='media-body',
+                            style={'min-width': '150px'}
+                        ),
+                        width=3
                     ),
-                    width=3
-                ),
-                dbc.Col(),
+                    dbc.Col(),
 
-                html.Div(dbc.Row([
                     dbc.Col(
                         html.Div([
                             dcc.Dropdown(
@@ -762,10 +762,8 @@ c_fig_sales_day_month = dbc.Card(
                         ],
                             className='media-left block-inline'),
                         width=3
-                    ),
+                    )
                 ])),
-
-            ])),
             dbc.Row([  # todo
                 dbc.Col(
                     html.Div(
@@ -962,33 +960,32 @@ key_category_sale = dbc.Card(
 area_sale_distribute = dbc.Card(
     children=dbc.CardBody(
         children=[
-            html.Div(dbc.Row([
-                dbc.Col(
-                    html.H5(
+            html.Div(
+                dbc.Row([
+                    dbc.Col(html.H5(
                         children='区域销售分布',
                         className='media-body',
                         style={'min-width': '150px'}
                     ),
-                    width=3
-                ),
-            ])),
-            dbc.Row([  # 筛选框
-                dbc.Col(
-                    html.Div([
-                        dcc.Dropdown(  # 全国或某个大区、某个省
-                            id="area_sale_distribute_option",
-                            style={'width': 120},
-                            options=[{'label': "全国", 'value': "china"},
-                                     ],
-                            value='china',
-                            searchable=False,
-                            clearable=False
-                        )
-                    ],
-                        className='media-left block-inline'),
-                    width=12
-                ),
-            ], className='media-left block-inline'),
+                        width=3
+                    ),
+                    dbc.Col(),
+                    dbc.Col(
+                        html.Div([
+                            dcc.Dropdown(  # 全国或某个大区、某个省
+                                id="area_sale_distribute_option",
+                                style={'width': 150},
+                                options=[{'label': "全国", 'value': "china"},
+                                         ],
+                                value='china',
+                                searchable=False,
+                                clearable=False
+                            )
+                        ],
+                            className='media-left block-inline'),
+                        width=4
+                    )
+                ])),
             dbc.Row([  # TODO
                 dbc.Col(
                     html.Div(
@@ -1046,54 +1043,58 @@ area_sale_rank = dbc.Card(
                     width=8, style={"height": "300px"}
                 ),
 
-                dbc.Col(children=[  # 画图
-                    dbc.Row([  # 筛选框
-                        dbc.Col(width=6),
-                        dbc.Col(
-                            html.Div([
-                                dcc.Dropdown(  # 筛选框1
-                                    id="area_sale_1",
-                                    style={'width': 120},
-                                    options=[
-                                        {'label': '销售额', 'value': 'xse'},
-                                        {'label': '客单量', 'value': 'kdl'}
+
+dbc.Col(children=[
+                    html.Div(
+                        # id='loading_sales_month',
+                        children=[
+                            # 画图
+                            dbc.Row([  # 筛选框
+                                dbc.Col(width=3),
+                                dbc.Col(
+                                    html.Div([
+                                        dcc.Dropdown(  # 筛选框1
+                                            id="area_sale_1",
+                                            style={'width': 120},
+                                            options=[
+                                                {'label': '销售额', 'value': 'xse'},
+                                                {'label': '客单量', 'value': 'kdl'}
+                                            ],
+                                            value='xse',
+                                            searchable=False,
+                                            clearable=False
+                                        ),
+                                        dcc.Dropdown(  # 筛选框2
+                                            id="area_sale_2",
+                                            style={'width': 120},
+                                            options=[{'label': "一级", 'value': "one"},
+                                                     {'label': "二级", 'value': "two"},
+                                                     ],
+                                            value='one',
+                                            searchable=False,
+                                            clearable=False
+                                        )
                                     ],
-                                    value='xse',
-                                    searchable=False,
-                                    clearable=False
+                                        className='media-left block-inline'),
+                                    width=9
                                 ),
-                                dcc.Dropdown(  # 筛选框2
-                                    id="area_sale_2",
-                                    style={'width': 120},
-                                    options=[{'label': "一级", 'value': "one"},
-                                             {'label': "二级", 'value': "two"},
-                                             ],
-                                    value='one',
-                                    searchable=False,
-                                    clearable=False
-                                )
-                            ],
-                                className='media-left block-inline'),
-                            width=8
-                        ),
-                    ]),
+                            ]),
+                            dbc.Row([  # TODO
+                                dbc.Col(
+                                    html.Div(
+                                        id='area_sale_rank_graph',
+                                        children=[
+                                            dcc.Graph(  # 区域销售排名横向对比条形图
+                                                # figure=sale_month_fig("day", "dealtotal", "zj"),
+                                                id='area_sale_rank_fig',
+                                            )
+                                            , ], ),
 
-                    dbc.Row([  # TODO
-                        dbc.Col(
-                            html.Div(
-                                id='area_sale_rank_graph',
-                                children=[
-                                    dcc.Graph(  # 区域销售排名横向对比条形图
-                                        # figure=sale_month_fig("day", "dealtotal", "zj"),
-                                        id='area_sale_rank_fig',
-                                    )
-                                    , ], ),
+                                ),
+                            ], ),
 
-                        ),
-                    ], ),
-
+                        ], ),
                 ], width=4),
-
             ], style={"height": "520px"})
         ]
     ),

@@ -198,7 +198,7 @@ def register_callbacks(dash_app):
             trace_name.append(i)
         fig = make_subplots(rows=3,  # 将画布分为3行
                             cols=3,  # 将画布分为3列
-                            subplot_titles=trace_name,  # 子图的标题
+                            # subplot_titles=trace_name,  # 子图的标题，在图上
                             )
         flag = 1  # 标记只能有9个
         for i, j in data:
@@ -220,14 +220,19 @@ def register_callbacks(dash_app):
                     y=y_dealtotal,
                     marker=dict(color=color_list),
                 )
-                # 对位置的添加
+                # 对每个图形位置的添加
                 fig.append_trace(trace, math.ceil(flag / 3), flag % 3 if flag % 3 != 0 else 3)
+                fig.update_xaxes(title_text=area_name,   # 对每个矩阵的下面写上标题
+                                 row=math.ceil(flag / 3),
+                                 col=(flag % 3 if flag % 3 != 0 else 3))
             else:
                 break
             flag += 1
         fig.update_layout(
             showlegend=False,
-            margin=dict(t=22, l=5, b=5, r=5)
+            margin=dict(t=30, l=5, b=5, r=5),
+            template='simple_white',
+            # template='plotly_white',
         )
         return fig
         # fig_list = []
