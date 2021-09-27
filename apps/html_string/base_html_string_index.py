@@ -74,8 +74,8 @@ base_html_string_index = """
                      </li>
                      <li class="menu-divider mg-y-20-force"></li>
                      <li>
-                        <a href=""><i data-feather="grid"></i>
-                        <span>第四个页面</span></a>
+                        <a href="/self/checking"><i data-feather="grid"></i>
+                        <span>自检看板</span></a>
                      </li>
                                           <li class="menu-divider mg-y-20-force"></li>
 

@@ -156,5 +156,22 @@ def year_month_count(year, month):
         return 28
 
 
+def get_week_day(date):
+    """
+    根据日期输出星期格式
+    """
+    week_day_dict = {
+        0: '星期一',
+        1: '星期二',
+        2: '星期三',
+        3: '星期四',
+        4: '星期五',
+        5: '星期六',
+        6: '星期天',
+    }
+    day = date.weekday()
+    return week_day_dict[day]
+
+
 if __name__ == '__main__':
     current_week_month()
