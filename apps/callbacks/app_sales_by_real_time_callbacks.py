@@ -1,4 +1,6 @@
+import copy
 import json
+import math
 from urllib.request import urlopen
 
 import pandas as pd
@@ -9,6 +11,7 @@ import dash
 import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
+from plotly.subplots import make_subplots
 
 from analog_data import today_area_sale_, yesterday_area_sale_, pie_key_category_sale_pie_today, \
     pie_key_category_sale_pie_yesterday, area_sale_rank_bar_today, area_sale_rank_bar_yesterday, china_data
@@ -150,33 +153,81 @@ def register_callbacks(dash_app):
         #     return ''
 
         pic_dff = pd.concat([today_data, yesterday_data])  # 聚合两天数据
-        fig_number = 0
         data = pic_dff.groupby([group_name])
+
+        # map_area = {"level_1": "area1", "level_2": "area2"}  # 根据选择确定对相应的列聚合
+        # group_name = map_area[level_area]  # 得出要分组列的name
+        # day_hour_arang, all_time_list = get_day_hour('1-24')
+        # today_data, yesterday_data = pd.DataFrame(today_area_sale_), pd.DataFrame(yesterday_area_sale_)  #
+        # # today_data, yesterday_data = srv_sales_real_time.sales_day(all_time_list)  #
+        # # if data_x == data_y:
+        # #     return ''
+        #
+        # pic_dff = pd.concat([today_data, yesterday_data])  # 聚合两天数据
+        # fig_number = 0
+        # data = pic_dff.groupby([group_name])
+        # for i, j in data:
+        #     fig_number += 1
+        # width_height = {  # 通过图形的数量动态的改变宽度和长度
+        #     1: [360, 150], 2: [720, 150], 3: [1080, 150],
+        #     4: [1080, 300], 5: [1080, 300], 6: [1080, 300],
+        #     7: [1080, 450], 8: [1080, 450], 9: [1080, 450]
+        # }
+        # color_list = ["darkgrey" if str(i) in all_time_list[0] else '#44cef6' for i in pic_dff["times"]]
+        # print(color_list, 53)
+        # fig = px.bar(
+        #     pic_dff,
+        #     x='times',
+        #     y="dealtotal",
+        #     barmode="group",  # 柱状图模式取值
+        #     facet_col='%s' % group_name,  # 列元素取值
+        #     facet_col_wrap=3,
+        #     # color=color_list,
+        #     width=width_height[fig_number][0],
+        #     height=width_height[fig_number][1],
+        # )
+        # fig.update_layout(
+        #     showlegend=False,
+        #     margin=dict(t=5, l=5, b=5, r=5),
+        #     template='plotly_white',
+        #
+        # )
+        # return fig
+        trace_name = []
         for i, j in data:
-            fig_number += 1
-        width_height = {  # 通过图形的数量动态的改变宽度和长度
-            1: [360, 150], 2: [720, 150], 3: [1080, 150],
-            4: [1080, 300], 5: [1080, 300], 6: [1080, 300],
-            7: [1080, 450], 8: [1080, 450], 9: [1080, 450]
-        }
-        color_list = ["darkgrey" if str(i) in all_time_list[0] else '#44cef6' for i in pic_dff["times"]]
-        print(color_list, 53)
-        fig = px.bar(
-            pic_dff,
-            x='times',
-            y="dealtotal",
-            barmode="group",  # 柱状图模式取值
-            facet_col='%s' % group_name,  # 列元素取值
-            facet_col_wrap=3,
-            # color=color_list,
-            width=width_height[fig_number][0],
-            height=width_height[fig_number][1],
-        )
+            trace_name.append(i)
+        fig = make_subplots(rows=3,  # 将画布分为3行
+                            cols=3,  # 将画布分为3列
+                            subplot_titles=trace_name,  # 子图的标题
+                            )
+        flag = 1  # 标记只能有9个
+        for i, j in data:
+            if flag < 9:
+                # 分组之后的每个战区名字，每组数据
+                area_name = i
+                times_list = []  # 时间列表，x轴
+                times_groupby = j.groupby("times")
+                for a, b in times_groupby:
+                    times_list.append(a)
+                y_dealtotal = times_groupby.sum()["dealtotal"]
+                # 对颜色处理
+                color_time_list = sorted(all_time_list[0] + all_time_list[1])
+                # 按照显示的效果将颜色设置好
+                color_list = ["darkgrey" if i in all_time_list[0] else '#44cef6' for i in color_time_list]
+                trace = go.Bar(
+                    name="{}".format(area_name),
+                    x=times_list,
+                    y=y_dealtotal,
+                    marker=dict(color=color_list),
+                )
+                # 对位置的添加
+                fig.append_trace(trace, math.ceil(flag / 3), flag % 3 if flag % 3 != 0 else 3)
+            else:
+                break
+            flag += 1
         fig.update_layout(
             showlegend=False,
-            margin=dict(t=5, l=5, b=5, r=5),
-            template='plotly_white',
-
+            margin=dict(t=22, l=5, b=5, r=5)
         )
         return fig
         # fig_list = []
@@ -199,7 +250,9 @@ def register_callbacks(dash_app):
         #             name="{}".format(area_name),
         #             x=times_list,
         #             y=y_dealtotal,
-        #             marker=dict(color=color_list)
+        #             marker=dict(color=color_list),
+        #             xaxis='x'+str(i), #
+        #             yaxis='y'+str(i)
         #         )
         #         layout = go.Layout(
         #             xaxis=dict(title="{}".format(area_name)),
@@ -450,7 +503,6 @@ def register_callbacks(dash_app):
         map_datas = pd.DataFrame(china_data)
 
         # map_datas = map_data.groupby('ad_name', as_index=False)['sales'].sum()
-        print(provinces_map, 9090909)
         fig = px.choropleth_mapbox(
             map_datas,
             geojson=provinces_map,
@@ -477,7 +529,8 @@ def register_callbacks(dash_app):
             hover_data=["sales"],
             labels={
                 'ad_name': '省份名称',
-                'sales': '销售总额'
+                'sales': '销售总额',
+                'normal': {"show": True}
             }
         )
         fig.update_layout(coloraxis_showscale=False)  # 去掉颜色条
