@@ -94,18 +94,25 @@ top_cards = [
                     dbc.Row(
                         children=html.Span(children="已结束",
                                            id="closed_status",
-                                           className="label label-default")),
+                                           className="label label-default",
+                                           style={
+                                               "borderRadius": "5px",
+                                               "backgroundColor": "#D7D7D7",
+                                               "padding": "5px"
+                                           }
+                                           )
+                    ),
                     dbc.Row(
                         children=[
                             dbc.Col(
                                 children=[
-                                    html.H6(children=["开市自检9月1日-9月30日"]),
-                                    html.H6(
+                                    html.P(children=["开市自检9月1日-9月30日"]),
+                                    html.P(
                                         children=[
                                             html.Span(children="应完成自检数: "),
                                             html.Span(children=3500)
                                         ]),
-                                    html.H6(
+                                    html.P(
                                         children=[
                                             html.Span(children="已完成: "),
                                             html.Span(children=2000)
@@ -133,16 +140,22 @@ top_cards = [
                     dbc.Row(
                         children=html.Span(children="进行中",
                                            id="pending_status",
-                                           style={},
-                                           className="label label-success")),
+                                           style={
+                                               "borderRadius": "5px",
+                                               "backgroundColor": "#70B603",
+                                               "padding": "5px",
+                                               "color": "#FFFFFF"
+                                           }
+                                           )
+                    ),
 
                     dbc.Row(
                         children=[
                             dbc.Col(
                                 children=[
-                                    html.H6(children="开市自检9月1日-9月30日"),
-                                    html.H6(children="应完成自检数: 3500"),
-                                    html.H6(children="已完成： 500"),
+                                    html.P(children="开市自检9月1日-9月30日"),
+                                    html.P(children="应完成自检数: 3500"),
+                                    html.P(children="已完成： 500"),
                                 ]
                             ),
 
@@ -166,21 +179,32 @@ top_cards = [
             children=dbc.CardBody(
                 children=[
                     dbc.Row(
-                        children=html.Span(children="未开始", id="not_yet_status", className="label label-default")),
+                        children=html.Span(children="未开始",
+                                           id="not_yet_status",
+                                           className="label label-default",
+                                           style={
+                                               "borderRadius": "5px",
+                                               "backgroundColor": "#A9A9A9",
+                                               "padding": "5px"
+                                           }
+                                           )
+                    ),
                     dbc.Row(
                         children=[
                             dbc.Col(
                                 children=[
-                                    html.H6(children="开市自检9月1日-9月30日"),
-                                    html.H6(children="应完成自检数: 3500"),
-                                    html.H6(children="已完成： 0"),
+                                    html.P(children="开市自检9月1日-9月30日"),
+                                    html.P(children=[
+                                        "应完成自检数: ", html.Code(id="", children="3500")
+                                    ]),
+                                    html.P(children=[
+                                        "已完成：", html.Code(id="", children="0")
+                                    ]),
                                 ]
                             ),
                             dbc.Col(
                                 children=[
-
-                                    dcc.Graph(id='graph_not_yet_rate',
-                                              style={"height": "260px"}),
+                                    dcc.Graph(id='graph_not_yet_rate'),
                                 ]
                             )
                         ])

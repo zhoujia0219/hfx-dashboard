@@ -38,7 +38,7 @@ def register_callbacks(dash_app):
     def update_close_rate(signal_data):
         df = pd.DataFrame([{"label": "已完成", "value": 1000},
                            {"label": "未完成", "value": 2500}])
-        fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.7)
+        fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.5, template="none")
         fig.update(layout_showlegend=False)
         return fig
 
@@ -48,9 +48,9 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_pending_rate(signal_data):
-        df = pd.DataFrame([{"label": "已完成", "value": 1000},
-                           {"label": "未完成", "value": 2500}])
-        fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.7)
+        df = pd.DataFrame([{"label": "已完成", "value": 1500},
+                           {"label": "未完成", "value": 2000}])
+        fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.5, template="none")
         fig.update(layout_showlegend=False)
         return fig
 
@@ -60,9 +60,9 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_not_yet_rate(signal_data):
-        df = pd.DataFrame([{"label": "已完成", "value": 1000},
-                           {"label": "未完成", "value": 2500}])
-        fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.7)
+        df = pd.DataFrame([{"label": "已完成", "value": 2000},
+                           {"label": "未完成", "value": 1500}])
+        fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.5, template="none")
         fig.update(layout_showlegend=False)
         return fig
 
@@ -72,7 +72,6 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_not_yet_rate(signal_data):
-
         fig = go.Figure(go.Funnelarea(
             text=["应完成", "已完成", "点评数", "合格数"],
             values=[60000, 45000, 35000, 30000],
@@ -205,7 +204,8 @@ def register_callbacks(dash_app):
                          '未点评': 'rgb(251,212,55)',
                          '未完成': 'rgb(67,81,136)',
 
-                     })
+                     },
+                     template="simple_white")
         return fig
 
     @dash_app.callback(
@@ -267,7 +267,8 @@ def register_callbacks(dash_app):
                          '未点评': 'rgb(251,212,55)',
                          '未完成': 'rgb(67,81,136)',
 
-                     }
+                     },
+                     template="simple_white"
                      )
         return fig
 
@@ -330,7 +331,8 @@ def register_callbacks(dash_app):
                          '未点评': 'rgb(251,212,55)',
                          '未完成': 'rgb(67,81,136)',
 
-                     }
+                     },
+                     template="simple_white"
                      )
         return fig
 
@@ -373,7 +375,8 @@ def register_callbacks(dash_app):
             {"month": "2021年07月", "name": "点评率", "value": 93},
             {"month": "2021年07月", "name": "合格率", "value": 89},
         ])
-        fig = px.line(df, x='month', y='value', color='name')
+        fig = px.line(df, x='month', y='value', color='name',
+                      template="simple_white")
         return fig
 
     @dash_app.callback(
@@ -664,7 +667,9 @@ def register_callbacks(dash_app):
             {"area": "重庆运营中心", "month": "2021年07月", "name": "合格率", "value": 89},
         ])
 
-        fig = px.line(df, x="month", y="value", color='name', facet_col="area", facet_col_wrap=3, )
+        fig = px.line(df, x="month", y="value", color='name', facet_col="area", facet_col_wrap=3,
+                      labels={'month':'月份','name':'','value':'比例'},
+                      template="simple_white")
 
         return fig
 
@@ -890,7 +895,8 @@ def register_callbacks(dash_app):
         ])
         fig = px.scatter(df, x="pass", y="finish",
                          size="total", color="area", hover_name="area",
-                         log_x=True, size_max=60)
+                         log_x=True, size_max=60,
+                         template="simple_white")
 
         return fig
 
@@ -999,17 +1005,25 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_question_diff_graph(category_value, month_value, signal_data):
-
         table_data = [['类别', '上月检查次数', '不合格次数', '本月检查次数', '本月不合格次数'],
-                      ['Q-物料来源', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['备料管控',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['水果管控',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['开封原料',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['效期管理',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['储藏管理',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['交叉感染',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['否决项/重点项',  random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)],
-                      ['OP操作', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000), random.randint(1, 100)]
+                      ['Q-物料来源', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['备料管控', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['水果管控', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['开封原料', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['效期管理', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['储藏管理', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['交叉感染', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['否决项/重点项', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)],
+                      ['OP操作', random.randint(1, 1000), random.randint(1, 100), random.randint(1, 1000),
+                       random.randint(1, 100)]
                       ]
 
         df = pd.DataFrame(table_data, columns=['类别', '上月检查次数', '不合格次数', '本月检查次数', '本月不合格次数'])
