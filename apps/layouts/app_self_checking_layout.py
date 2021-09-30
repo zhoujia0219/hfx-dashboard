@@ -13,6 +13,7 @@ from apps.components import filter_date_range
 from apps.components import filter_store_age
 from apps.components import filter_store_area
 from apps.components import filter_store_star
+from services import srv_comm_dim
 from services.srv_comm_dim import get_dim_graph_agg, get_dim_graph_cate, \
     get_dim_graph_type, get_dim_order_type, get_dim_graph_four, get_dim_graph_scatter, \
     get_dim_graph_scatter_x, get_dim_graph_scatter_y, get_dim_graph_map_limits, get_dim_graph_map_index
@@ -96,9 +97,9 @@ top_cards = [
                                            id="closed_status",
                                            className="label label-default",
                                            style={
-                                               "borderRadius": "5px",
+                                               "borderRadius": "8px",
                                                "backgroundColor": "#D7D7D7",
-                                               "padding": "5px"
+                                               "padding": "1px 10px",
                                            }
                                            )
                     ),
@@ -107,16 +108,8 @@ top_cards = [
                             dbc.Col(
                                 children=[
                                     html.P(children=["开市自检9月1日-9月30日"]),
-                                    html.P(
-                                        children=[
-                                            html.Span(children="应完成自检数: "),
-                                            html.Span(children=3500)
-                                        ]),
-                                    html.P(
-                                        children=[
-                                            html.Span(children="已完成: "),
-                                            html.Span(children=2000)
-                                        ]),
+                                    html.P(children=["应完成自检数: ", html.Code(children="3500")]),
+                                    html.P(children=["已完成: ", html.Code(children="2000")]),
                                 ]
                             ),
                             dbc.Col(
@@ -141,9 +134,9 @@ top_cards = [
                         children=html.Span(children="进行中",
                                            id="pending_status",
                                            style={
-                                               "borderRadius": "5px",
+                                               "borderRadius": "8px",
                                                "backgroundColor": "#70B603",
-                                               "padding": "5px",
+                                               "padding": "1px 10px",
                                                "color": "#FFFFFF"
                                            }
                                            )
@@ -154,15 +147,14 @@ top_cards = [
                             dbc.Col(
                                 children=[
                                     html.P(children="开市自检9月1日-9月30日"),
-                                    html.P(children="应完成自检数: 3500"),
-                                    html.P(children="已完成： 500"),
+                                    html.P(children=["应完成自检数: ", html.Code(children="3500")]),
+                                    html.P(children=["已完成: ", html.Code(children="500")]),
                                 ]
                             ),
 
                             dbc.Col(
                                 children=[
-                                    dcc.Graph(id='graph_pending_rate',
-                                              style={"height": "260px"}),
+                                    dcc.Graph(id='graph_pending_rate'),
                                 ]
                             )
                         ]
@@ -183,9 +175,9 @@ top_cards = [
                                            id="not_yet_status",
                                            className="label label-default",
                                            style={
-                                               "borderRadius": "5px",
+                                               "borderRadius": "8px",
                                                "backgroundColor": "#A9A9A9",
-                                               "padding": "5px"
+                                               "padding": "1px 10px"
                                            }
                                            )
                     ),
@@ -207,7 +199,8 @@ top_cards = [
                                     dcc.Graph(id='graph_not_yet_rate'),
                                 ]
                             )
-                        ])
+                        ]
+                    )
 
                 ]),
             style={"height": "270px"}
@@ -222,81 +215,78 @@ month_finish_detail_graph = [
             dbc.Card(
                 children=dbc.CardBody(
                     children=[
-                        dbc.Col(
-                            children=[
-                                dcc.Graph(id="graph_month_finish")
-                            ]
-                        )
-                    ]
-                )
-            )
+                        html.H5(children='月度自检完成情况', className='media-body'),
+                        dbc.Row(children=[
+                            dbc.Col(
+                                children=[
+                                    dcc.Graph(id="graph_month_finish")
+                                ]
+                            ),
+                            dbc.Col(
+                                children=[
+                                    html.Br(),
+                                    html.Br(),
+                                    dbc.Col(
+                                        children=[
+                                            html.H6(children=[
+                                                html.Span(children="应完成报告数:"),
+                                                html.Span(id="month_finish_report_count", children="71730"),
+                                            ]),
+                                            html.H6(children=[
+                                                html.Span(children="已完成:"),
+                                                html.Span(id="month_finished", children="66450"),
+                                            ]),
+                                            dbc.Progress(id="month_finished_process", children="35%", value=35)
+                                        ]
+                                    ),
 
-        ]
-    ),
-    dbc.Col(
-        children=[
-            dbc.Card(
-                children=dbc.CardBody(
-                    children=[
-                        html.Br(),
-                        html.Br(),
+                                    html.Br(),
+                                    html.Br(),
+                                    html.Br(),
+                                    dbc.Col(
+                                        children=[
+                                            html.H6(children=[
+                                                html.Span(children="点评报告数:"),
+                                                html.Span(id="month_remarks_report_count", children="33809"),
+                                            ]),
+                                            html.H6(children=[
+                                                html.Span(children="点评率:"),
+                                                html.Span(id="month_remarks_rate", children="88.8%"),
+                                            ]),
+                                            dbc.Progress(id="month_remarks_rate_process", children="88.8%", value=88.8)
+                                        ]
+                                    ),
 
-                        dbc.Col(
-                            children=[
-                                html.H6(children=[
-                                    html.Span(children="应完成报告数:"),
-                                    html.Span(id="month_finish_report_count", children="10000"),
-                                ]),
-                                html.H6(children=[
-                                    html.Span(children="已完成:"),
-                                    html.Span(id="month_finished", children="10000"),
-                                ]),
-                                dbc.Progress(id="month_finished_process", children="35%", value=35)
-                            ]
-                        ),
-                        html.Br(),
-                        html.Br(),
-                        html.Br(),
+                                    html.Br(),
+                                    html.Br(),
+                                    html.Br(),
+                                    dbc.Col(
+                                        children=[
+                                            html.H6(children=[
+                                                html.Span(children="点评报告数:"),
+                                                html.Span(id="month_remarks_report_count_2", children="33809"),
+                                            ]),
+                                            html.H6(children=[
+                                                html.Span(children="合格数:"),
+                                                html.Span(id="month_remarks_report_pass_count", children="43000"),
+                                            ]),
+                                            html.H6(children=[
+                                                html.Span(children="不合格数:"),
+                                                html.Span(id="month_remarks_report_no_pass_count", children="12000"),
+                                            ]),
+                                            dbc.Progress(id="month_remarks_report_pass_process", children="90%",
+                                                         value=90)
+                                        ]
+                                    ),
 
-                        dbc.Col(
-                            children=[
-                                html.H6(children=[
-                                    html.Span(children="点评报告数:"),
-                                    html.Span(id="month_remarks_report_count", children="10000"),
-                                ]),
-                                html.H6(children=[
-                                    html.Span(children="点评率:"),
-                                    html.Span(id="month_remarks_rate", children="88.8%"),
-                                ]),
-                                dbc.Progress(id="month_remarks_rate_process", children="88.8%", value=88.8)
-                            ]
-                        ),
-
-                        html.Br(),
-                        html.Br(),
-                        html.Br(),
-
-                        dbc.Col(
-                            children=[
-                                html.H6(children=[
-                                    html.Span(children="点评报告数:"),
-                                    html.Span(id="month_remarks_report_count_2", children="10000"),
-                                ]),
-                                html.H6(children=[
-                                    html.Span(children="合格数:"),
-                                    html.Span(id="month_remarks_report_pass_count", children="10000"),
-                                ]),
-                                html.H6(children=[
-                                    html.Span(children="不合格数:"),
-                                    html.Span(id="month_remarks_report_no_pass_count", children="10000"),
-                                ]),
-                                dbc.Progress(id="month_remarks_report_pass_process", children="25%", value=25)
-                            ]
-                        ),
-
-                        html.Br(),
-                        html.Br(),
-                        html.Br(),
+                                ]
+                            ),
+                            dbc.Col(
+                                children=[
+                                    dcc.Graph(id="graph_area_detail")
+                                ]
+                            )
+                        ])
 
                     ]
                 )
@@ -304,21 +294,6 @@ month_finish_detail_graph = [
 
         ]
     ),
-    dbc.Col(
-        children=[
-            dbc.Card(
-                children=dbc.CardBody(
-                    children=[
-                        dbc.Col(
-                            children=[
-                                dcc.Graph(id="graph_area_detail")
-                            ]
-                        )
-                    ]
-                )
-            )
-        ]
-    )
 
 ]
 
@@ -422,6 +397,8 @@ indicator_trend_graph = [
             dbc.Card(
                 children=dbc.CardBody(
                     children=[
+                        html.H5(children='完成率、点评率、合格率指标趋势', className='media-body'),
+                        html.Hr(),
                         dbc.Col(
                             children=[
                                 dcc.Graph(id="graph_indicator_trend")
@@ -449,9 +426,10 @@ indicator_relevance_graph = [
                         # 筛选框
                         dbc.Row(
                             children=[
-                                dbc.Col(width=6),
+                                html.H5(children='完成率、点平率、合格率指标关联性', className='media-body'),
+                                html.Hr(),
                                 dbc.Col(
-                                    html.Div([
+                                    children=html.Div([
                                         # x 轴
                                         dbc.Label(children="X轴"),
                                         dcc.Dropdown(
@@ -502,10 +480,12 @@ indicator_relevance_graph = [
                                             clearable=False
                                         )
                                     ],
-                                        className='media-left block-inline'),
-                                    width=6
+                                        className='media-right block-inline'),
                                 ),
-                            ]),
+                            ],
+                            className='media flex-wrap ',
+                            style={'alignItems': 'flex-end'}
+                        ),
                         dbc.Row(children=[
                             dbc.Col(
                                 children=[
@@ -528,18 +508,19 @@ question_item_graph = [
                 children=[
                     dbc.Row(
                         children=[
-                            dbc.Col(width=6),
+                            html.H5(children='问题项分布', className='media-body'),
+                            html.Hr(),
+
                             dbc.Col(
+                                children=
                                 html.Div([
                                     # x 轴
                                     dbc.Label(children="类别筛选"),
                                     dcc.Dropdown(
                                         id="choices_item_category",
                                         style={'width': 120},
-                                        options=[
-                                            {'label': '5S定位查询', 'value': 'search'}
-                                        ],
-                                        value='search',
+                                        options=srv_comm_dim.get_inspection_category(),
+                                        value='',
                                         searchable=False,
                                         clearable=False
                                     ),
@@ -556,10 +537,11 @@ question_item_graph = [
                                     ),
 
                                 ],
-                                    className='media-left block-inline'),
-                                width=6
+                                    className='media-left block-inline')
                             ),
-                        ]
+                        ],
+                        className='media flex-wrap ',
+                        style={'alignItems': 'flex-end'}
                     ),
                     dbc.Row(
                         children=[
@@ -582,18 +564,17 @@ question_item_graph = [
                 children=[
                     dbc.Row(
                         children=[
-                            dbc.Col(width=6),
+                            html.H5(children='问题项环比', className='media-body'),
+                            html.Hr(),
                             dbc.Col(
-                                html.Div([
+                                children=html.Div([
                                     # x 轴
                                     dbc.Label(children="类别筛选"),
                                     dcc.Dropdown(
                                         id="choices_diff_category",
                                         style={'width': 120},
-                                        options=[
-                                            {'label': '5S定位查询', 'value': 'search'}
-                                        ],
-                                        value='search',
+                                        options=srv_comm_dim.get_inspection_category(),
+                                        value='',
                                         searchable=False,
                                         clearable=False
                                     ),
@@ -610,17 +591,20 @@ question_item_graph = [
                                         clearable=False
                                     ),
                                 ],
-                                    className='media-left block-inline'),
-                                width=6
+                                    className='media-left block-inline')
                             ),
-                        ]
+                        ],
+                        className='media flex-wrap ',
+                        style={'alignItems': 'flex-end'}
                     ),
                     dbc.Row(
                         children=[
                             dbc.Col(
+                                id='question_diff_tab',
                                 children=[
-                                    dcc.Graph(id="question_diff_tab_graph"),
-                                ]
+                                    # dcc.Graph(id="question_diff_tab_graph"),
+                                ],
+                                style={'width': '50%', 'fontSize': '12px'}
                             ),
 
                             dbc.Col(
