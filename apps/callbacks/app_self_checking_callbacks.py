@@ -37,8 +37,8 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_close_rate(signal_data):
-        df = pd.DataFrame([{"label": "已完成", "value": 1000},
-                           {"label": "未完成", "value": 2500}])
+        df = pd.DataFrame([{"label": "已完成", "value": 2000},
+                           {"label": "未完成", "value": 1500}])
         fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.5, template="simple_white")
         fig.update(layout_showlegend=False)
         return fig
@@ -49,8 +49,8 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_pending_rate(signal_data):
-        df = pd.DataFrame([{"label": "已完成", "value": 1500},
-                           {"label": "未完成", "value": 2000}])
+        df = pd.DataFrame([{"label": "已完成", "value": 500},
+                           {"label": "未完成", "value": 3000}])
         fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.5, template="simple_white")
         fig.update(layout_showlegend=False)
         return fig
@@ -61,8 +61,8 @@ def register_callbacks(dash_app):
             Input('signal', 'data'),
         ])
     def update_not_yet_rate(signal_data):
-        df = pd.DataFrame([{"label": "已完成", "value": 2000},
-                           {"label": "未完成", "value": 1500}])
+        df = pd.DataFrame([{"label": "已完成", "value": 0},
+                           {"label": "未完成", "value": 3500}])
         fig = px.pie(df, values='value', names='label', width=220, height=220, hole=0.5, template="simple_white")
         fig.update(layout_showlegend=False)
         return fig
@@ -79,7 +79,6 @@ def register_callbacks(dash_app):
             Output('month_remarks_rate_process', 'children'),
             Output('month_remarks_rate_process', 'value'),
 
-
             Output('month_remarks_report_count_2', 'children'),
             Output('month_remarks_report_pass_count', 'children'),
             Output('month_remarks_report_no_pass_count', 'children'),
@@ -94,20 +93,19 @@ def register_callbacks(dash_app):
         month_finish_report_count = 71730
         # 已完成
         month_finished = 66450
-        # 完成率
+        # 完成率 = 已完成报告数/应完成报告数
         month_finished_process = month_finished / month_finish_report_count
 
         # 点评报告数
         remarks_report_count = 33809
-        # 点评率
-        month_remarks_rate = month_finished/remarks_report_count
-
+        # 点评率 = 点评报告数 / 已完成报告数
+        month_remarks_rate = remarks_report_count / month_finished
 
         # 合格数
         remarks_report_pass_count = 43000
         # 不合格数
         remarks_report_no_pass_count = 12000
-        # 进度
+        # 合格率 = 合格数 /（合格数+不合格数）
         remarks_report_pass_process = (remarks_report_pass_count /
                                        (remarks_report_no_pass_count + remarks_report_pass_count))
 
@@ -115,21 +113,19 @@ def register_callbacks(dash_app):
             month_finish_report_count,
             month_finished,
             '{:.2%}'.format(month_finished_process),
-            '{:.2f}'.format(month_finished_process*100),
+            '{:.2f}'.format(month_finished_process * 100),
 
             remarks_report_count,
             '{:.2%}'.format(month_remarks_rate),
             '{:.2%}'.format(month_remarks_rate),
-            '{:.2f}'.format(month_remarks_rate*100),
+            '{:.2f}'.format(month_remarks_rate * 100),
 
             remarks_report_count,
             remarks_report_pass_count,
             remarks_report_no_pass_count,
             '{:.2%}'.format(remarks_report_pass_process),
-            '{:.2f}'.format(remarks_report_pass_process*100)
+            '{:.2f}'.format(remarks_report_pass_process * 100)
         ]
-
-
 
     @dash_app.callback(
         Output('graph_month_finish', 'figure'),

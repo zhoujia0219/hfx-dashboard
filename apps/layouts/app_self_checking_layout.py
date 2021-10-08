@@ -187,10 +187,10 @@ top_cards = [
                                 children=[
                                     html.P(children="开市自检9月1日-9月30日"),
                                     html.P(children=[
-                                        "应完成自检数: ", html.Code(id="", children="3500")
+                                        "应完成自检数: ", html.Code(id="item_check_count", children="3500")
                                     ]),
                                     html.P(children=[
-                                        "已完成：", html.Code(id="", children="0")
+                                        "已完成：", html.Code(id="item_finished_count", children="0")
                                     ]),
                                 ]
                             ),
@@ -230,13 +230,13 @@ month_finish_detail_graph = [
                                         children=[
                                             html.H6(children=[
                                                 html.Span(children="应完成报告数:"),
-                                                html.Span(id="month_finish_report_count", children="71730"),
+                                                html.Span(id="month_finish_report_count"),
                                             ]),
                                             html.H6(children=[
                                                 html.Span(children="已完成:"),
-                                                html.Span(id="month_finished", children="66450"),
+                                                html.Span(id="month_finished"),
                                             ]),
-                                            dbc.Progress(id="month_finished_process", children="35%", value=35)
+                                            dbc.Progress(id="month_finished_process")
                                         ]
                                     ),
 
@@ -247,13 +247,13 @@ month_finish_detail_graph = [
                                         children=[
                                             html.H6(children=[
                                                 html.Span(children="点评报告数:"),
-                                                html.Span(id="month_remarks_report_count", children="33809"),
+                                                html.Span(id="month_remarks_report_count"),
                                             ]),
                                             html.H6(children=[
                                                 html.Span(children="点评率:"),
-                                                html.Span(id="month_remarks_rate", children="88.8%"),
+                                                html.Span(id="month_remarks_rate"),
                                             ]),
-                                            dbc.Progress(id="month_remarks_rate_process", children="88.8%", value=88.8)
+                                            dbc.Progress(id="month_remarks_rate_process")
                                         ]
                                     ),
 
@@ -264,18 +264,17 @@ month_finish_detail_graph = [
                                         children=[
                                             html.H6(children=[
                                                 html.Span(children="点评报告数:"),
-                                                html.Span(id="month_remarks_report_count_2", children="33809"),
+                                                html.Span(id="month_remarks_report_count_2"),
                                             ]),
                                             html.H6(children=[
                                                 html.Span(children="合格数:"),
-                                                html.Span(id="month_remarks_report_pass_count", children="43000"),
+                                                html.Span(id="month_remarks_report_pass_count"),
                                             ]),
                                             html.H6(children=[
                                                 html.Span(children="不合格数:"),
-                                                html.Span(id="month_remarks_report_no_pass_count", children="12000"),
+                                                html.Span(id="month_remarks_report_no_pass_count"),
                                             ]),
-                                            dbc.Progress(id="month_remarks_report_pass_process", children="90%",
-                                                         value=90)
+                                            dbc.Progress(id="month_remarks_report_pass_process")
                                         ]
                                     ),
 
