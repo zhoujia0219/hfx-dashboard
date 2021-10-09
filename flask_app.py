@@ -1,3 +1,4 @@
+import logging
 from importlib import import_module
 from os import path
 
@@ -5,6 +6,8 @@ from flask import Flask, url_for
 from flask_caching import Cache
 
 # 引入dash应用实例
+from redis import StrictRedis
+
 from apps.app_sales_by_real_time import register_real_time_sales_app
 from apps.app_sales_bymonth_index import register_sales_app
 from apps.app_store_inspection import register_store_inspection_app
@@ -63,8 +66,27 @@ def apply_themes(app):
         return url_for(endpoint, **values)
 
 
+class Config(object):
+    DEBUG = True
+    SECRET_KEY = 'nNYMkDHH+uleYRxSpizW6HEDEp2KfwcggXLW3ikWGE7VmgDWfIC2k271rwejEKDX'  # 设置全局唯一的密钥，主要是为后面的session
+
+    # Redis 的配置
+    REDIS_HOST = '127.0.0.1'
+    REDIS_PORT = 6379
+
+    # Session保存配置
+    SESSION_TYPE = "redis"
+    SESSION_USE_SIGNER = True  # 开启session签名,是否被加密签名
+    SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+    SESSION_PERMANENT = False  # 设置是否过期时间
+    PERMANENT_SESSION_LIFETIME = 86400 * 2  # 设置过期时间，两天
+
+    # 设置日志等级
+    LOG_LEVEL = logging.DEBUG
+
 def create_app():
-    app = Flask(__name__, static_folder='base/static')
+    app = Flask(__name__, static_folder='base/static', template_folder='base/templates')
+    app.config.from_object(Config)  # 加载配置
     # 注册dash应用实例
     register_sales_app(app)
     register_real_time_sales_app(app)  # 实时销售页面的dash对象的注册

@@ -9,7 +9,8 @@
 # 4. 每一个app对应于一个service文件，service文件命名为 [ srv_ ] + [app名称]
 #   如, 月度销售分析页面对于的service文件为 srv_sales_bymonth.py
 
-
+# 用戶登錄接口
+USER_REGISTER = '/register'
 # 门店月度销售分析
 URL_SALES_BYMONTH = "/sales/bymonth/"
 # 实时销售页面
