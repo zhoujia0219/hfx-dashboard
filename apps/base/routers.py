@@ -1,12 +1,12 @@
-from flask import Blueprint, jsonify, render_template, request, url_for, g
+from flask import Blueprint, render_template, request, url_for, g
 from flask import redirect
 
-from conf.router_conts import URL_SALES_BYMONTH, URL_LOGIN_SALES_BYMONTH
+from conf.router_conts import URL_SALES_BYMONTH
 from services.srv_user_info import user_info, update_last_login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 
-from utils.tools import create_token, verify_token, user_login_data
+from utils.tools import create_token
 
 blueprint = Blueprint(
     'base_blueprint',
@@ -18,9 +18,10 @@ blueprint = Blueprint(
 
 
 @blueprint.route('/', methods=['POST', 'GET'])
-@user_login_data
+# @user_login_data
 def index():
-    # user = g.user
+    user = g.user
+    print(user,242363636)
     return redirect(URL_SALES_BYMONTH)
 
 

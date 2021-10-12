@@ -88,6 +88,7 @@ def user_login_data(f):
             pass
     当需要取用户信息的时候，user = g.user 即可取到相应的登录用户信息
     """
+
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         token = session.get("token", None)

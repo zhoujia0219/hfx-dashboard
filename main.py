@@ -1,4 +1,4 @@
-from flask import request, current_app, session
+from flask import request, current_app, session, g
 from werkzeug.utils import redirect
 
 from conf.basic_const import WHITE_URL_LIST
@@ -22,6 +22,12 @@ def requied_login():
     token = session.get("token", None)
     if token is None:
         return redirect('/login')  # 如果没有该登录信息就跳到登录页面
+    user = {
+        "user_id": session.get("user_id", None),
+        "username": session.get("username", None),
+        "brand": session.get("brand", None),
+    }
+    g.user = user  # 将用户信息直接丢到 g 变量中，在后续用到只需 user = g.user 就可以取到相关信息
 
 
 if __name__ == "__main__":
