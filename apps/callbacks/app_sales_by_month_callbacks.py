@@ -7,6 +7,7 @@ from urllib.request import urlopen
 import plotly.express as px
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
+from flask import g
 from pandas import DataFrame
 
 from services import srv_sales_bymonth
@@ -16,6 +17,7 @@ from services import srv_sales_bymonth
 ###############
 from services.srv_comm_dim import get_ZE_PJS_ZWS
 from utils.thread_one_interface import MyThread
+from utils.tools import user_login_data
 
 
 def register_callbacks(dash_app):
@@ -25,6 +27,7 @@ def register_callbacks(dash_app):
 
     # 顶部 12月趋势图
     def build_group_sales_fig(df: DataFrame):
+
         """
         12个月销售趋势图
         :param df: 包含月份和销售额的dataframe 数据
@@ -323,6 +326,7 @@ def register_callbacks(dash_app):
             State('f_store_star', 'value'),
         ]
     )
+    # @user_login_data
     def compute_value(n_clicks, begin_month, end_month, city_level, channel, store_age, store_area, store_star):
         """
         点击提交按钮后，保存筛选值到signal
@@ -337,6 +341,8 @@ def register_callbacks(dash_app):
         :return 返回筛选的所有选中值（用于取缓存）
 
         """
+        # user = g.user
+        # print(user, 44555666777889)
         filter_values = {'begin_month': begin_month, 'end_month': end_month,
                          'city_level': city_level, 'channel': channel,
                          'store_age': store_age, 'store_area': store_area, 'store_star': store_star}

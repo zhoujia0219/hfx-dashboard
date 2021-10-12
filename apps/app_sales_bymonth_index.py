@@ -2,7 +2,7 @@ import dash
 from flask_login import login_required
 
 from conf.hfx_dashboard import BOOTSTRAP_THEME
-from conf.router_conts import URL_SALES_BYMONTH
+from conf.router_conts import URL_SALES_BYMONTH, URL_LOGIN_SALES_BYMONTH
 from apps.html_string.base_html_string_index import base_html_string_index
 
 
@@ -34,7 +34,7 @@ def register_sales_app(app):
         #     ]
         # )
         register_callbacks(dash_app)
-
+    # _protect_dash_views(dash_app)
 
 def _protect_dash_views(dash_app):
     for view_func in dash_app.server.view_functions:

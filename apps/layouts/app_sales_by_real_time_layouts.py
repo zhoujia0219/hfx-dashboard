@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import dash
 import plotly.graph_objects as go
 
@@ -36,6 +35,7 @@ stop_month = (today - relativedelta(months=1)).strftime('%Y-%m')
 ###############
 # sidebar
 ###############
+
 
 # 侧边栏
 sidebar = html.Div(

@@ -78,14 +78,14 @@ class Config(object):
     SESSION_TYPE = "redis"
     SESSION_USE_SIGNER = True  # 开启session签名,是否被加密签名
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
-    SESSION_PERMANENT = False  # 设置是否过期时间
+    SESSION_PERMANENT = True  # 设置是否过期时间
     PERMANENT_SESSION_LIFETIME = 86400 * 2  # 设置过期时间，两天
 
     # 设置日志等级
     LOG_LEVEL = logging.DEBUG
 
 def create_app():
-    app = Flask(__name__, static_folder='base/static', template_folder='base/templates')
+    app = Flask(__name__, static_folder='./apps/base/static', template_folder='./apps/base/templates')
     app.config.from_object(Config)  # 加载配置
     # 注册dash应用实例
     register_sales_app(app)
@@ -100,3 +100,4 @@ def create_app():
     # 注册样式
     apply_themes(app)
     return app
+

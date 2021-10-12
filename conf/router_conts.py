@@ -12,7 +12,8 @@
 # 用戶登錄接口
 USER_REGISTER = '/register'
 # 门店月度销售分析
-URL_SALES_BYMONTH = "/sales/bymonth/"
+URL_SALES_BYMONTH = "/sales/bymonth/"  # 后台直接运行的路由
+URL_LOGIN_SALES_BYMONTH = "/login/sales/bymonth/"  # 做跳转的路由
 # 实时销售页面
 URL_REAL_TIME_SALE = "/real_time/"
 # 巡检看板页面

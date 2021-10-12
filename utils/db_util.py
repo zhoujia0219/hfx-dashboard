@@ -57,6 +57,20 @@ def query_list(sql: str, dbname: str):
     finally:
         conn.close()
 
+def just_execute(sql:str, dbname:str):
+    """
+    只执行一下sql
+    """
+    conn = gp_connect(dbname=dbname)
+    cur = conn.cursor(cursor_factory=LoggingCursor)
+    try:
+        cur.execute(sql)
+        conn.commit()
+    except Exception as e:
+        logging.error("执行异常：{}, sql {}", str(e), sql)
+        raise e
+    finally:
+        conn.close()
 
 # 查询数据
 def read_by_pd(sql: str, dbname: str):
@@ -88,7 +102,6 @@ def read_by_pd1(sql: str, dbname: str):
 
     import dask.dataframe as pd
     conn = gp_connect(dbname=dbname)
-    print(conn,23343)
     try:
         df = pd.read_sql_table(sql, index_col="businessname",uri=conn)
         return df
