@@ -208,7 +208,7 @@ def get_store_sort() -> List[Dict]:
        门店巡检完成率排序——（正序、倒序）
        :return List[dict]
        """
-    return [{"label": "倒序", "value": "asc"},{"label": "正序", "value": "desc"}, ]
+    return [{"label": "倒序", "value": "asc"}, {"label": "正序", "value": "desc"}, ]
 
 
 def get_store_month() -> List[Dict]:
@@ -229,3 +229,22 @@ def get_store_month() -> List[Dict]:
             {"label": "11月", "value": "11"},
             {"label": "12月", "value": "12"}
             ]
+
+
+def get_inspection_category() -> List[Dict]:
+    """
+        巡检类别
+       :return List[dict]
+    """
+    return [
+        {"label": "所有", "value": ''},
+        {"label": "Q-物料来源", "value": "Q-物料来源"},
+        {"label": "备料管控", "value": "备料管控"},
+        {"label": "水果管控", "value": "水果管控"},
+        {"label": "开封原料", "value": "开封原料"},
+        {"label": "效期管理", "value": "效期管理"},
+        {"label": "储藏管理", "value": "储藏管理"},
+        {"label": "交叉感染", "value": "交叉感染"},
+        {"label": "否决项/重点项", "value": "否决项/重点项"},
+        {"label": "OP操作", "value": "OP操作"},
+    ]
