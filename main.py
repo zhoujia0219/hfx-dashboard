@@ -14,7 +14,7 @@ def requied_login():
     is_white_url = False
     for white_url in WHITE_URL_LIST:
         # 如果是白名单则不需要验证
-        if (current_url.replace(white_url, "") + white_url) == current_url:
+        if (current_url.replace(white_url, "") + white_url) == current_url or 'static/' in current_url:
             is_white_url = True
             break
     if is_white_url:
