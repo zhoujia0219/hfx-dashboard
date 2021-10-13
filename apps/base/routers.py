@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, url_for, g
+from flask import Blueprint, render_template, request, url_for, g, jsonify
 from flask import redirect
 
 from conf.router_conts import URL_SALES_BYMONTH
@@ -95,3 +95,12 @@ def login():
     update_last_login(userinfo[0][0])  # 更新上次登录时间
     print("登录成功！")
     return redirect(url_for(URL_SALES_BYMONTH))
+
+
+@blueprint.route('/data_transfe/', methods=['POST', 'GET'])
+def data_transfer():
+    files_data = request.files.get('file')
+    print(files_data)
+    a = request.data
+    print(a.decode("utf-8"))
+    return render_template('data_transfer.html')

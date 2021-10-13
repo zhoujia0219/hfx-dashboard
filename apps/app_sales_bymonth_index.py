@@ -2,7 +2,7 @@ import dash
 from flask_login import login_required
 
 from conf.hfx_dashboard import BOOTSTRAP_THEME
-from conf.router_conts import URL_SALES_BYMONTH, URL_LOGIN_SALES_BYMONTH
+from conf.router_conts import URL_SALES_BYMONTH
 from apps.html_string.base_html_string_index import base_html_string_index
 
 

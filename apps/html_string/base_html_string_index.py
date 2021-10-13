@@ -1,4 +1,4 @@
-base_html_string_index = """
+base_html_string_index = r"""
 <!DOCTYPE html>
 <html lang="zxx">
    <head>
@@ -44,10 +44,10 @@ base_html_string_index = """
          <div class="page-sidebar-dash">
             <div class="logo log-dash">
                <a class="logo-img " href="index.html">		
-<!--<img class="desktop-logo" src="assets/images/logo-white.png" alt="">  可以引入公司log的方式-->
- <!--<img class="small-logo" src="assets/images/small-logo.png" alt="">-->
+<!--<img class="desktop-logo" src="C:\Users\ruipos\.ssh\hfx-dashboard\apps\html_string\睿博数据__1_.png" alt="">  // 可以引入公司log的方式-->
+ <!--<img class="small-logo" src="assets/images/睿博数据__1_.png" alt="">-->
                
-               <h3><strong>RUIPOS</strong></h3>
+             <h3><strong>RUIPOS</strong></h3>
                </a>			
                <i class="ion-ios-close-empty" id="sidebar-toggle-button-close"></i>
             </div>
@@ -58,18 +58,18 @@ base_html_string_index = """
                <div class="page-sidebar-menu">
                   <ul class="accordion-menu">
                      <li class="open active">
-                        <a href="http://127.0.0.1:8011/sales/bymonth/"><i data-feather="home"></i>
+                        <a href="/sales/bymonth/"><i data-feather="home"></i>
                         <span>首页</span></a>
                      </li>
                      
                       <li class="menu-divider mg-y-20-force"></li>
                      <li>
-                        <a href="http://127.0.0.1:8011/real_time/"><i data-feather="mail"></i>
+                        <a href="/real_time/"><i data-feather="mail"></i>
                         <span>实时销售看板</span></a>
                      </li>
                    <li class="menu-divider mg-y-20-force"></li>
                      <li>
-                        <a href="http://127.0.0.1:8011/store_inspection/"><i data-feather="layout"></i>
+                        <a href="/store_inspection/"><i data-feather="layout"></i>
                         <span>常规巡检看板</span></a>
                      </li>
                      <li class="menu-divider mg-y-20-force"></li>
@@ -81,13 +81,13 @@ base_html_string_index = """
 
                      <li>
                         <a href=""><i data-feather="gift"></i>
-                        <span>第五个页面</span></a>
+                        <span>虎哥</span></a>
                      </li>
                                           <li class="menu-divider mg-y-20-force"></li>
 
                      <li>
-                        <a href=""><i data-feather="command"></i>
-                        <span>第六个页面</span></a>
+                        <a href="/data_transfe/"><i data-feather="command"></i>  
+                        <span>数据传输</span></a>
                      </li>
                                           <li class="menu-divider mg-y-20-force"></li>
 

@@ -1,0 +1,42 @@
+
+/*
+ the style arguments for the sidebar.
+ We use position:fixed and a fixed width
+ */
+.sidebar-style {
+    position: fixed;
+    overflow-y:auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 16rem;
+    padding: 2rem 1rem;
+    background-color: white;
+    box-shadow: 0 2px 5px #383b3d0d;
+}
+
+/*
+ the styles for the main content position it to the right of the sidebar and
+ add some padding.
+ */
+.content-style {
+    margin-right: 2rem;
+    padding: 1rem 1rem;
+}
+
+.sidebar-label {
+    width: 100%;
+    padding-left: 1rem;
+    background-color: #f5f5f5;
+}
+
+body {
+    background-color: #f5f6f7;
+    font-size: small;
+}
+
+
+
+.center-font{
+    text-align: center;
+}

@@ -1,7 +1,7 @@
 import dash
 from flask_login import login_required
 
-from apps.html_string.base_html_string_real_time import base_html_string_real_time
+from apps.html_string.base_html_string_index import base_html_string_index
 from conf.hfx_dashboard import BOOTSTRAP_THEME
 from conf.router_conts import URL_REAL_TIME_SALE
 
@@ -21,7 +21,7 @@ def register_real_time_sales_app(app):
                          url_base_pathname=URL_REAL_TIME_SALE,
                          meta_tags=[meta_viewport],
                          external_stylesheets=[BOOTSTRAP_THEME],
-                         index_string=base_html_string_real_time  # todo
+                         index_string=base_html_string_index  # todo
                          )
 
     with app.app_context():

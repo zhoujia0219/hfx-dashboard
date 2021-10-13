@@ -93,6 +93,8 @@ def create_app():
     register_store_inspection_app(app)
     # 自检
     register_self_checking_app(app)
+    # # 数据传输
+    # register_data_transfe_app(app)
     # 集成插件
     register_extensions(app)
     # 注册 路由

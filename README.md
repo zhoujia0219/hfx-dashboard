@@ -149,36 +149,38 @@ hfx-dashboard
 
    ```python
         def calculate_cards(filter_values: dict) -> Dict:
-    """
-    计算头部的4个card 的数据
-    :param filter_values :
-                { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
-                  'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
-                  'city_level': 城市级别: List类型,
-                  'channel': 渠道: List类型,
-                  'store_age': 店龄: List类型 ,
-                  'store_area': 门店面积: List类型,
-                  'store_star': 门店星级: List类型}
-    :return dict :
-            {"total_sale": 总销售量: 浮点类型，单位百万(M),
-            "last_month_total": 上月销售量：浮点类型，单位百万(M),
-            "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
-            "hb_percentage": 环比百分比（上月的数据比上上月的数据）：字符串类型，单位%,
-            "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
-            "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
-            "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
-    """
-            # ...省略计算处理逻辑
-            # 返回示例
-            return {"total_sale": 15.00,
-                    "last_month_total": 12.00,
-                    "tb_percentage": '10.00%',
-                    "hb_percentage": '-2.00%',
-                    "c_month_total_sale": 15.00,
-                    "m_growth_rate": '25%',
-                    "group_sales": []}
-        
-   ```
+
+
+"""
+计算头部的4个card 的数据
+:param filter_values :
+            { 'begin_month': 开始时间: 字符串类型，格式 YYYY-MM,
+              'end_month': 结束时间: 字符串类型，格式 YYYY-MM,
+              'city_level': 城市级别: List类型,
+              'channel': 渠道: List类型,
+              'store_age': 店龄: List类型 ,
+              'store_area': 门店面积: List类型,
+              'store_star': 门店星级: List类型}
+:return dict :
+        {"total_sale": 总销售量: 浮点类型，单位百万(M),
+        "last_month_total": 上月销售量：浮点类型，单位百万(M),
+        "tb_percentage": 同比百分比（上月的数据比去年的数据）：字符串类型，单位%,
+        "hb_percentage": 环比百分比（上月的数据比上上月的数据）：字符串类型，单位%,
+        "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
+        "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%,
+        "group_sales": 12个月的销售趋势：Dataframe类型，包含字段[month_group:月份, dealtotal:当月销量]}
+"""
+# ...省略计算处理逻辑
+# 返回示例
+return {"total_sale": 15.00,
+        "last_month_total": 12.00,
+        "tb_percentage": '10.00%',
+        "hb_percentage": '-2.00%',
+        "c_month_total_sale": 15.00,
+        "m_growth_rate": '25%',
+        "group_sales": []}
+
+```
 
 ## 项目部署运行
 
@@ -218,9 +220,11 @@ pip install -r requirements.txt
 - base/routers.py
 
 - 示例
+
 > 注意：路由参数@blueprint.route('/')和 重定向 redirect(URL_SALES_BYMONTH) 不能一致
-> 
-> 例如，如果 @blueprint.route('/test') 配置的路由路径是/test ; 那么 redirect(URL_SALES_BYMONTH)中  URL_SALES_BYMONTH 的值不能为/test
+>
+> 例如，如果 @blueprint.route('/test') 配置的路由路径是/test ; 那么 redirect(URL_SALES_BYMONTH)中 URL_SALES_BYMONTH 的值不能为/test
+
 ```python
 
 @blueprint.route('/')
@@ -229,8 +233,10 @@ def index():
 ```
 
 ### 第五步： 注册dash应用
+
 - flask_app.py
 - 示例（为省略后的代码，具体参看flask_app.py文件）:
+
 ```python
 from importlib import import_module
 from os import path
@@ -239,6 +245,7 @@ from flask import Flask, url_for
 from flask_caching import Cache
 # 引入新建的dash应用: 
 from apps.app_sales_bymonth_index import register_sales_app
+
 
 def register_blueprints(app):
     module = import_module('apps.{}.routers'.format("base"))
@@ -252,7 +259,6 @@ def create_app():
     register_blueprints(app)
     return app
 ```
-
 
 ## 使用数据库取数
 
@@ -344,6 +350,7 @@ def read_by_pd(sql: str, dbname: str):
 
 根据上面的封装工具，测试一个查询（目前暂时只封装了查询方法）：
 > 示例1：
+
 ```python
 from utils import db_util
 
@@ -635,6 +642,8 @@ def update_card_group_month_graph(filter_values):
 
 ```python
     def calculate_card_data(df: DataFrame, end_month: str) -> Dict:
+
+
     """
     计算头部的4个card 的数据
     :param df: 处理数据
@@ -647,57 +656,57 @@ def update_card_group_month_graph(filter_values):
             "c_month_total_sale": 本月总销售量：浮点类型，单位百万(M),
             "m_growth_rate": 增长率（本月比上月）：字符串类型，单位%}
     """
-    time_start = time.time()
+time_start = time.time()
 
-    # 总营业额
-    total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
-    # 当前月份(以时间筛选的截止日期为准)的上月数据
-    ve_date = datetime.strptime(end_month, "%Y-%m")
-    s_date = date_util.get_last_month_first_day(ve_date).date()
-    e_date = date_util.get_last_month_last_day(ve_date).date()
-    last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)] if len(df) > 0 else []
-    last_month_total = round((last_month_df["dealtotal"].sum()) / trans_num, 2) if len(last_month_df) > 0 else 0.00
+# 总营业额
+total_sale = round((df["dealtotal"].sum() / trans_num), 2) if len(df) > 0 else 0.00
+# 当前月份(以时间筛选的截止日期为准)的上月数据
+ve_date = datetime.strptime(end_month, "%Y-%m")
+s_date = date_util.get_last_month_first_day(ve_date).date()
+e_date = date_util.get_last_month_last_day(ve_date).date()
+last_month_df = df[(df["rdate"] >= s_date) & (df["rdate"] < e_date)] if len(df) > 0 else []
+last_month_total = round((last_month_df["dealtotal"].sum()) / trans_num, 2) if len(last_month_df) > 0 else 0.00
 
-    # 同比 取去年当月数据
-    tb_sdate = (s_date - relativedelta(years=1))
-    tb_edate = (e_date - relativedelta(years=1))
-    # 去年的数据
-    tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)] if len(df) > 0 else []
-    # 去年的总营业额
-    tb_total_sale = round((tb_df["dealtotal"].sum() / trans_num), 2) if len(tb_df) > 0 else 0.00
+# 同比 取去年当月数据
+tb_sdate = (s_date - relativedelta(years=1))
+tb_edate = (e_date - relativedelta(years=1))
+# 去年的数据
+tb_df = df[(df["rdate"] >= tb_sdate) & (df["rdate"] < tb_edate)] if len(df) > 0 else []
+# 去年的总营业额
+tb_total_sale = round((tb_df["dealtotal"].sum() / trans_num), 2) if len(tb_df) > 0 else 0.00
 
-    # 同比增长率计算 =（本期数－同期数）/同期数×100%
-    tb_percentage = "%.2f%%" % round(
-        ((last_month_total - tb_total_sale) / tb_total_sale * 100) if tb_total_sale > 0 else 0, 2)
+# 同比增长率计算 =（本期数－同期数）/同期数×100%
+tb_percentage = "%.2f%%" % round(
+    ((last_month_total - tb_total_sale) / tb_total_sale * 100) if tb_total_sale > 0 else 0, 2)
 
-    # 环比 取上月数据
-    hb_sdate = date_util.get_last_month_first_day(s_date).date()
-    hb_edate = date_util.get_last_month_last_day(e_date).date()
+# 环比 取上月数据
+hb_sdate = date_util.get_last_month_first_day(s_date).date()
+hb_edate = date_util.get_last_month_last_day(e_date).date()
 
-    # 上月数据
-    hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)] if len(df) > 0 else []
-    # 上月总营业额
-    hb_total_sale = round((hb_df["dealtotal"].sum() / trans_num), 2) if len(hb_df) > 0 else 0.00
+# 上月数据
+hb_df = df[(df["rdate"] >= hb_sdate) & (df["rdate"] < hb_edate)] if len(df) > 0 else []
+# 上月总营业额
+hb_total_sale = round((hb_df["dealtotal"].sum() / trans_num), 2) if len(hb_df) > 0 else 0.00
 
-    # 环比增长率计算= （本期数-上期数）/上期数×100%。
-    hb_percentage = "%.2f%%" % round(
-        ((last_month_total - hb_total_sale) / hb_total_sale * 100) if hb_total_sale > 0 else 0, 2)
-    # 本月销售额
-    c_sdate = date_util.get_month_first_day(ve_date).date()
-    c_edate = date_util.get_month_last_day(ve_date).date()
-    c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)] if len(df) > 0 else []
-    c_month_total_sale = round((c_month_df["dealtotal"].sum() / trans_num), 2) if len(c_month_df) > 0 else 0.00
+# 环比增长率计算= （本期数-上期数）/上期数×100%。
+hb_percentage = "%.2f%%" % round(
+    ((last_month_total - hb_total_sale) / hb_total_sale * 100) if hb_total_sale > 0 else 0, 2)
+# 本月销售额
+c_sdate = date_util.get_month_first_day(ve_date).date()
+c_edate = date_util.get_month_last_day(ve_date).date()
+c_month_df = df[(df["rdate"] >= c_sdate) & (df["rdate"] < c_edate)] if len(df) > 0 else []
+c_month_total_sale = round((c_month_df["dealtotal"].sum() / trans_num), 2) if len(c_month_df) > 0 else 0.00
 
-    # 本月营业额与上月对比营业额 增长率 - 月增长率 =（本月营业额-上月营业额）/上月营业额*100%
-    m_growth_rate = "%.2f%%" % round(
-        ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
+# 本月营业额与上月对比营业额 增长率 - 月增长率 =（本月营业额-上月营业额）/上月营业额*100%
+m_growth_rate = "%.2f%%" % round(
+    ((c_month_total_sale - last_month_total) / last_month_total * 100) if last_month_total > 0 else 0, 2)
 
-    time_end = time.time()
-    print('calculate_card_data: Running time:{} seconds'.format(time_end - time_start))
-    # 封装结果数据
-    return {"total_sale": total_sale, "last_month_total": last_month_total,
-            "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
-            "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate}
+time_end = time.time()
+print('calculate_card_data: Running time:{} seconds'.format(time_end - time_start))
+# 封装结果数据
+return {"total_sale": total_sale, "last_month_total": last_month_total,
+        "tb_percentage": tb_percentage, "hb_percentage": hb_percentage,
+        "c_month_total_sale": c_month_total_sale, "m_growth_rate": m_growth_rate}
 
 
 def calculate_card_graph(df: DataFrame) -> DataFrame:
@@ -718,3 +727,22 @@ def calculate_card_graph(df: DataFrame) -> DataFrame:
 
 
 ```
+
+## 登录验证
+
+    1.所有的页面、接口都已通过flask钩子函数的形式做了登录限制处理，并且可以加入一些其他的user信息：
+        user = {
+        "user_id": session.get("user_id", None),
+        "username": session.get("username", None),
+        "brand": session.get("brand", None),
+    }
+    g.user = user  # 将user信息存入g变量
+        
+    2.对于一些路由或者页面想加入白名单可以在conf/basic_const里面的WHITE_URL_LIST加入列表：
+        WHITE_URL_LIST = [
+    '/login'
+        ]  # 路由白名单
+    3.在后续的逻辑中想取user信息时，只需:
+        user=g.user
+        就可以取到user的信息
+

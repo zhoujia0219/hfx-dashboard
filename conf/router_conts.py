@@ -20,3 +20,5 @@ URL_REAL_TIME_SALE = "/real_time/"
 URL_STORE_INSPECTION = "/store_inspection/"
 # 自检
 URL_SELF_CHECKING = "/self/checking/"
+# 数据传输
+URL_DATA_TRANSFE = "/data_transfe/"
