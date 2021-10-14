@@ -1,12 +1,18 @@
+import os
+
+import xlrd as xlrd
+import xlwt as xlwt
 from flask import Blueprint, render_template, request, url_for, g, jsonify
 from flask import redirect
 
+from conf.basic_const import EXPORT_LOAD_TABLENAME_FIELD
 from conf.router_conts import URL_SALES_BYMONTH
-from services.srv_user_info import user_info, update_last_login
+from services.srv_user_info import user_info, update_last_login, default_dbname
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 
-from utils.tools import create_token
+from utils.db_util import just_execute, query_list
+from utils.tools import create_token, check_row_data, md5
 
 blueprint = Blueprint(
     'base_blueprint',
@@ -21,7 +27,7 @@ blueprint = Blueprint(
 # @user_login_data
 def index():
     user = g.user
-    print(user,242363636)
+    print(user, 242363636)
     return redirect(URL_SALES_BYMONTH)
 
 
@@ -99,8 +105,90 @@ def login():
 
 @blueprint.route('/data_transfe/', methods=['POST', 'GET'])
 def data_transfer():
-    files_data = request.files.get('file')
-    print(files_data)
-    a = request.data
-    print(a.decode("utf-8"))
-    return render_template('data_transfer.html')
+    """
+    数据导入
+    """
+    file_path = r'C:\Users\ruipos\Desktop\demo.xls'
+    # file_data = request.data
+    # print(file_data,111)
+    # file_data2 =request.files.get('file')
+    # print(file_data2,222)
+    table_key = 'fyjh'  # 将决定是用哪组数据库表数据
+    clinic_file = xlrd.open_workbook(file_path)
+    table = clinic_file.sheet_by_index(0)
+    # 输出每一行的内容
+    # table.nrows获取该sheet中的有效行数
+    flag_is_first = True
+    sql = ''  # sql字符串
+    filed_str = ''  # sql字符串中的字段字符串
+    for i in EXPORT_LOAD_TABLENAME_FIELD[table_key][1]:
+        # 拼接sql中的字段组成
+        if filed_str:
+            filed_str += ','
+            filed_str += i
+        else:
+            filed_str += i
+    for row_num in range(1, table.nrows):
+        # 对每一行数据进行校验
+        current_row = table.row_values(row_num)  # 列表形式的每一行数据
+        check_data, msg = check_row_data(current_row, table_key, row_num + 1)  # 校验数据
+        if not check_data:  # 校验未通过
+            return jsonify(data={"code": 0, "msg": msg})
+            # return render_template('data_transfer.html', data={"code": 0, "msg": msg})
+        if flag_is_first:
+            # 第一条数据创建插入语句
+            sql = """
+                insert into  chunbaiwei.{} ({}) 
+                    values {}
+            """.format(EXPORT_LOAD_TABLENAME_FIELD[table_key][0], filed_str, tuple(current_row))
+            flag_is_first = False
+        else:
+            sql += ','
+            sql += '{}'.format(tuple(current_row))  # 对后续的数据拼接到插入语句
+        row_num += 1
+    try:
+        just_execute(sql, default_dbname)  # 执行批量插入
+    except:
+        return render_template('data_transfer.html', data={"code": 0, "msg": "数据库未知错误！"})
+    # return render_template('data_transfer.html')
+
+    return jsonify(1)
+
+
+@blueprint.route('/export_data/', methods=['POST', 'GET'])
+def export_data():
+    """
+    数据导出
+    将文件下载到指定路径
+    """
+    file_path = r'C:\Users\ruipos\Desktop\demo111.xls'
+    table_key = 'fyjh'  # 将决定是用哪组数据库表数据
+    filed_str = ''  # sql字符串中的字段字符串
+    excel_header = EXPORT_LOAD_TABLENAME_FIELD[table_key][4]  # 表头
+    # 判断是否已有的文件
+    if os.path.exists(file_path):
+        return jsonify(data={"code": 0, "msg": "文件已存在"})
+    for i in EXPORT_LOAD_TABLENAME_FIELD[table_key][1]:
+        # 拼接sql中的字段组成
+        if filed_str:
+            filed_str += ','
+            filed_str += i
+        else:
+            filed_str += i
+    sql = """
+        select {} from chunbaiwei.{} 
+    """.format(filed_str, EXPORT_LOAD_TABLENAME_FIELD[table_key][0])  # sql字符串
+    all_data = query_list(sql, default_dbname)
+    # 先创建表格
+
+    new_workbook = xlwt.Workbook()
+    worksheet = new_workbook.add_sheet("sheet1")  # 创建sheet
+    for row in range(len(all_data)+1):  # 数据的行数+表头行
+        for col in range(len(excel_header)):  # 列
+            if row == 0:
+                worksheet.write(row, col, excel_header[col])  # 写入表头
+            else:
+                worksheet.write(row, col, all_data[row-1][col])  # 写入数据
+    new_workbook.save(file_path)  # 保存excel
+
+    return jsonify(111)

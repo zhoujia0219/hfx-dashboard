@@ -69,6 +69,7 @@ def just_execute(sql:str, dbname:str):
     except Exception as e:
         logging.error("执行异常：{}, sql {}", str(e), sql)
         raise e
+
     finally:
         conn.close()
 
