@@ -250,23 +250,41 @@
 
                 <!-- Main Wrapper -->
                 <!--               ## 内容-->
+
+
+                <div class="btn-file-box pos-rel">
+                    <input type="file" accept='.xls,.xlsx'  name="upload"  id="uploadFile"  />
+                    <button type="button" onclick="to_lead()" class="myClass">导入</button>
+
+                </div>
+
+
+                <br/>
                 <form action="#" name="f" method="post" class="login_form_con">
 
                     <div>
                         <span>1.费用计划</span>
                         </br>
 
-                        <input type="file" accept='.xls,.xlsx' class="file" id="id1">
-                        <button type="button" onclick="to_lead()" class="myClass">导入</button>
-                        <button type="button" onclick="export_data()">导出</button>
+                        <!--                        <input type="file" id="file" name="myfile" accept='.xls,.xlsx' />-->
+
+                        <!--                        <input class="myClass" type="button" onclick="to_lead()" value="导入"/>-->
+                        <!--                        <input class="myClass" type="button" onclick="export_data()" value="导出"/>-->
+                        <!--                                                <input type="file" accept='.xls,.xlsx' class="file" id="id1">-->
+                        <!--                                                <button type="button" onclick="to_lead()" class="myClass">导入</button>-->
+                        <!--                                                <button type="button" onclick="export_data()">导出</button>-->
                         </br>
 
                         <span>2.销售计划</span>
                         </br>
                         <input type="file" accept='.xls,.xlsx' class="file" id="id2">
-                        <button type="button" onclick="to_lead()" class="myClass">导入</button>
-                        <button type="button" onclick="export_data()">导出</button>
+                        <!--                        <button type="button" onclick="to_lead()" class="myClass">导入</button>-->
+                        <input class="myClass" type="button" onclick="to_lead()" value="导入"/>
+                        <input class="myClass" type="button" onclick="export_data()" value="导出"/>
+                        <!--                        <button type="button" onclick="export_data()">导出</button>-->
                     </div>
+
+
                 </form>
 
 
@@ -326,6 +344,6 @@
 <script src="../static/data_transfe/app.js"></script>
 <script src="../static/data_transfe/custom.js"></script>
 <script src="../static/js/data_transfer.js">
-    </script>
+</script>
 </body>
 </html>

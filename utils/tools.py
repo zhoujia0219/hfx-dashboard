@@ -8,8 +8,6 @@ from flask import session
 from flask import session
 from werkzeug.utils import redirect
 
-from conf.basic_const import EXPORT_LOAD_TABLENAME_FIELD
-
 
 def big_number_conduct(numb, decimal_point: int):
     """大的数字的处理
@@ -126,27 +124,6 @@ def md5(str):
     return m.hexdigest()
 
 
-def check_row_data(row_data, table_name_key, row_num):
-    """
-    校验excel的每一行数据是否合格,
-    params row_data:每行数据，列表形式
-    params table_name_key:用的哪一组数据表的信息键
-    params row_num:行数，从1开始计算的，此处为2表示表头是第一行
-    return:1.是否通过（True，False），2.未通过时候的原因
-    """
-    table_key_data = EXPORT_LOAD_TABLENAME_FIELD[table_name_key]
-    # 校验数据列数是否足够
-    if len(row_data) != len(table_key_data[1]):
-        return False, "文件中缺少列"
-    type_list = table_key_data[2]  # 一条数据对应的类型
-    # 判断每条数据的数据格式是否正确
-    for index, data in enumerate(row_data):
-        # 如果是整型数据会在读取的时候变成float类型，所以需要转
-        is_type_correct = isinstance(data, ((int, float) if type_list[index] == int else type_list[index]))
-        if not is_type_correct:
-            return False, "第{}行第{}列应该是{}！".format(row_num, index + 1, table_key_data[3][index])
-    
-    return True, "OK!"
 
 
 if __name__ == '__main__':
