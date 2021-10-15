@@ -92,8 +92,8 @@ base_html_string_index = r"""
                                           <li class="menu-divider mg-y-20-force"></li>
 
                      <li>
-                        <a href=""><i data-feather="calendar"></i>
-                        <span>第七个页面</span></a>
+                        <a href="/caidapang_data/"><i data-feather="calendar"></i>
+                        <span>门店数据模型</span></a>
                      </li>
                                           <li class="menu-divider mg-y-20-force"></li>
 
