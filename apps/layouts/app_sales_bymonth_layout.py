@@ -217,10 +217,15 @@ c_fig_01 = dbc.Card(
             html.Hr(),
 
             # 图
-            dcc.Loading(id='loading-1',
-                        type='circle',
-                        children=[dcc.Graph(id="graph_out_qs")],
-                        style={'width': '1022px', 'height': '450px'}),
+            html.Div(
+                children=[
+                    dcc.Loading(id='loading-1',
+                                type='circle',
+                                children=[dcc.Graph(id="graph_out_qs")],
+                                style={'width': '1022px', 'height': '450px'}),
+                ],
+                style={'height': '450px'}
+            ),
 
             # 用户选项
             html.Div(
@@ -254,10 +259,15 @@ c_fig_01 = dbc.Card(
             html.Hr(),
 
             # 图
-            dcc.Loading(id='loading-2',
-                        type='circle',
-                        children=[dcc.Graph(id="graph_out_dy")],
-                        style={'width': '1022px', 'height': '450px'}),
+            html.Div(
+                children=[
+                    dcc.Loading(id='loading-2',
+                                type='circle',
+                                children=[dcc.Graph(id="graph_out_dy")],
+                                style={'width': '1022px', 'height': '450px'}),
+                ],
+                style={'height': '450px'}
+            ),
 
             html.Hr(),
             html.Div(
@@ -324,10 +334,15 @@ c_fig_02 = dbc.Card(
             html.Hr(),
 
             # 图
-            dcc.Loading(id='loading-3',
-                        type='circle',
-                        children=[dcc.Graph(id='graph_out_wd')],
-                        style={'width': '1022px', 'height': '450px'}),
+            html.Div(
+                children=[
+                    dcc.Loading(id='loading-3',
+                                type='circle',
+                                children=[dcc.Graph(id='graph_out_wd')],
+                                style={'width': '1022px', 'height': '450px'}),
+                ],
+                style={'height': '450px'}
+            ),
 
             html.Hr(),
             html.Div(
@@ -381,12 +396,17 @@ c_fig_03 = dbc.Card(
             html.Hr(),
 
             # 图
-            dcc.Loading(id='loading-4',
-                        type='circle',
-                        children=[
-                            dcc.Graph(id="graph_top")
-                        ],
-                        style={'width': '460px', 'height': '450px'}),
+            html.Div(
+                children=[
+                    dcc.Loading(id='loading-4',
+                                type='circle',
+                                children=[
+                                    dcc.Graph(id="graph_top")
+                                ],
+                                style={'width': '460px', 'height': '450px'}),
+                    ],
+                style={'height': '450px'}
+            ),
 
             html.Hr(),
             html.Div(
@@ -546,16 +566,22 @@ c_fig_05 = dbc.Card(
             html.Hr(),
 
             # 画图 - 气泡图
-            dcc.Loading(
-                id='loading_scatter',
-                type='circle',
+            html.Div(
                 children=[
-                    dcc.Graph(
-                        id="graph_billcount"
-                    )
+                    dcc.Loading(
+                        id='loading_scatter',
+                        type='circle',
+                        children=[
+                            dcc.Graph(
+                                id="graph_billcount"
+                            )
+                        ],
+                        style={'width': '1022px', 'height': '450px'}
+                    ),
                 ],
-                style={'width': '1022px', 'height': '450px'}
+                    style = {'height': '450px'}
             ),
+
             html.Hr(),
             html.Div(
                 children=[
@@ -612,15 +638,21 @@ c_fig_06 = dbc.Card(
             ),
             html.Hr(),
             # 画图 - 地理图
-            dcc.Loading(
-                id='map_loading',
+            html.Div(
                 children=[
-                    dcc.Graph(
-                        id="map_graph"
-                    )
+                    dcc.Loading(
+                        id='map_loading',
+                        children=[
+                            dcc.Graph(
+                                id="map_graph"
+                            )
+                        ],
+                        style={'width': '1022px', 'height': '450px'}
+                    ),
                 ],
-                style={'width': '1022px', 'height': '450px'}
+                style={'height': '450px'}
             ),
+
             html.Hr(),
             html.Div(
                 children=[
