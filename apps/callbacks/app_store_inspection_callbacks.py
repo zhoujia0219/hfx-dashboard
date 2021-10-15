@@ -84,6 +84,7 @@ def register_callbacks(dash_app):
         fig.update_layout(
             # showlegend=False,
             plot_bgcolor='white',
+            # template='plotly_white',
             height=400,
             # margin=dict(t=5, l=5, b=5, r=5)
         )

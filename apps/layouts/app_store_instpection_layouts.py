@@ -107,6 +107,10 @@ left_body_01 = dbc.Card(children=dbc.CardBody(children=[
                 children=[
                     dcc.Graph(  # 本月累计销售额/计划的饼图
                     figure=pie_store_inspection_rate(),
+                    config={
+                        # 隐藏浮动工具栏
+                        'displayModeBar': False
+                    },
                     style={"width": "200px", "height": "200px"})
                 ],style={"height": "200px"}
         ))
@@ -235,7 +239,13 @@ left_body_02 = dbc.Card(
                     dcc.Loading(id='inspection_line_loading',
                                 type='circle',
                                 children=[
-                                    dcc.Graph(id="graph_inspection_line")
+                                    dcc.Graph(
+                                        id="graph_inspection_line",
+                                        config={
+                                            # 隐藏浮动工具栏
+                                            'displayModeBar': False
+                                        }
+                                    )
                                 ],
                                 style={'width': 120}),
                     ],style={'height':'450px'}
@@ -289,6 +299,10 @@ right_body = dbc.Card(children=dbc.CardBody(children=[
                 children=[
                     dcc.Graph(
                     figure=pie_store_regular_rate("s_regular"),
+                    config={
+                        # 隐藏浮动工具栏
+                        'displayModeBar': False
+                    },
                     style={"width": "200px", "height": "200px"})
                 ],style={"height": "200px"}
             )
@@ -310,7 +324,11 @@ module_table_and_bar = dbc.Card(
                                 type='circle',
                                 children=[
                                     dcc.Graph(
-                                        figure=fig_five_table()
+                                        figure=fig_five_table(),
+                                        config={
+                                            # 隐藏浮动工具栏
+                                            'displayModeBar': False
+                                        }
                                     )
                                 ],
                             ),
@@ -323,6 +341,10 @@ module_table_and_bar = dbc.Card(
                         children=[
                             dcc.Graph(
                                 figure=fig_six_compare_bar(),
+                                config={
+                                    # 隐藏浮动工具栏
+                                    'displayModeBar': False
+                                }
                             )
                             , ], ),
 
@@ -377,7 +399,13 @@ build_inspect_item_fig = dbc.Card(
                         id='inspection_item_loading',
                         type='circle',
                         children=[
-                            dcc.Graph(id="graph_inspect_item_pie")
+                            dcc.Graph(
+                                id="graph_inspect_item_pie",
+                                config={
+                                    # 隐藏浮动工具栏
+                                    'displayModeBar': False
+                                }
+                            )
                         ],
                         style={'width': '460px', 'height': '380px'}
                     ),
@@ -423,7 +451,13 @@ build_inspect_style_unqualified_radar_fig = dbc.Card(
                         id='inspection_style_loading',
                         type='circle',
                         children=[
-                            dcc.Graph(id="graph_inspect_style_radar")
+                            dcc.Graph(
+                                id="graph_inspect_style_radar",
+                                config={
+                                    # 隐藏浮动工具栏
+                                    'displayModeBar': False
+                                }
+                            )
                         ],
                         style={'width': '460px', 'height': '380px'}
                     ),
@@ -470,8 +504,11 @@ build_inspect_style_unqualified_tree_fig = dbc.Card(
                         type='circle',
                         children=[
                             dcc.Graph(
-                                id='graph_inspect_style_tree'
+                                id='graph_inspect_style_tree',
                                 # figure=build_inspect_tree("i_tree")
+                                config = {
+                                # 隐藏浮动工具栏
+                                'displayModeBar': False},
                             )
                         ],
                         style={'width': '460px', 'height': '380px'}
