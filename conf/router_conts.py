@@ -22,3 +22,5 @@ URL_STORE_INSPECTION = "/store_inspection/"
 URL_SELF_CHECKING = "/self/checking/"
 # 数据传输
 URL_DATA_TRANSFE = "/data_transfe/"
+# 门店数据模型
+URL_CAIDAPANG_DATA = "/caidapang_data/"

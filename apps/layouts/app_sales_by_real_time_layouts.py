@@ -173,7 +173,11 @@ card_list = [
                         ],
                         id="month_group_title"
                     ),
-                    dcc.Graph(id='graph_month_group', style={"height": "60px"}),
+                    html.Div(
+                        children=[
+                            dcc.Graph(id='graph_month_group', style={"height": "60px"}),
+                        ], style={"height": "60px"}
+                    ),
                 ]
             ),
             className='title-card'
@@ -368,11 +372,14 @@ left_table = dbc.Card(
                                 children="  "
                             ))),  # 这三个的目的是让图不置顶
                             dbc.Row(dbc.Col(
-                                dcc.Graph(  # 本周累计销售额/计划图
-                                    figure=pie_map_month_week("week"),
-                                    style={"width": "100px", "height": "100px"}
-                                )
-                                ,
+                                html.Div(
+                                    children=[
+                                        dcc.Graph(  # 本周累计销售额/计划图
+                                            figure=pie_map_month_week("week"),
+                                            style={"width": "100px", "height": "100px"}
+                                        ),
+                                    ], style={"height": "100px"}
+                                ),
                                 style={"backgroundColor": "#dcdcdc"},
 
                             )), ], width=4),
@@ -419,11 +426,14 @@ left_table = dbc.Card(
                                 children="  "
                             ))),  # 这三个的目的是让图不置顶
                             dbc.Row(dbc.Col(
-                                dcc.Graph(  # 本月累计销售额/计划的饼图
-                                    figure=pie_map_month_week("month"),
-                                    style={"width": "100px", "height": "100px"}
-                                )
-                                ,
+                                html.Div(
+                                    children=[
+                                        dcc.Graph(  # 本月累计销售额/计划的饼图
+                                            figure=pie_map_month_week("month"),
+                                            style={"width": "100px", "height": "100px"}
+                                        ),
+                                    ], style={"height": "100px"}
+                                ),
                                 style={"backgroundColor": "#dcdcdc"},
                             ), ), ],
                             width=4
@@ -730,7 +740,7 @@ c_fig_sales_day_month = dbc.Card(
                                 id='sales_real_time_day',
                                 style={'height': '400px', 'width': '1200px'}
                             )
-                        ], ), ),
+                        ], ),style={'height':'400px'} ),
             ], ),
             html.Br(),
             html.Br(),
@@ -773,7 +783,7 @@ c_fig_sales_day_month = dbc.Card(
                                 id='day_area_fig_bar',
                                 style={'height': '450px', "width": "1080px"}
                             )
-                        ], ),
+                        ],style={'height':'450px'} ),
                     width=4
                 )
             ], ),
@@ -884,8 +894,9 @@ key_category_sale = dbc.Card(
                                 # figure=sale_month_fig("day", "dealtotal", "zj"),
                                 id='key_category_sale_bar_fig',
                             )
-                            , ], ),
-
+                            , ],
+                        # style={'height':' '}
+                    ),
                 ], width=3),
 
                 dbc.Col(children=[
@@ -937,7 +948,7 @@ key_category_sale = dbc.Card(
                                                 id='pie_key_category_sale_fig',
                                                 style={'height': '400px', 'width': '600px'}
                                             )
-                                            , ], ),
+                                            , ], style={'height':'400px'}),
 
                                 ),
                             ], ),
@@ -994,7 +1005,9 @@ area_sale_distribute = dbc.Card(
                             dcc.Graph(  # # 画图,地理图：区域销售分布
                                 id='area_sale_distribute_fig',
                             )
-                            , ], ),
+                            , ],
+                        style={'height':'450px'}
+                    ),
                 ),
             ], ),
         ]
@@ -1087,13 +1100,14 @@ dbc.Col(children=[
                                             dcc.Graph(  # 区域销售排名横向对比条形图
                                                 # figure=sale_month_fig("day", "dealtotal", "zj"),
                                                 id='area_sale_rank_fig',
-                                            )
-                                            , ], ),
-
+                                            ),
+                                        ],
+                                    ),
                                 ),
-                            ], ),
-
-                        ], ),
+                            ],
+                        ),
+                    ],
+                ),
                 ], width=4),
             ], style={"height": "520px"})
         ]
@@ -1165,7 +1179,7 @@ current_month_sale = dbc.Card(
                                 # id='sales_real_time_month',
                                 style={'height': '400px'}
                             )
-                            , ], ),
+                            , ],style={'height': '400px'} ),
 
                 ),
             ], ),

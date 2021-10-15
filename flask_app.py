@@ -12,6 +12,7 @@ from apps.app_sales_by_real_time import register_real_time_sales_app
 from apps.app_sales_bymonth_index import register_sales_app
 from apps.app_store_inspection import register_store_inspection_app
 from apps.app_self_checking_index import register_self_checking_app
+from apps.app_caidapang_data import register_caidapang_data_app
 from conf import hfx_dashboard
 
 # #########################
@@ -91,6 +92,8 @@ def create_app():
     register_sales_app(app)
     register_real_time_sales_app(app)  # 实时销售页面的dash对象的注册
     register_store_inspection_app(app)
+    #门店数据模型
+    register_caidapang_data_app(app)
     # 自检
     register_self_checking_app(app)
     # # 数据传输
