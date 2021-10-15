@@ -6,6 +6,8 @@ import dash_html_components as html
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 
+from apps.layouts import app_cdp_layout
+
 ###############
 # sidebar
 ###############
@@ -427,8 +429,11 @@ content = html.Div(
 )
 
 # 页面布局
+content_1 = app_cdp_layout.content
+
 layout = html.Div(
     children=[
+        content_1,
         content,
         dcc.Store(id='signal')
     ],
