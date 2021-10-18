@@ -1,59 +1,40 @@
 // 导入
-//function uploadPicture(obj) {
-//    var file = $(obj).attr("id");
-//    alert(file)
-//                        $.ajax({
-//                        url: "/data_transfe/",
-//                        type: "post",
-//                        contentType: "application/json",
-//                        data: file,
-////                        data:  JSON.stringify(params),
-//                        success: function (resp) {
-//                            return false
-//                        },
-//                        error:function(res){
-//                        }
-//                    })
-//}
 function to_lead(){
-    var fileinfo = document.getElementById("uploadFile").files[0];
-    alert(fileinfo);
-//    var reader = new FileReader();
-//    reader.readAsDataURL(fileinfo);
-//    data = reader.result.split(",")[1]  #　这样才是完整的数据
-    var params = {
-        "a": 1,
-    }
-    $.ajax({
-    url: "/data_transfe/",
-    type: "post",
-    contentType: "application/json",
-//    data: file,
-  data:JSON.stringify(params),
-//  data:fileinfo,
+    $(function () {
+               $("#btn_uploadimg1").click(function () {
+                   var fileObj = document.getElementById("FileUpload1").files[0]; // js 获取文件对象
+                   if (typeof (fileObj) == "undefined" || fileObj.size <= 0) {
+                       alert("请选择图片");
+                       return;
+                   }
+                   var formFile = new FormData();
+                   formFile.append("action", "UploadVMKImagePath");
+                   formFile.append("file", fileObj); //加入文件对象
 
-    success: function (resp) {
-        return false
-    },
-    error:function(res){
-    }
-})
+                   // ajax 提交
+                   var data = formFile;
+                   $.ajax({
+                       url: "/data_transfe/",
+                       data: data,
+                       type: "Post",
+                       dataType: "json",
+                       cache: false,//上传文件无需缓存
+                       processData: false,//用于对data参数进行序列化处理 这里必须false
+                       contentType: false, //必须
+                       success: function (result) {
+                       if (result.code==1){
 
-//$("#upload").on("change",function(){
-//        $.ajaxFileUpload({
-//            url : '/data_transfe/',//后台请求地址
-//            type: 'post',//请求方式  当要提交自定义参数时，这个参数要设置成post
-//            secureuri : false,//是否启用安全提交，默认为false。
-//            fileElementId : 'upload',// 需要上传的文件域的ID，即<input type="file">的ID。
-//            dataType : 'json',//服务器返回的数据类型。可以为xml,script,json,html。如果不填写，jQuery会自动判断。如果json返回的带pre,这里修改为json即可解决。
-//            success : function (json, status) {//提交成功后自动执行的处理函数，参数data就是服务器返回的数据。
-//                  alert(json.retMsg);
-//            },
-//            error : function (json, status, e) {//提交失败自动执行的处理函数。
-//
-//            }
-//        });
-//    });
+                       alert(result.msg)
+                       }else{
+                        alert(0)
+                       }
+
+                       alert(result);
+                           alert("上传完成!");
+                       },
+                   })
+               })
+           })
 }
 
 

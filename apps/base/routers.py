@@ -1,3 +1,4 @@
+import json
 import os
 
 import xlrd as xlrd
@@ -108,24 +109,21 @@ def data_transfer():
     """
     数据导入
     """
-    print(request)
-    a1=request.values.get("a") #获取所有参数
-    a2=request.values.get("fileinfo") #获取所有参数
-    a3 = request.args.get('a')
-    a4 = request.form.get('a')
-    aa = request.values.get('a')
-    print(a1,a2,a3,a4,aa)
-
-    a = request.files.get('file')
-    print(a)
     if request.method == "GET":
         return render_template('data_transfer.html')
-    file_path = r'C:\Users\ruipos\Desktop\demo.xls'
+    if 'file' not in request.files:  # 判断前端是否发送文件过来
+        return render_template('data_transfer.html', data={"code": 0, 'msg': "请选择文件！"})
+    file = request.files.get('file')
+    print(file.filename,file)
+
     table_key = 'fyjh'  # 将决定是用哪组数据库表数据
 
     data_to_lead = dataToLead()  # 创建数据导入类对象
     # 1.加载excel的数据
-    clinic_file = xlrd.open_workbook(file_path)
+    # clinic_file = xlrd.open_workbook(file_path)
+    f = file.read()
+    clinic_file = xlrd.open_workbook(file_contents=f)
+
     table = clinic_file.sheet_by_index(0)
     # 2.对相应的导入做逻辑处理(每一行的数据验证+验证之后所需执行的sql拼接)
     if table_key == 'fyjh':
@@ -139,7 +137,7 @@ def data_transfer():
         except:
             return render_template('data_transfer.html', data={"code": 0, "msg": "数据库未知错误！"})
     # return render_template('data_transfer.html')
-    return jsonify('ok!')
+    return jsonify({"code": 1, "msg": "导入成功！"})
     # return render_template('data_transfer.html', data={"code": 1, "msg": "导入成功！"})
 
 
