@@ -26,9 +26,22 @@ class dataToLead(object):
         self.sql = ''  # sql字符串
         self.flag_is_first = True  # 是否是第一条数据
 
+    def check_file_transfer_excel(self, file):
+        """
+                校验excel文件一些验证是否合格,公共的检测方法
+        params
+        return:1.是否通过（True，False），2.未通过时候的原因
+        """
+        if file:  # 判断前端是否发送文件过来
+            return False, '请选择文件!'
+        file_name = file.filename  # 文件名
+        if file_name.split('.')[1] not in ["xls", 'xlsx']:
+            return False, "请选择正确格式的文件！"
+
+        return True, ""
+
     def check_row_data(self, row_data, table_name_key, row_num):
         """
-
         校验excel的每一行数据是否合格,公共的检测方法
         params row_data:每行数据，列表形式
         params table_name_key:用的哪一组数据表的信息键

@@ -86,7 +86,7 @@ base_html_string_index = r"""
                                           <li class="menu-divider mg-y-20-force"></li>
 
                      <li>
-                        <a href="/data_transfe/"><i data-feather="command"></i>  
+                        <a href="/to_lead/"><i data-feather="command"></i>  
                         <span>数据传输</span></a>
                      </li>
                                           <li class="menu-divider mg-y-20-force"></li>
