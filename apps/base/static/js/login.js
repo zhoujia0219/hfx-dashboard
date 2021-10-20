@@ -46,6 +46,8 @@ function login(){
 //
 //}
 
+
+
 //var imageCodeId = ""
 //function generateUUID(){
 //         $.ajax({  // 验证码发给后端
@@ -106,20 +108,7 @@ function change(){
         success: function (resp) {
             return false
         },
-//        error:function(res){
-//        }
     })
-//     $.ajax({  // 验证码发给后端
-//        url: "/verify_code/",
-//        type: "get",
-//        contentType: "application/json",
-//        data: JSON.stringify(params),
-//        success: function (resp) {
-//            return false
-//        },
-//        error:function(res){
-//        }
-//    })
   }
 
 change();

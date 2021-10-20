@@ -35,7 +35,6 @@ def verify_code():
     """
     im_code = request.json.get("code")  # 获取验证码
     session['im_code'] = im_code
-    session['im_code'] = im_code
     return jsonify({"code":1})
 
 

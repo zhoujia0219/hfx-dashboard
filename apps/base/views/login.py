@@ -32,7 +32,7 @@ def login_view():
     # 2.查询数据并验证
     if not all([username, password, brand]):
         return False
-    print(session.get("im_code", None),img_code)
+    # 验证码验证
     if session.get("im_code", None).lower() != img_code.lower():
         return False
     userinfo = user_info(username)  # 查询用户信息
