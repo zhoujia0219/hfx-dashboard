@@ -39,7 +39,9 @@ def get_verify_code():
     # 绘制字符串
     for item in range(4):
         draw.text((5 + random.randint(-3, 3) + 23 * item, 5 + random.randint(-3, 3)),
-                  text=code[item], fill=rndColor())
+                  text=code[item], fill=rndColor(),
+                  # font=font
+                  )
 
     return im, code
 
@@ -50,7 +52,6 @@ def get_code():
     buf = BytesIO()
     image.save(buf, 'gif')
     buf_str = buf.getvalue()  # 图片数据
-    #
     return buf_str, code
 
 

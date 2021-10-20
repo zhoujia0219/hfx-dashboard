@@ -33,3 +33,9 @@ p.ref {
 	text-align: center;
 	padding: 2em 1em;
 }
+
+.get_pic_code{
+    position:absolute;
+    left:350px;
+    top:10px
+}

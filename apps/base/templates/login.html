@@ -56,11 +56,25 @@
                                    style="color: #FFFFFF !important; position:absolute; z-index:100;"
                                    value="" type="password" placeholder="请输入密码">
                         </div>
+
+                                                <div class="input_outer">
+                                <span class="us_uer">
+                                </span>
+                            <input name="verify_img" class="text" id="verify_img"
+                                   style="color: #FFFFFF !important; position:absolute; z-index:100;"
+                                   value="" type="text" placeholder="请输入验证码">
+<!--                        <img src=""  alt="上海鲜花港 - 郁金香" height="80" width="150" class="get_pic_code"/>-->
+                        <input type="button" id="code1" onclick="verify_code()" class="get_pic_code"/>
+  <span id="code" class="identify-code">
+　　<canvas class="show-captcha" id="canvas" style="width: 100%; height: 100%;"></canvas>
+</span>
+                        </div>
+
 <!--                        <div class="mb2">-->
                         <!--                            <a href="http://127.0.0.1:8011/" class="act-but submit" style="color: #FFFFFF">-->
                         <!--                                登录-->
                         <!--                            </a>-->
-                            <input type="submit" name="" value="登 录" class="act-but submit" style="color: #FFFFFF" onclick="login()">
+                            <input type="submit" name="" value="登 录" class="act-but submit to_register" style="color: #FFFFFF" onclick="login()">
 <!--                                            </div>-->
                     </div>
                 </form>

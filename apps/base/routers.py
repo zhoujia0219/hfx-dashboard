@@ -2,11 +2,12 @@ import os
 
 import xlrd as xlrd
 import xlwt as xlwt
-from flask import Blueprint, render_template, request, url_for, jsonify
+from flask import Blueprint, render_template, request, url_for, jsonify, make_response, session
 from flask import redirect
+from werkzeug.exceptions import abort
 
 from apps.base.views.data_transfer import to_lead_view, export_data_view
-from apps.base.views.login import login_view
+from apps.base.views.login import login_view, verify_code_view
 from conf.router_conts import URL_SALES_BYMONTH
 from services.srv_user_info import default_dbname
 
@@ -25,6 +26,17 @@ blueprint = Blueprint(
 @blueprint.route('/', methods=['POST', 'GET'])
 def index():
     return redirect(URL_SALES_BYMONTH)
+
+
+@blueprint.route('/verify_code/', methods=['POST'])
+def verify_code():
+    """
+    验证码
+    """
+    im_code = request.json.get("code")  # 获取验证码
+    session['im_code'] = im_code
+    session['im_code'] = im_code
+    return jsonify({"code":1})
 
 
 @blueprint.route('/login', methods=['POST', 'GET'])

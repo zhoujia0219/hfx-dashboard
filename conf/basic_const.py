@@ -2,7 +2,8 @@
 from pyparsing import basestring
 
 WHITE_URL_LIST = [
-    '/login'
+    '/login',
+    '/verify_code/'
 ]  # 路由白名单
 
 REAL_TIME_SALA_ANALYZE_INTERVAL_TIME = 30 * 1000  # 销售分析图形定时器的刷新时间， 3*1000=3秒

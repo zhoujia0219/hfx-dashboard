@@ -14,13 +14,14 @@ def requied_login():
     is_white_url = False
     for white_url in WHITE_URL_LIST:
         # 如果是白名单则不需要验证
-        if (current_url.replace(white_url, "") + white_url) == current_url or 'static/' in current_url:
+        if (current_url.replace(white_url, "").split('?')[0] + white_url) == current_url.split('?')[0] or 'static/' in current_url or '/favicon.ico' in current_url:
             is_white_url = True
             break
     if is_white_url:
         return
     token = session.get("token", None)
     if token is None:
+        print("请登录！")
         return redirect('/login')  # 如果没有该登录信息就跳到登录页面
     user_info = {
         "user_id": session.get("user_id", None),
