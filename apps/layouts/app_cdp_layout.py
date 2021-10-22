@@ -11,41 +11,7 @@ import plotly.express as px
 # 数据
 ###############
 
-from services.srv_cdp import df_md_pm
-
-df_md_pm_db = df_md_pm[['门店名', '营业额排名', '净利润排名']]
-df_md_pm_db = df_md_pm_db.melt(
-    id_vars='门店名', 
-    value_vars=['营业额排名', '净利润排名'], 
-    var_name='排名类别', 
-    value_name='排名'
-)
-
-df_cs = pd.DataFrame({
-    '城市': ['自贡市','绵阳市','拉萨市','成都市','南充市','戍都市','广安市','贵阳市','丽江市','眉山市','乐山市'],
-    '个数': [30,3,2,2,1,1,1,1,1,1,1]
-    })
-
-df_qy = pd.DataFrame({
-    '区域': ['市辖区', '县', '县级市', '镇'],
-    '个数': [44,4,1,1]
-})
-
-df_md = pd.DataFrame({
-    '数据范围': ['前20家门店', '前50家门店'],
-    '房租': [8032, 7382],
-    '人工': [14000, 13000],
-    '季度营业额': [300000, 320000],
-    '月均营业额': [100000, 110000],
-    '净利润月': [20000, 19000],
-    '净利润年': [240000, 221000],
-    '投资回报周期': [6.3, 7.7],
-})
-
-df_tz = pd.DataFrame({
-    '区域': ['成都市', '县级市', '其他市', '县', '镇'],
-    '周期': [9.6, 4.8, 9.2, 6.4, 7.4]
-})
+from services.srv_cdp import df_md_pm, df_md_pm_db, df_cs, df_qy, df_md, df_tz ##
 
 ###############
 # 图
@@ -54,9 +20,9 @@ df_tz = pd.DataFrame({
 # 城市分布图
 fig_cs = px.bar(
     df_cs,
-    x='城市', 
-    y='个数', 
-    text='个数', 
+    x='ad_name', 
+    y='ad_count', 
+    text='ad_count', 
     title='城市分布',
     template='plotly_white', 
 )
@@ -145,7 +111,7 @@ table_md_pm = dash_table.DataTable(
         {
             'if': {
                 'column_id': '营业额排名',
-                'filter_query': '{营业额排名} <= 20',
+                'filter_query': '{营业额排名} <= 15',
                 },
             'backgroundColor': 'pink'
         },
@@ -170,7 +136,11 @@ card_cs = dbc.Card([
             id='fig_cs_loading',
             type='circle',
             children=[
-                dcc.Graph(id="fig_cs_bar", figure=fig_cs)
+                dcc.Graph(
+                    id="fig_cs_bar", 
+                    figure=fig_cs, 
+                    config={'displayModeBar': False}
+                )
             ],
         )
     ])
@@ -183,7 +153,11 @@ card_qy = dbc.Card([
             id='fig_qy_loading',
             type='circle',
             children=[
-                dcc.Graph(id="fig_qy_bar", figure=fig_qy)
+                dcc.Graph(
+                    id="fig_qy_bar", 
+                    figure=fig_qy,
+                    config={'displayModeBar': False}
+                )
             ],
         )
     ])
@@ -222,7 +196,11 @@ card_qy2 = dbc.Card([
             id='pie_qy_loading',
             type='circle',
             children=[
-                dcc.Graph(id='fig_qy2_pie', figure=fig_qy2)
+                dcc.Graph(
+                    id='fig_qy2_pie', 
+                    figure=fig_qy2,
+                    config={'displayModeBar': False}
+                )
             ],
         )
     ])
@@ -235,7 +213,11 @@ card_tz = dbc.Card([
             id='fig_tz_loading',
             type='circle',
             children=[
-                dcc.Graph(id="fig_tz_bar", figure=fig_tz)
+                dcc.Graph(
+                    id="fig_tz_bar", 
+                    figure=fig_tz,
+                    config={'displayModeBar': False}
+                )
             ],
         )
     ])
@@ -248,7 +230,11 @@ card_md_pm_db = dbc.Card([
             id='fig_md_pm_db_loading',
             type='circle',
             children=[
-                dcc.Graph(id="fig_md_pm_db_bar", figure=fig_md_pm)
+                dcc.Graph(
+                    id="fig_md_pm_db_bar", 
+                    figure=fig_md_pm,
+                    config={'displayModeBar': False}
+                )
             ],
         )
     ])

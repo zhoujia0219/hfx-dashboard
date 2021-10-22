@@ -81,7 +81,7 @@ base_html_string_index = r"""
 
                      <li>
                         <a href=""><i data-feather="gift"></i>
-                        <span>虎哥</span></a>
+                        <span></span></a>
                      </li>
                                           <li class="menu-divider mg-y-20-force"></li>
 
