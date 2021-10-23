@@ -857,11 +857,18 @@ body:not(.page-sidebar-fixed) .page-sidebar-dash .slimScrollDiv {
 .page-sidebar-menu ul li.active>a i,.page-sidebar-menu ul li.active>a i.accordion-icon,.page-sidebar-menu ul li.open>a i.accordion-icon,.page-sidebar-menu ul li a:hover i.accordion-icon {
 	color:#5d78ff!important
 }
+
+
+
 .page-sidebar-menu ul li.active>a {
 	color:#5d78ff;
 	position:relative;
-	background:red
+	background:#13131d
 }
+
+
+
+
 .page-sidebar-menu ul li:hover,.page-sidebar-menu ul>li.active,.page-sidebar-menu ul>li.open {
 	border-left:3px solid #5d78ff;
 	-webkit-transition:all .3s;
