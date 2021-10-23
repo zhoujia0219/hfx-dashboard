@@ -736,10 +736,14 @@ ul li a#collapsed-sidebar-toggle-button i,.header-right ul li a#search-button i,
 	-ms-transition:all .3s;
 	transition:all .3s
 }
+
+
+
+
 .page-sidebar-dash {
 	font-weight:400;
 	width:250px;
-	background:#13131d;
+	background:#AAAAAA;
 	min-height:100%;
 	float:left;
 	z-index:100;
@@ -856,7 +860,7 @@ body:not(.page-sidebar-fixed) .page-sidebar-dash .slimScrollDiv {
 .page-sidebar-menu ul li.active>a {
 	color:#5d78ff;
 	position:relative;
-	background:#13131d
+	background:red
 }
 .page-sidebar-menu ul li:hover,.page-sidebar-menu ul>li.active,.page-sidebar-menu ul>li.open {
 	border-left:3px solid #5d78ff;

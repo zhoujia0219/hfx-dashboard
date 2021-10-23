@@ -736,16 +736,27 @@ ul li a#collapsed-sidebar-toggle-button i,.header-right ul li a#search-button i,
 	-ms-transition:all .3s;
 	transition:all .3s
 }
+
+
+
+
+
+
+
+
 .page-sidebar-dash {
 	font-weight:400;
 	width:250px;
-	background:#13131d;
+	background:	#AAAAAA;
 	min-height:100%;
 	float:left;
 	z-index:100;
 	position:relative;
 	border-right:1px solid rgba(40,40,40,0.7)
 }
+
+
+
 .page-sidebar-fixed .page-sidebar-dash {
 	position:fixed;
 	top:0;

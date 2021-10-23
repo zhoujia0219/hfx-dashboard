@@ -2,6 +2,8 @@ base_html_string_index = r"""
 <!DOCTYPE html>
 <html lang="zxx">
    <head>
+       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
       <!-- The above 6 meta tags *must* come first in the head; any other head content must come *after* these tags -->
       <meta charset="utf-8">
       <meta http-equiv="x-ua-compatible" content="IE=edge">
@@ -41,16 +43,17 @@ base_html_string_index = r"""
          <!--================================-->
          <!-- Page Sidebar Start -->
          <!--================================-->
-         <div class="page-sidebar-dash">
-            <div class="logo log-dash">
-               <a class="logo-img " href="index.html">		
-<!--<img class="desktop-logo" src="C:\Users\ruipos\.ssh\hfx-dashboard\apps\html_string\睿博数据__1_.png" alt="">  // 可以引入公司log的方式-->
- <!--<img class="small-logo" src="assets/images/睿博数据__1_.png" alt="">-->
-               
-             <h3><strong>RUIPOS</strong></h3>
-               </a>			
-               <i class="ion-ios-close-empty" id="sidebar-toggle-button-close"></i>
-            </div>
+             <div class="page-sidebar-dash">
+        <div class="logo log-dash">
+            <a class="logo-img " href="index.html">
+                <img class="desktop-logo" src="assets/images/睿博数据__1_.png" alt="">
+                 <img class="small-logo" src="assets/images/睿博数据__1_.png" alt="">
+
+<!--                <h3><strong>RUIPOS</strong></h3>-->
+            </a>
+            <i class="ion-ios-close-empty" id="sidebar-toggle-button-close"></i>
+        </div>
+
             <!--================================-->
             <!-- Sidebar Menu Start -->
             <!--================================-->
@@ -86,7 +89,7 @@ base_html_string_index = r"""
                                           <li class="menu-divider mg-y-20-force"></li>
 
                      <li>
-                        <a href="/to_lead/"><i data-feather="command"></i>  
+                        <a href="/to_import/"><i data-feather="command"></i>  
                         <span>数据传输</span></a>
                      </li>
                                           <li class="menu-divider mg-y-20-force"></li>
@@ -271,26 +274,10 @@ base_html_string_index = r"""
       <!--================================-->
       <!-- Footer Script -->
       <!--================================-->
-      <script src="assets/jquery.min.js"></script>
-      <script src="assets/jquery-ui.js"></script>
-      <script src="assets/popper.js"></script>
-      <script src="assets/feather.min.js"></script>
-      <script src="assets/bootstrap.min.js"></script>
-      <script src="assets/pace.min.js"></script>
-      <script src="assets/toastr.min.js"></script>
-      <script src="assets/counterup.min.js"></script>		
-      <script src="assets/waypoints.min.js"></script>
-      <script src="assets/chartjs.js"></script>
-      <script src="assets/apexcharts.min.js"></script>
-      <script src="assets/irregular-data-series.js"></script>
-      <script src="assets/jquery.simpler-sidebar.min.js"></script>	   
-      <script src="assets/sales-dashboard-init.js"></script>
-      <script src="assets/jquery.slimscroll.min.js"></script>
-      <script src="assets/highlight.min.js"></script>
-      <script src="assets/app.js"></script>
-      <script src="assets/custom.js"></script>
+
       
-      
+
+
             {%config%}
             {%scripts%}
             {%renderer%}  
