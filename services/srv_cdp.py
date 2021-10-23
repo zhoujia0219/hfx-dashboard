@@ -1,266 +1,127 @@
 import pandas as pd
+import numpy as np
 
-df_dict = {'门店名': {0: '蔡大胖炸洋芋（华商店)',
-  1: '蔡大胖炸洋芋（火炮街店)',
-  2: '萊大胖炸洋芋（拉萨金马店)',
-  3: '蔡大胖炸洋芋（华熙528店）',
-  4: '蔡大胖炸洋芋（中央华城店)',
-  5: '蔡大胖炸洋芋（南充高坪中学店)',
-  6: '蔡大胖炸洋芋（川师成龙校区店)',
-  7: '禁大胖炸洋芋（九里晴川店)',
-  8: '禁大胖炸洋芋（岳池财富中心店)',
-  9: '蔡大胖炸洋芋（滨江和城店)',
-  10: '蔡大胖炸洋芋（新尚天地店)',
-  11: '蔡大胖炸洋芋（花果园店)',
-  12: '蔡大胖炸洋芋（天府逸家店)',
-  13: '蔡大胖炸洋芋（华润时光里店)',
-  14: '蔡大胖炸洋芋（(上东街店)',
-  15: '蔡大胖炸洋芋（航园路店)',
-  16: '蔡大胖炸洋芋（丽江华坪店)',
-  17: '禁大胖炸洋芋（仁寿汇金店)',
-  18: '蔡大胖炸洋芋（新天国际店)',
-  19: '蔡大胖炸洋芋（广安北街店)'},
- '城市': {0: '自贡市',
-  1: '绵阳市',
-  2: '拉萨市',
-  3: '成都市',
-  4: '成都市',
-  5: '南充市',
-  6: '成都市',
-  7: '戍都市',
-  8: '广安市',
-  9: '成都市',
-  10: '成都市',
-  11: '贵阳市',
-  12: '成都市',
-  13: '成都市',
-  14: '绵阳市',
-  15: '成都市',
-  16: '丽江市',
-  17: '眉山市',
-  18: '乐山市',
-  19: '广安市'},
- '区域': {0: '自流井区',
-  1: '江油市',
-  2: '堆龙德庆区',
-  3: '锦江区',
-  4: '成华区',
-  5: '高坪区',
-  6: '龙泉驿区',
-  7: '双流区',
-  8: '岳池县',
-  9: '天府新区',
-  10: '温江区',
-  11: '南明区',
-  12: '龙泉驿区',
-  13: '高新区',
-  14: '三合县',
-  15: '双流区',
-  16: '华坪县',
-  17: '仁寿县',
-  18: '市中区',
-  19: '广安区'},
- '区域属性': {0: '市辖区',
-  1: '县级市',
-  2: '市辖区',
-  3: '市辖区',
-  4: '市辖区',
-  5: '市辖区',
-  6: '市辖区',
-  7: '市辖区',
-  8: '县',
-  9: '市辖区',
-  10: '市辖区',
-  11: '市辖区',
-  12: '市辖区',
-  13: '市辖区',
-  14: '县',
-  15: '市辖区',
-  16: '县',
-  17: '县',
-  18: '市辖区',
-  19: '市辖区'},
- '商圈': {0: '商场',
-  1: '小吃街',
-  2: '社区',
-  3: '商场',
-  4: '综合社区',
-  5: '学校',
-  6: '学校',
-  7: '社区',
-  8: '小吃街',
-  9: '社区',
-  10: '小吃街',
-  11: '商场＋周边酒吧',
-  12: '社区',
-  13: '社区',
-  14: '学校',
-  15: '综合社区',
-  16: '综合社区',
-  17: '社区',
-  18: '社区',
-  19: '小吃街'},
- '房租': {0: 9000,
-  1: 9000,
-  2: 9000,
-  3: 9000,
-  4: 9000,
-  5: 9000,
-  6: 9000,
-  7: 9000,
-  8: 9000,
-  9: 9000,
-  10: 9000,
-  11: 9000,
-  12: 9000,
-  13: 9000,
-  14: 9000,
-  15: 9000,
-  16: 9000,
-  17: 9000,
-  18: 9000,
-  19: 9000},
- '人工': {0: 10000,
-  1: 10000,
-  2: 10000,
-  3: 10000,
-  4: 10000,
-  5: 10000,
-  6: 10000,
-  7: 10000,
-  8: 10000,
-  9: 10000,
-  10: 10000,
-  11: 10000,
-  12: 10000,
-  13: 10000,
-  14: 10000,
-  15: 10000,
-  16: 10000,
-  17: 10000,
-  18: 10000,
-  19: 10000},
- '季度营业额': {0: 500000,
-  1: 500000,
-  2: 500000,
-  3: 500000,
-  4: 500000,
-  5: 500000,
-  6: 500000,
-  7: 500000,
-  8: 500000,
-  9: 500000,
-  10: 500000,
-  11: 500000,
-  12: 500000,
-  13: 500000,
-  14: 500000,
-  15: 500000,
-  16: 500000,
-  17: 500000,
-  18: 500000,
-  19: 500000},
- '月均': {0: 150000,
-  1: 150000,
-  2: 150000,
-  3: 150000,
-  4: 150000,
-  5: 150000,
-  6: 150000,
-  7: 150000,
-  8: 150000,
-  9: 150000,
-  10: 150000,
-  11: 150000,
-  12: 150000,
-  13: 150000,
-  14: 150000,
-  15: 150000,
-  16: 150000,
-  17: 150000,
-  18: 150000,
-  19: 150000},
- '净利润月': {0: 30000,
-  1: 30000,
-  2: 30000,
-  3: 30000,
-  4: 30000,
-  5: 30000,
-  6: 30000,
-  7: 30000,
-  8: 30000,
-  9: 30000,
-  10: 30000,
-  11: 30000,
-  12: 30000,
-  13: 30000,
-  14: 30000,
-  15: 30000,
-  16: 30000,
-  17: 30000,
-  18: 30000,
-  19: 30000},
- '净利润年': {0: 360000,
-  1: 360000,
-  2: 360000,
-  3: 360000,
-  4: 360000,
-  5: 360000,
-  6: 360000,
-  7: 360000,
-  8: 360000,
-  9: 360000,
-  10: 360000,
-  11: 360000,
-  12: 360000,
-  13: 360000,
-  14: 360000,
-  15: 360000,
-  16: 360000,
-  17: 360000,
-  18: 360000,
-  19: 360000},
- '营业额排名': {0: 1,
-  1: 8,
-  2: 12,
-  3: 9,
-  4: 11,
-  5: 5,
-  6: 2,
-  7: 6,
-  8: 42,
-  9: 19,
-  10: 28,
-  11: 3,
-  12: 13,
-  13: 10,
-  14: 32,
-  15: 30,
-  16: 48,
-  17: 50,
-  18: 44,
-  19: 18},
- '净利润排名': {0: 1,
-  1: 2,
-  2: 3,
-  3: 4,
-  4: 5,
-  5: 6,
-  6: 7,
-  7: 8,
-  8: 9,
-  9: 10,
-  10: 11,
-  11: 12,
-  12: 13,
-  13: 14,
-  14: 15,
-  15: 16,
-  16: 17,
-  17: 18,
-  18: 19,
-  19: 20}}
+from utils.clickhouse_util import client
 
-df_md_pm = pd.DataFrame(df_dict)
 
-# print(df_md_pm.info())
+###############
+# Sql
+###############
+
+sql_bo_store = """
+    select store_code, store_name, ad_code, investment
+    from bo_store 
+    where store_status='2' 
+"""
+
+sql_pdim_admin = """
+    select ad_code, ad_name, ad_level
+    from pdim_admin_district
+"""
+
+sql_sd_trade_bymonth = """
+    select 
+        store_name, 
+        ad_name, 
+        business_district_name, 
+        round(avg(trade_amount_avg*business_days), 0) as amount_month,
+        round(avg(net_profit_total), 0) as profit_month,
+        sum(trade_amount_avg*business_days) as amount_quarter,
+        sum(net_profit_total) as profit_quarter
+    from sd_trade_bymonth
+    where sd_month in ('6', '7', '8')
+    group by store_name, ad_name, business_district_name
+"""
+
+
+###############
+# Data_raw 
+###############
+
+# df_bo_store
+data_bo_store = client.execute(sql_bo_store)
+df_bo_store = pd.DataFrame(data_bo_store, columns=['store_code', 'store_name', 'ad_code', 'investment'])
+
+# df_pdim_admin
+data_pdim_admin = client.execute(sql_pdim_admin)
+df_pdim_admin = pd.DataFrame(data_pdim_admin, columns=['ad_code', 'ad_name', 'ad_level'])
+
+# df_sd_trade_bymonth
+data_sd_trade_bymonth = client.execute(sql_sd_trade_bymonth)
+df_sd_trade_bymonth = pd.DataFrame(data_sd_trade_bymonth, 
+                                    columns=[
+                                            'store_name', 
+                                            'ad_name', 
+                                            'business_district_name',
+                                            'amount_month',
+                                            'profit_month',
+                                            'amount_quarter',
+                                            'profit_quarter'
+                                    ])
+
+###############
+# Data_mart
+###############
+
+# df_cs
+df_cs = df_bo_store.merge(df_pdim_admin, on='ad_code', how='left')['ad_name'].value_counts().to_frame()\
+        .reset_index().rename(columns={'index': 'ad_name', 'ad_name': 'ad_count'})
+
+# df_md_pm_db
+df_md_ana = df_sd_trade_bymonth.merge(df_bo_store, on='store_name', how='left')\
+                .drop(columns=['store_code', 'ad_code'], axis=1)  # 联表
+df_md_ana['roi_expect'] = round(df_md_ana['investment']/df_md_ana['profit_month'], 1)  # 投资回报周期
+df_md_ana['amount_rank'] = df_md_ana['amount_quarter'].rank(ascending=False).astype(int)  # 营业额排名
+df_md_ana['profit_rank'] = df_md_ana['profit_quarter'].rank(ascending=False).astype(int)  # 利润排名
+df_md_pm_db = df_md_ana[['store_name', 'amount_rank', 'profit_rank']].sort_values(by='amount_rank')  # 排序
+df_md_pm_db.rename(columns={'store_name': '门店名', 'amount_rank': '营业额排名', 'profit_rank': '净利润排名'}, inplace=True) # 重命名
+df_md_pm_db = df_md_pm_db.melt(
+    id_vars='门店名', 
+    value_vars=['营业额排名', '净利润排名'], 
+    var_name='排名类别', 
+    value_name='排名'
+)  # 融合
+
+# df_md_pm
+df_md_pm = df_md_ana.drop(['investment', 'roi_expect'], axis=1).rename(columns={
+    'store_name': '门店名',
+    'ad_name': '城市',
+    'business_district_name': '商圈',
+    'amount_month': '月度营业额',
+    'profit_month': '月度利润',
+    'amount_quarter': '季度营业额',
+    'profit_quarter': '季度净利润',  
+    'amount_rank': '营业额排名', 
+    'profit_rank': '净利润排名'
+}).sort_values(by='净利润排名')
+df_md_pm['房租'] = np.random.randint(8000,9000,20)
+df_md_pm['人工'] = np.random.randint(10000,14000,20)
+col = ['门店名', '城市', '商圈', '房租', '人工', '月度营业额', '月度利润', '季度营业额', '季度净利润', '营业额排名', '净利润排名',]
+df_md_pm = df_md_pm[col]
+
+# df_qy
+df_qy = pd.DataFrame({
+    '区域': ['市辖区', '县', '县级市', '镇'],
+    '个数': [44,4,1,1]
+})
+
+# df_md
+df_md = pd.DataFrame({
+    '数据范围': ['前20家门店', '前50家门店'],
+    '房租': [8032, 7382],
+    '人工': [14000, 13000],
+    '季度营业额': [300000, 320000],
+    '月均营业额': [100000, 110000],
+    '净利润月': [20000, 19000],
+    '净利润年': [240000, 221000],
+    '投资回报周期': [6.3, 7.7],
+})
+
+# df_tz
+df_tz = pd.DataFrame({
+    '区域': ['成都市', '县级市', '其他市', '县', '镇'],
+    '周期': [9.6, 4.8, 9.2, 6.4, 7.4]
+})
+
+
+

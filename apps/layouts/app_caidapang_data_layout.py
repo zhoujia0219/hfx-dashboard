@@ -1,4 +1,5 @@
-import pandas
+import pandas as pd
+import dash_table
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -114,95 +115,57 @@ def fig_sales_bar_method():
     #                  )
     return fig
 
+# 时段门店数量数据
+df_stores_count= pd.DataFrame({
+    '时段①': ['00:00-01:','01:00-02:00','02:00-03:00','03:00-04:00','04:00-05:00','05:00-06:00','06:00-07:00','07:00-08:00'],
+    '门店数①': [65,26,19,7,9,8,10,20],
+    '时段②': ['08:00-09:00','09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00'],
+    '门店数②': [137,161,166,166,166,166,166,166],
+    '时段③': ['16:00-17:00','14:00-15:00','15:00-16:00','16:00-17:00','17:00-18:00','18:00-19:00','19:00-20:00','20:00-21:00'],
+    '门店数③': [166,166,166,166,166,166,166,166],
+    '时段④': ['21:00-22:00','22:00-23:00','23:00-00:00','','','','',''],
+    '门点数④': [166,159,119,'','','','',''],
+})
+# 时段门店数量table
+table_stores_count= dash_table.DataTable(
+    id='table_stores',
+    data=df_stores_count.to_dict('records'),
+    columns=[{'name': i, 'id': i} for i in df_stores_count.columns],
+)
 
-# 定义方法：  销售占比统计table
-def fig_sales_table_method():
-    fig = go.Figure(data=[go.Table(
-        # 列属性的顺序
-        columnorder=[1, 2, 3, 4, 5, 6],
-        # 列属性中元素所占单元格整体大小
-        columnwidth=[350, 950, 350, 350, 350, 350],
-        header=dict(values=['编号', '门店名', '堂食占比', '外卖占比', '营业额排名', '净利润排名'],
-                    line_color='darkslategray',
-                    fill_color='white',
-                    align='center'),
-        cells=dict(values=[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, " "],
-                           ['蔡大胖炸洋芋（华商店）', '蔡大胖炸洋芋（火炮街店）', '蔡大胖炸洋芋（拉萨金马店）',
-                            '蔡大胖炸洋芋（华熙528店）', '蔡大胖炸洋芋（中央华城店）','蔡大胖炸洋芋（南充高坪中学店）',
-                            '蔡大胖炸洋芋（川师成龙校区店）', '蔡大胖炸洋芋（九里晴川店）', '蔡大胖炸洋芋（滨江和城店）',
-                            '蔡大胖炸洋芋（花果园店）','蔡大胖炸洋芋（天府逸家店）', '蔡大胖炸洋芋（华润时光里店）',
-                            '蔡大胖炸洋芋（广安北街店）', '平均占比'],
-                           [0.8, 0.5, 0.2, 0.4, 0.3, 0.4, 0.4, 0.3, 0.5, 0.3, 0.3, 0.3, 0.3, 0.4],
-                           [0.2, 0.5, 0.8, 0.6, 0.7, 0.6, 0.6, 0.7, 0.5, 0.7, 0.7, 0.7, 0.7, 0.6],
-                           [1, 8, 12, 9, 11, 5, 2, 6, 19, 3, 13, 10, 18, " "],
-                           [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 20, " "]
-                           ],
-                   line_color=['#000000', ],
-                   fill=dict(color=[
-                       ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white',
-                        'white', 'white', 'white', 'white'],
-                       ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white',
-                        'white', 'white', 'white', 'white'],
-                       ['pink', 'pink', 'white', 'pink', 'white', 'pink', 'pink', 'white', 'pink', 'white', 'white',
-                        'white', 'white', 'white'],
-                       ['white', 'white', 'paleturquoise', 'white', 'paleturquoise', 'white', 'white', 'paleturquoise',
-                        'white', 'paleturquoise', 'paleturquoise', 'paleturquoise', 'paleturquoise', 'white'],
-                       ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white',
-                        'white', 'white', 'white', 'white'],
-                       ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white',
-                        'white', 'white', 'white', 'white']
-                   ]),
-                   align=('center','left','center'),
-                   height=28,
-                   font=dict(family='Microsoft Yahei')
-                   ))
-    ])
-    fig.update_layout(margin=dict(t=5, l=5, b=5, r=5),
-                      height=450)
-    # fig.update_traces(
-    #     columnwidth=100,
-    #     hoverlabel_namelength=15,
-    # #   header_line_width=8, #表格第一行边框厚度
-    #     cells_fill_color='white',
-    #     cells_font_family="PT Sans Narrow"
-    # )
-    return fig
-
-# 定义方法： 时段门店数量table
-def fig_stores_table_method():
-    fig = go.Figure(data=[go.Table(
-        # 列属性的顺序
-        columnorder=[1, 2, 3, 4, 5, 6, 7, 8],
-        # 列属性中元素所占单元格整体大小
-        columnwidth=[500, 500, 500, 500, 500, 500, 500, 500],
-        header=dict(values=['时段', '门店数', '时段', '门店数', '时段', '门店数', '时段', '门店数'],
-                    line_color='darkslategray',
-                    fill_color='white',
-                    align='center'),
-        cells=dict(values=[
-            ['00:00-01:00', '01:00-02:00', '02:00-03:00', '03:00-04:00', '04:00-05:00', '05:00-06:00', '06:00-07:00',
-             '07:00-08:00'],
-            [65, 26, 19, 7, 9, 8, 10, 20],
-            ['08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00',
-             '15:00-16:00'],
-            [137, 161, 166, 166, 166, 166, 166, 166],
-            ['16:00-17:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00', '18:00-19:00', '19:00-20:00',
-             '20:00-21:00'],
-            [166, 166, 166, 166, 166, 166, 166, 166],
-            ['21:00-22:00', '22:00-23:00', '23:00-00:00'],
-            [166, 159, 119]
-        ],
-                   line_color=['#000000', ],
-                   fill=dict(color=['white', 'white']),
-                   align='center',
-                   height=28,
-                   font=dict(family='Microsoft Yahei')
-                   ))
-    ])
-    fig.update_layout(margin=dict(t=5, l=5, b=5, r=5),
-                      height=300)
-    return fig
-
+# 销售占比数据
+df_sales_tot = pd.DataFrame({
+    '编号': [1,2,3,4,5,6,7,8,9,10,11,12,13,''],
+    '门店名': ['蔡大胖炸洋芋（华商店）','蔡大胖炸洋芋（火炮街店）','蔡大胖炸洋芋（拉萨金马店）','蔡大胖炸洋芋（华熙528店）','蔡大胖炸洋芋（中央华城店）',
+                       '蔡大胖炸洋芋（南充高坪中学店）','蔡大胖炸洋芋（川师成龙校区店）','蔡大胖炸洋芋（九里晴川店）','蔡大胖炸洋芋（滨江和城店）','蔡大胖炸洋芋（花果园店）',
+                        '蔡大胖炸洋芋（天府逸家店）','蔡大胖炸洋芋（华润时光里店）','蔡大胖炸洋芋（广安北街店）','平均占比'],
+    '堂食占比': [0.8,0.5,0.2,0.4,0.3,0.4,0.4,0.3,0.5,0.3,0.3,0.3,0.3,0.4],
+    '外卖占比': [0.2,0.5,0.8,0.6,0.7,0.6,0.6,0.7,0.5,0.7,0.7,0.7,0.7,0.6],
+    '营业额排名':[1,8,12,9,11,5,2,6,19,3,13,10,18," "],
+    '净利润排名': [1,2,3,4,5,6,7,8,10,12,13,14,20," "]
+})
+# 销售占比table
+table_sales_tot = dash_table.DataTable(
+    id='table_sales',
+    data=df_sales_tot.to_dict('records'),
+    columns=[{'name': i, 'id': i} for i in df_sales_tot.columns],
+    style_data_conditional=[
+        {
+            'if': {
+                'column_id': '堂食占比',
+                'filter_query': '{堂食占比} >= 0.4',
+                },
+            'backgroundColor': 'pink'
+        },
+        {
+            'if': {
+                'column_id': '外卖占比',
+                'filter_query': '{外卖占比} > 0.6',
+                },
+            'backgroundColor': 'yellow'
+        },
+    ]
+)
 
 # 门店销售时段&平均销售额bar图
 module_ave_sales_bar = dbc.Card(
@@ -260,7 +223,6 @@ module_time_sales_bar = dbc.Card(
                         children=' ',
                         className='media-body'
                     ),
-                    html.Hr(),
                     # 图
                     html.Div(
                         children=[
@@ -289,110 +251,36 @@ module_time_sales_bar = dbc.Card(
 module_sales_tot_table = dbc.Card(
     children=dbc.CardBody(
         children=[
-            # 用户选项
             html.Div(
-                [
-                    html.H5(
-                        id='sales_table',
-                        children=' ',
-                        className='media-body'
-                    ),
-                    html.Hr(),
-                    # 图
-                    html.Div(
-                        children=[
-                            dcc.Loading(id='sales_table_loading',
-                                        type='circle',
-                                        children=[
-                                            dcc.Graph(
-                                                figure=fig_sales_table_method(),
-                                                config={
-                                                    # 隐藏浮动工具栏
-                                                    'displayModeBar': False
-                                                }
-                                            )
-                                        ],
-                                        style={'width': 120}
-                                        ),
-                        ],
-                        style={"height":"450px"}
-                    )
-                ]
+                children=[
+                    dcc.Loading(id='sales_table_loading',
+                                type='circle',
+                                children=[
+                                    table_sales_tot
+                                ],
+                                style={'width': 120}
+                                ),
+                ],
+                # style={"height":"200px"}
             )
         ]
     )
 )
-
 #销售时间段统计（门店数量）tbale
 module_stores_count_table = dbc.Card(
     children=dbc.CardBody(
         children=[
-            # 用户选项
             html.Div(
-                [
-                    html.H5(
-                        id='stores_table',
-                        children=' ',
-                        className='media-body'
-                    ),
-                    html.Hr(),
-                    # 图
-                    html.Div(
-                        children=[
-                            dcc.Loading(id='stores_table_loading',
-                                        type='circle',
-                                        children=[
-                                            dcc.Graph(figure=fig_stores_table_method(),
-                                                      config={
-                                                          # 隐藏浮动工具栏
-                                                          'displayModeBar': False
-                                                      }
-                                                      )
-                                        ],
-                                        style={'width': 120}
-                                        ),
-                        ],
-                        # style={"height":"200px"}
-                    )
-                ]
-            )
-        ]
-    )
-)
-
-# 销售占比统计
-module_sales_tot_three_table = dbc.Card(
-    children=dbc.CardBody(
-        children=[
-            # 用户选项
-            html.Div(
-                [
-                    html.H5(
-                        id='sales_table',
-                        children=' ',
-                        className='media-body'
-                    ),
-                    html.Hr(),
-                    # 图
-                    html.Div(
-                        children=[
-                            dcc.Loading(id='sales_table_loading',
-                                        type='circle',
-                                        children=[
-                                            dcc.Graph(
-                                                figure=fig_sales_table_method(),
-                                                config={
-                                                    # 隐藏浮动工具栏
-                                                    'displayModeBar': False
-                                                }
-                                            )
-                                        ],
-                                        style={'width': 120}
-                                        ),
-                        ],
-                        style={"height":"450px"}
-                    )
-                ]
+                children=[
+                    dcc.Loading(id='stores_table_loading',
+                                type='circle',
+                                children=[
+                                    table_stores_count
+                                ],
+                                style={'width': 120}
+                                ),
+                ],
+                # style={"height":"200px"}
             )
         ]
     )
