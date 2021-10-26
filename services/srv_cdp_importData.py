@@ -26,7 +26,6 @@ sql_time_order = """
     select time_period_code,min_value,max_value from cdp.cdim_time_period
 """
 query_time_order = client.query_sql(sql_time_order)
-print(query_time_order)
 time_order = []
 for row in query_time_order:
     time_order.append([row[0], switchStr(row[1], row[2])])
@@ -117,11 +116,8 @@ list_data = sorted(a, key=lambda x: (x[1]))
 return_list = []
 index = 1  # 自定义下标
 for row in reversed(list_data):
-    # print(row[0],row[1],row[2],index)
     return_list.append([row[0], row[1], row[2], index])
     index = index + 1
-
-# print(return_list)
 
 # 第一列数据排序处理完毕，再对第二列进行排序
 # 中括号内填写按哪行排序
@@ -130,10 +126,9 @@ list_data_2 = sorted(return_list, key=lambda x: (x[2]))
 return_list_2 = []
 index2 = 1  # 自定义下标
 for row in reversed(list_data_2):
-    # print(row[0], row[1], row[2], row[3],index2)
     return_list_2.append([row[0], row[1], row[2], row[3], index2])
     index2 = index2 + 1
-# print(return_list_2)
+
 
 # 转换成dataframe类型
 query_time_order = [list(i) for i in time_order]
@@ -159,7 +154,6 @@ def demo(data):
     for i in range(6): # 整体数据分成了6份
         pd_data = data[i*4:(i+1)*4]
         demo_list = list()
-        print(333,pd_data,5555)
         for j in range(4):  # 把每份数据往后加4次
             demo_list.append(pd_data.loc[j+(i*4)]['1_x'])
             demo_list.append(pd_data.loc[j+(i*4)]['1_y'])
@@ -169,7 +163,7 @@ def demo(data):
 # 门店数量数据
 data_time_storecount = df_time_order.merge(df_store_count, left_on=0, right_on=0)
 res= demo(data_time_storecount)
-# print(11,res,222)
+
 # 所有门店时段内平均销售额
 data_time_allstore_avg = df_time_order.merge(df_all_store_avg, left_on=0, right_on=0)
 # (1)合并门店表和月营业排名表 and (2)继续合并时段平均销售额表

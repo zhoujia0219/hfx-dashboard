@@ -29,44 +29,14 @@ def fig_time_bar_method():
         text=values,
         title='门店销售时段●平均销售额',
         template='plotly_white',
+        height=590
     )
-    fig.update_layout(margin=dict(l=20, r=0, t=40, b=20), title_x=0.5)
+    fig.update_layout(margin=dict(l=20, r=0, t=40, b=20), title_x=0.5,barmode='group', bargap=0.4, bargroupgap=0.2,
+                      xaxis_tickangle=-45,)
     fig.update_traces(texttemplate='%{text:.0f}', textposition='outside', )
     fig.update_xaxes(title=None)
     fig.update_yaxes(title=None)
     return fig
-    # fig = go.Figure(data=[go.Bar(
-    #     x=date,
-    #     y=values,
-    #     name='门店销售时段*平均销售额',
-    #     text=values,
-    #     textposition='outside',
-    #     textfont_size=12,
-    #     #marker_color='rgb(55, 83, 109)'
-    # )])
-    # fig.update_layout(
-    #     #xaxis_tickangle=-45,
-    #     template='plotly_white',
-    #     # 柱状图模式
-    #     barmode='group',
-    #     # 组间距离
-    #     bargap=0.5,
-    #     # 组内距离
-    #     bargroupgap=0.2,
-    #     font=dict(family='arial',
-    #               color='#000000',
-    #               size=12),
-    #     # 显示文本/数值
-    #     uniformtext_mode='show',
-    #     # 文本/数值显示的大小
-    #     uniformtext_minsize=8,
-    #     title_text='门店销售时段*平均销售额',
-    #     # margin=dict(t=5, l=5, b=5, r=5)
-    # )
-    # fig.update_traces(hoverinfo='label+percent',    # 设置鼠标悬浮上去时显示的文本
-    #                   textfont_size=20,
-    #                  )
-
 
 # 定义方法： （13家）日均时段销售额
 def fig_sales_bar_method():
@@ -76,7 +46,7 @@ def fig_sales_bar_method():
         x=date,
         y=values,
         text=values,
-        title='营业额&利润排名重合门店(13家)\n日均时段销售额',
+        title='营业额&利润排名重合门店(13家)●日均时段销售额',
         template='plotly_white',
     )
     fig.update_layout(margin=dict(l=20, r=0, t=40, b=20), title_x=0.5, barmode='group', bargap=0.2, bargroupgap=0.2,
@@ -84,26 +54,6 @@ def fig_sales_bar_method():
     fig.update_traces(texttemplate='%{text:.0f}', textposition='outside', )
     fig.update_xaxes(title=None)
     fig.update_yaxes(title=None)
-    # fig.update_layout(
-    #     # X坐标轴标签倾斜度数
-    #     xaxis_tickangle=-45,
-    #     # 柱状图模式
-    #     barmode='group',
-    #     # 组间距离
-    #     bargap=0.2,
-    #     # 组内距离
-    #     bargroupgap=0.2,
-    #     # 字体样式、颜色、大小设置
-    #     font=dict(family='arial',
-    #               color='#000000',
-    #               size=12),
-    #     title_x=0.5
-    #     # margin=dict(t=5, l=5, b=5, r=5)
-    # )
-    # fig.update_traces(texttemplate='%{text:.0f}', textposition='outside', )
-    # fig.update_traces(hoverinfo='label+percent',    # 设置鼠标悬浮上去时显示的文本
-    #                   textfont_size=20,
-    #                  )
     return fig
 
 # 时段门店数量数据
@@ -126,7 +76,7 @@ table_stores_count = dash_table.DataTable(
 )
 
 # 销售占比数据
-data_sales_proport = pd.DataFrame({
+df_sales_proports = pd.DataFrame({
     '编号': data_sales_proport[4],
     '门店名': data_sales_proport[0],
     '堂食占比': data_sales_proport['1_y'],
@@ -136,33 +86,33 @@ data_sales_proport = pd.DataFrame({
 })
 
 # 销售占比table
-table_sales_tot = dash_table.DataTable(
+table_sales_tots = dash_table.DataTable(
     id='table_sales',
-    data=data_sales_proport.to_dict('records'),
-    columns=[{'name': i, 'id': i} for i in data_sales_proport.columns],
-    style_data_conditional=[
-        {
-            'if': {
-                'column_id': '堂食占比',
-                'filter_query': '{堂食占比} >= 0.4',
-            },
-            'backgroundColor': 'pink'
-        },
-        {
-            'if': {
-                'colum_id': '堂食占比',
-                'filter_query': '{堂食占比[-1]}'
-            },
-            'backgroundColor': 'white'
-        },
-        {
-            'if': {
-                'column_id': '外卖占比',
-                'filter_query': '{外卖占比} > 0.6',
-            },
-            'backgroundColor': 'yellow'
-        },
-    ]
+    data=df_sales_proports.to_dict('records'),
+    columns=[{'name': i, 'id': i} for i in df_sales_proports.columns],
+    # style_data_conditional=[
+    #         {
+    #             'if': {
+    #                 'column_id': '堂食占比',
+    #                 'filter_query': '{堂食占比} >= 0.4',
+    #             },
+    #             'backgroundColor': 'pink'
+    #         },
+    #         {
+    #             'if': {
+    #                 'colum_id': '堂食占比',
+    #                 'filter_query': '{堂食占比[-1]}'
+    #             },
+    #             'backgroundColor': 'white'
+    #         },
+    #         {
+    #             'if': {
+    #                 'column_id': '外卖占比',
+    #                 'filter_query': '{外卖占比} > 0.6',
+    #             },
+    #             'backgroundColor': 'yellow'
+    #         },
+    #     ]
 )
 
 # 门店销售时段&平均销售额bar图
@@ -185,7 +135,7 @@ module_ave_sales_bar = dbc.Card(
                                 ),
                 ],
                 # 设置固定高度，增加页面体验效果
-                style={"height": "450px"}
+                style={"height": "620px"}
             )
         ]
     )
@@ -226,12 +176,12 @@ module_sales_tot_table = dbc.Card(
                     dcc.Loading(id='sales_table_loading',
                                 type='circle',
                                 children=[
-                                    table_sales_tot
+                                    table_sales_tots
                                 ],
                                 style={'width': 120}
                                 ),
                 ],
-                # style={"height":"200px"}
+                style={"height":"620px"}
             )
         ]
     )
@@ -262,25 +212,19 @@ content = html.Div(
     children=[
         dbc.Row(
             children=[
+                dbc.Col(module_stores_count_table),
+            ],
+            className='mt-3'
+        ),
+        dbc.Row(
+            children=[
                 dbc.Col(module_ave_sales_bar),
-            ],
-            className='mt-3'
-        ),
-        dbc.Row(
-            children=[
-                dbc.Col(module_time_sales_bar),
-            ],
-            className='mt-3'
-        ),
-        dbc.Row(
-            children=[
-                dbc.Col(module_sales_tot_table),
-                dbc.Col()
+                dbc.Col(module_sales_tot_table)
             ],
             className='mt-3'),
         dbc.Row(
             children=[
-                dbc.Col(module_stores_count_table),
+                dbc.Col(module_time_sales_bar),
             ],
             className='mt-3'),
     ],
