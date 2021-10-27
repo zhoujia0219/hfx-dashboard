@@ -747,7 +747,7 @@ ul li a#collapsed-sidebar-toggle-button i,.header-right ul li a#search-button i,
 .page-sidebar-dash {
 	font-weight:400;
 	width:250px;
-	background: 	#008B8B;
+	background: 	rgb(19,35,83);
 	min-height:100%;
 	float:left;
 	z-index:100;

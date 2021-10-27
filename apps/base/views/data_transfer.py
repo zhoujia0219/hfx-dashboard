@@ -4,10 +4,10 @@ import xlwt
 from flask import request
 
 from conf.basic_const import IMPORT_EXPORT_TABLENAME_FIELD
-from services.srv_to_import import pay_mode_all_data_code
+from services.srv_to_import import pay_mode_all_data_code, pay_channel_all_data_code
 from utils.clickhouse_conn import clickHouseConn
 from utils.db_util import query_list
-from utils.import_export_check import dataToImportFYJH, dataToImportBrand, dataImportPayMode
+from utils.import_export_check import dataToImportFYJH, dataToImportBrand, dataImportPayMode, dataImportPayChannel
 
 default_dbname = "data_analysis"
 
@@ -38,7 +38,9 @@ def to_import_view(file, table_key, import_mode):
     elif table_key == "PayMode":
         pay_mode_data = pay_mode_all_data_code()
         result = dataImportPayMode().main(table, file, pay_mode_data, import_mode)
-
+    elif table_key == "payChannel":
+        pay_channel_data = pay_channel_all_data_code()
+        result = dataImportPayChannel().main(table, file, pay_channel_data, import_mode)
     return result
 
 
