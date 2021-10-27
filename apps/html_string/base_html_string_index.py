@@ -46,8 +46,8 @@ base_html_string_index = r"""
              <div class="page-sidebar-dash">
         <div class="logo log-dash">
             <a class="logo-img " href="index.html">
-                <img class="desktop-logo" src="assets/images/睿博数据__1_.png" alt="">
-                 <img class="small-logo" src="assets/images/睿博数据__1_.png" alt="">
+                <img class="desktop-logo" src="assets/images/睿博数据__5_.png" alt="">
+                 <img class="small-logo" src="assets/images/睿博数据__5_.png" alt="">
 
 <!--                <h3><strong>RUIPOS</strong></h3>-->
             </a>

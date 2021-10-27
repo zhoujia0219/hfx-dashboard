@@ -15,10 +15,10 @@ $(function () {
                var data = formFile;
                var res = {
                     "file":data,
-                    "table_key":"PayMode"
+                    "table_key":"CustDistrict"
                }
                $.ajax({
-                   url: "/to_import/PayMode_1",
+                   url: "/to_import/CustDistrict_1",
                    data: data,
                    type: "Post",
                    dataType: "text",
@@ -47,10 +47,10 @@ $(function () {
                var data = formFile;
                var res = {
                     "file":data,
-                    "table_key":"PayMode"
+                    "table_key":"CustDistrict"
                }
                $.ajax({
-                   url: "/to_import/PayMode_2",
+                   url: "/to_import/CustDistrict_2",
                    data: data,
                    type: "Post",
                    dataType: "text",
@@ -79,10 +79,10 @@ $(function () {
                var data = formFile;
                var res = {
                     "file":data,
-                    "table_key":"PayMode"
+                    "table_key":"CustDistrict"
                }
                $.ajax({
-                   url: "/to_import/PayMode_3",
+                   url: "/to_import/CustDistrict_3",
                    data: data,
                    type: "Post",
                    dataType: "text",
@@ -309,10 +309,10 @@ $(function () {
                var data = formFile;
                var res = {
                     "file":data,
-                    "table_key":"PayMode"
+                    "table_key":"Charge"
                }
                $.ajax({
-                   url: "/to_import/PayMode_1",
+                   url: "/to_import/Charge_1",
                    data: data,
                    type: "Post",
                    dataType: "text",
@@ -341,10 +341,10 @@ $(function () {
                var data = formFile;
                var res = {
                     "file":data,
-                    "table_key":"PayMode"
+                    "table_key":"Charge"
                }
                $.ajax({
-                   url: "/to_import/PayMode_2",
+                   url: "/to_import/Charge_2",
                    data: data,
                    type: "Post",
                    dataType: "text",
@@ -373,10 +373,10 @@ $(function () {
                var data = formFile;
                var res = {
                     "file":data,
-                    "table_key":"PayMode"
+                    "table_key":"Charge"
                }
                $.ajax({
-                   url: "/to_import/PayMode_3",
+                   url: "/to_import/Charge_3",
                    data: data,
                    type: "Post",
                    dataType: "text",

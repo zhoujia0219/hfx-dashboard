@@ -802,7 +802,8 @@ body:not(.page-sidebar-fixed) .page-sidebar-dash .slimScrollDiv {
 	width:60px
 }
 .logo a.logo-img img {
-	max-height:32px;
+		max-height:80px;
+	max-width:500px;
 	width:auto
 }
 .page-sidebar-collapsed .logo a.logo-img img.desktop-logo {
@@ -810,7 +811,8 @@ body:not(.page-sidebar-fixed) .page-sidebar-dash .slimScrollDiv {
 }
 .logo a.logo-img img.small-logo {
 	display:none;
-	max-height:28px
+	max-height:80px;
+	max-width:500px;
 }
 .page-sidebar-collapsed .logo a.logo-img img.small-logo {
 	display:block

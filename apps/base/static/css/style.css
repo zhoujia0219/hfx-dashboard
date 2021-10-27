@@ -1039,7 +1039,8 @@ body:not(.page-sidebar-fixed) .page-sidebar .slimScrollDiv {
 }
 
 .logo a.logo-img img {
-	max-height: 32px;
+		max-height:80px;
+	max-width:500px;
 	width: auto;
 }
 
@@ -1049,7 +1050,8 @@ body:not(.page-sidebar-fixed) .page-sidebar .slimScrollDiv {
 
 .logo a.logo-img img.small-logo {
 	display: none;
-	max-height: 28px;
+		max-height:80px;
+	max-width:500px;
 }
 
 .page-sidebar-collapsed .logo a.logo-img img.small-logo {
