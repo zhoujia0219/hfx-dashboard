@@ -12,8 +12,12 @@ $(function () {
 
                // ajax 提交
                var data = formFile;
+               var res = {
+                    "file":data,
+                    "table_key":"PayMode"
+               }
                $.ajax({
-                   url: "/to_import/",
+                   url: "/to_import/PayMode_3",
                    data: data,
                    type: "Post",
                    dataType: "text",

@@ -4,16 +4,17 @@ import xlwt
 from flask import request
 
 from conf.basic_const import IMPORT_EXPORT_TABLENAME_FIELD
+from services.srv_to_import import pay_mode_all_data_code
 from utils.clickhouse_conn import clickHouseConn
 from utils.db_util import query_list
-from utils.transfer_export_check import dataToImportFYJH, dataToImportBrand
+from utils.import_export_check import dataToImportFYJH, dataToImportBrand, dataImportPayMode
 
 default_dbname = "data_analysis"
 
 clickhouse = clickHouseConn()
 
 
-def to_import_view(file, table_key):
+def to_import_view(file, table_key, import_mode):
     """
     数据导入视图
     """
@@ -29,11 +30,15 @@ def to_import_view(file, table_key):
     table = clinic_file.sheet_by_index(0)
 
     # 3.对相应的导入做逻辑处理(每一行的数据验证+验证之后所需执行的sql拼接)
-    result = {"code": 1, "msg": "导入成功！"}
+    result = {"code": 0, "msg": "参数错误！"}
     if table_key == 'fyjh':
         result = dataToImportFYJH().main(table, file)
     elif table_key == 'brand':
         result = dataToImportBrand().main(table, file)
+    elif table_key == "PayMode":
+        pay_mode_data = pay_mode_all_data_code()
+        result = dataImportPayMode().main(table, file, pay_mode_data, import_mode)
+
     return result
 
 

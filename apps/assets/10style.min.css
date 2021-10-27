@@ -743,7 +743,7 @@ ul li a#collapsed-sidebar-toggle-button i,.header-right ul li a#search-button i,
 .page-sidebar-dash {
 	font-weight:400;
 	width:250px;
-	background:#AAAAAA;
+	background:#008B8B;
 	min-height:100%;
 	float:left;
 	z-index:100;
@@ -848,7 +848,7 @@ body:not(.page-sidebar-fixed) .page-sidebar-dash .slimScrollDiv {
 	font-size:13px;
 	display:block;
 	padding:10px 15px;
-	color:#596b8c;
+	color:white;
 	line-height:1.5!important;
 	-webkit-font-smoothing:antialiased;
 	position:relative;
@@ -863,7 +863,7 @@ body:not(.page-sidebar-fixed) .page-sidebar-dash .slimScrollDiv {
 .page-sidebar-menu ul li.active>a {
 	color:#5d78ff;
 	position:relative;
-	background:#13131d
+	background:	#f2f8fe
 }
 
 

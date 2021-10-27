@@ -20,7 +20,7 @@ def register_caidapang_data_app(app):
                          url_base_pathname=URL_CAIDAPANG_DATA,
                          meta_tags=[meta_viewport],
                          external_stylesheets=[BOOTSTRAP_THEME],
-                         index_string=base_html_string_index  # todo
+                         # index_string=base_html_string_index  # todo
                          )
 
     with app.app_context():
