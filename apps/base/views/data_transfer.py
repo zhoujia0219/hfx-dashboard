@@ -48,7 +48,7 @@ def to_import_view(file, table_key, import_mode):
     return result
 
 
-def export_data_view():
+def export_data_view(table_key):
     """
     数据导出视图
     """
@@ -56,9 +56,7 @@ def export_data_view():
         # 拼接路径
         parama_dict = request.form
         file_path = parama_dict.get("file_path")
-        file_path = file_path + r'fyjh_{}.xls'.format(int(time.time()))
-
-        table_key = 'fyjh'  # 将决定是用哪组数据库表数据
+        file_path = file_path + r'{}_{}.xls'.format(table_key, int(time.time()))
         filed_str = ''  # sql字符串中的字段字符串
         excel_header = IMPORT_EXPORT_TABLENAME_FIELD[table_key][2]  # 表头
         for i in IMPORT_EXPORT_TABLENAME_FIELD[table_key][1]:
@@ -70,9 +68,10 @@ def export_data_view():
                 filed_str += i
         # 1.查询数据
         sql = """
-               select {} from chunbaiwei.{} 
+               select {} from cdp.{} 
            """.format(filed_str, IMPORT_EXPORT_TABLENAME_FIELD[table_key][0])  # sql字符串
-        all_data = query_list(sql, default_dbname)
+        all_data = clickhouse.query_sql(sql)
+        # all_data = query_list(sql, default_dbname)
         # 2.创建表格
         new_workbook = xlwt.Workbook()
         worksheet = new_workbook.add_sheet("sheet1")  # 创建sheet
@@ -85,6 +84,6 @@ def export_data_view():
                     worksheet.write(row, col, all_data[row - 1][col])  # 写入数据
         # 4.保存excel
         new_workbook.save(file_path)
-        return {"code": 1, "msg": "导出成功！"}
+        return {"code": 1, "msg": r"导出成功！"}
     except:
-        return {"code": 0, "msg": "文件导出错误！"}
+        return {"code": 0, "msg": r"文件导出错误！"}

@@ -62,11 +62,13 @@ def to_import(table_key):
     return jsonify(data)  # 返回处理的结果
 
 
-@blueprint.route('/export_data/', methods=['POST', 'GET'])
-def export_data():
+@blueprint.route('/export_data/<table_key>', methods=['POST', 'GET'])
+def export_data(table_key):
     """
     数据导出
     将文件下载到指定路径
     """
-    data = export_data_view()
-    return render_template('data_transfer.html', data=data)
+    data = export_data_view(table_key)
+    # return render_template('data_transfer.html', data=data)
+    # return jsonify(data)
+    return jsonify(data['msg'])

@@ -391,25 +391,73 @@ $(function () {
        })
 
 
-// 导出
-function export_data(){
+
+// 导出1.自定义城市区划
+function export_data1(){
     // 发起导出请求
                 var params = {
                     "file_path": 'C:\\Users\\ruipos\\Desktop\\',
                 }
             $.ajax({
                     type: 'POST',
-                    url: "/export_data/",
+                    url: "/export_data/CustDistrict",
                     data: params,
                     dataType: 'text',
                     success: function (resp) {
                             alert('导出成功！');
-//                    alert(resp)
-//                    alert(resp.code)
                             return false
                         },
-
             });
-
-
+}
+// 导出2.支付渠道
+function export_data2(){
+    // 发起导出请求
+                var params = {
+                    "file_path": 'C:\\Users\\ruipos\\Desktop\\',
+                }
+            $.ajax({
+                    type: 'POST',
+                    url: "/export_data/payChannel",
+                    data: params,
+                    dataType: 'text',
+                    success: function (resp) {
+                                        alert(resp);
+                            alert('导出成功！');
+                            return false
+                        },
+            });
+}
+// 导出3.支付方式
+function export_data3(){
+    // 发起导出请求
+                var params = {
+                    "file_path": 'C:\\Users\\ruipos\\Desktop\\',
+                }
+            $.ajax({
+                    type: 'POST',
+                    url: "/export_data/PayMode",
+                    data: params,
+                    dataType: 'text',
+                    success: function (resp) {
+                            alert('导出成功！');
+                            return false
+                        },
+            });
+}
+// 导出4.费用
+function export_data4(){
+    // 发起导出请求
+                var params = {
+                    "file_path": 'C:\\Users\\ruipos\\Desktop\\',
+                }
+            $.ajax({
+                    type: 'POST',
+                    url: "/export_data/Charge",
+                    data: params,
+                    dataType: 'text',
+                    success: function (resp) {
+                            alert('导出成功！');
+                            return false
+                        },
+            });
 }
