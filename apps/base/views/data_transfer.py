@@ -4,7 +4,7 @@ import xlwt
 from flask import request
 
 from conf.basic_const import IMPORT_EXPORT_TABLENAME_FIELD
-from services.srv_to_import import pay_mode_all_data_code, pay_channel_all_data_code
+from services.srv_to_import import pay_mode_all_data_code, pay_channel_all_data_code, cust_district_all_data_code
 from utils.clickhouse_conn import clickHouseConn
 from utils.db_util import query_list
 from utils.import_export_check import dataImportPayMode, dataImportPayChannel
@@ -43,8 +43,8 @@ def to_import_view(file, table_key, import_mode):
         pay_channel_data = pay_channel_all_data_code()
         result = dataImportPayChannel().main(table, file, pay_channel_data, import_mode)
     elif table_key == "CustDistrict":  # ⾃定义城市区划
-        pay_channel_data = pay_channel_all_data_code()
-        result = dataImportPayChannel().main(table, file, pay_channel_data, import_mode)
+        cust_district_data = cust_district_all_data_code()
+        result = dataImportPayChannel().main(table, file, cust_district_data, import_mode)
     return result
 
 

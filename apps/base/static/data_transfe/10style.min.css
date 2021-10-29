@@ -768,7 +768,7 @@ body:not(.page-sidebar-fixed) .page-sidebar-dash .slimScrollDiv {
 	height:auto!important
 }
 .page-sidebar-fixed .page-sidebar-dash,.page-header-fixed .page-sidebar-dash,.page-sidebar-fixed.page-header-fixed .page-sidebar-dash {
-	padding-top:80px;
+	padding-top:0px;
 	transition:all .5s;
 	-webkit-transition:all .5s;
 	-ms-transition:all .5s;
